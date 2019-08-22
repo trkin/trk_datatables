@@ -1,4 +1,4 @@
-require "trk_datatables/version"
+require 'trk_datatables/version'
 
 module TrkDatatables
   class Error < StandardError; end
