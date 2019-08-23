@@ -3,9 +3,30 @@ module TrkDatatables
   end
 
   class Base
+    TYPE_CAST_POSTGRES = 'VARCHAR'.freeze
+    TYPE_CAST_MYSQL    = 'CHAR'.freeze
+    TYPE_CAST_SQLITE   = 'TEXT'.freeze
+    TYPE_CAST_ORACLE   = 'VARCHAR2(4000)'.freeze
+
+    DB_ADAPTER_TYPE_CAST = {
+      psql: TYPE_CAST_POSTGRES,
+      mysql: TYPE_CAST_MYSQL,
+      mysql2: TYPE_CAST_MYSQL,
+      sqlite: TYPE_CAST_SQLITE,
+      sqlite3: TYPE_CAST_SQLITE,
+      oracle: TYPE_CAST_ORACLE,
+      oracleenhanced: TYPE_CAST_ORACLE
+    }.freeze
+
     def initialize(view)
       @view = view
       @dt_params = DtParams.new view.params
+      @type_cast = if defined?(ActiveRecord::Base)
+                     DB_ADAPTER_TYPE_CAST[ActiveRecord::Base.connection_config[:adapter]]
+
+                   else
+                     TYPE_CAST_POSTGRES
+                   end
     end
 
     # Get all items from db
@@ -42,6 +63,12 @@ module TrkDatatables
       cols.to_a[index]
     end
 
+    def searchable_columns
+      columns.reject do |_column_key, column_options|
+        column_options[:search]
+      end
+    end
+
     # Define page data
     # @example
     #   def rows(page_items)
@@ -58,8 +85,12 @@ module TrkDatatables
       raise NotImplementedError, "You should implement #{__method__} method"
     end
 
-    def filter_items(_all)
-      raise 'filter_items_is_defined_in_specific_orm'
+    def filter_by_search_all(_all)
+      raise 'filter_by_columns_is_defined_in_specific_orm'
+    end
+
+    def filter_by_columns(_all)
+      raise 'filter_by_columns_is_defined_in_specific_orm'
     end
 
     def order_and_paginate_items(_filtered_items)
@@ -69,7 +100,7 @@ module TrkDatatables
     def as_json
       # get the value if it is not a relation
       all_count = all_items.count
-      filtered_items = filter_items all_items
+      filtered_items = filter_by_search_all filter_by_columns all_items
       ordered_paginated_filtered_items = order_and_paginate_items filtered_items
       {
         draw: @view.params[:draw].to_i,

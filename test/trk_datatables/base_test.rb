@@ -37,16 +37,18 @@ class TrkDatatablesBaseTest < Minitest::Test
 
   def test_as_json
     blank = BlankDatatable.new(view)
-    blank.stub :filter_items, [] do
-      blank.stub :order_and_paginate_items, [] do
-        act = blank.as_json
-        exp = {
-          draw: 0,
-          recordsTotal: 0,
-          recordsFiltered: 0,
-          data: [],
-        }
-        assert_equal exp, act
+    blank.stub :filter_by_search_all, [] do
+      blank.stub :filter_by_columns, [] do
+        blank.stub :order_and_paginate_items, [] do
+          act = blank.as_json
+          exp = {
+            draw: 0,
+            recordsTotal: 0,
+            recordsFiltered: 0,
+            data: [],
+          }
+          assert_equal exp, act
+        end
       end
     end
   end

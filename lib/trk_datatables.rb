@@ -4,6 +4,7 @@ require 'trk_datatables/active_record'
 require 'trk_datatables/dt_params'
 
 require 'active_support/core_ext/hash/indifferent_access'
+require 'active_support/core_ext/string/inflections'
 
 module TrkDatatables
 end

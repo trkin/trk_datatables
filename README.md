@@ -6,25 +6,98 @@ It can help generating first page in html (so non-js crawlers can see it),
 filtering and sorting by one or more columns, adding map and other reporting
 based on GET params.
 
+There are alternatives, for example:
+* [jbox-web/ajax-datatables-rails](https://github.com/jbox-web/ajax-datatables-rails)
+excellent gem but it's scope is only to produce JSON. I wanted to have server
+side rendering and more advance reporting
+
+
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
+# Gemfile
 gem 'trk_datatables'
 ```
 
-And then execute:
+You need to create a class that inherits from `TrkDatatables::ActiveRecord` (you
+can use Rails generator)
 
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install trk_datatables
+```
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+In datatable class you need to define three methods: `all_items`, `columns` and
+`rows`.
+For example in Ruby on Rails:
+
+```
+# app/datatables/posts_datatable.rb
+class PostsDatatable < TrkDatatables::ActiveRecord
+  def all_items
+    Post.left_joins(:user)
+  end
+
+  def columns
+    {
+      'posts.title': {},
+      'users.email': {},
+    }
+  end
+
+  def rows(filtered)
+    filtered.map do |post|
+      [
+        @view.link_to(post.title, post),
+        post.user&.email,
+      ]
+    end
+  end
+end
+```
+
+In controller you need to initialize with `view_context`
+
+```
+# app/controllers/posts_controller.rb
+class PostsController < ApplicationController
+  def index
+    @datatable = PostsDatatable.new view_context
+  end
+
+  def search
+    render json: PostsDatatable.new(view_context).as_json
+  end
+end
+```
+
+In controller add a route to `:search`
+
+```
+# config/routes.rb
+Rails.application.routes.draw do
+  resources :posts do
+    colletion do
+      get :search
+    end
+  end
+end
+```
+
+And finally in a view, use `render_html` to have first page show up prerendered
+
+```
+# app/views/posts/index.html
+<h1>Posts</h1>
+<%= @datatable.render_html %>
+```
+
+## More examples
+
+Search can be global ie search all columns or it can search for specific
+column.
 
 ## Development
 

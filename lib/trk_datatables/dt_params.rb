@@ -41,6 +41,10 @@ module TrkDatatables
       end
     end
 
+    def search_all
+      @params.dig(:search, :value) || ''
+    end
+
     def self.sample_view_params(options = {})
       OpenStruct.new(
         params: sample_params(options),
