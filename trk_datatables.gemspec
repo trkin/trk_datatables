@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
     spec.metadata['homepage_uri'] = spec.homepage
     spec.metadata['source_code_uri'] = 'https://github.com/trkin/trk_datatables'
     spec.metadata['changelog_uri'] = 'https://github.com/trkin/trk_datatables/CHANGELOG.md'
+    spec.metadata['yard.run'] = 'yri' # use "yard" to build full HTML docs.
   else
     raise 'RubyGems 2.0 or newer is required to protect against ' \
       'public gem pushes.'
@@ -36,8 +37,17 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
+  # for HashWithIndifferentAccess
+  spec.add_dependency 'activesupport'
+
+  spec.add_development_dependency 'activerecord', '~> 6.0'
   spec.add_development_dependency 'bundler', '~> 2.0'
+  spec.add_development_dependency 'byebug'
+  spec.add_development_dependency 'database_cleaner'
   spec.add_development_dependency 'minitest', '~> 5.0'
+  spec.add_development_dependency 'minitest-color'
+  spec.add_development_dependency 'pg'
   spec.add_development_dependency 'rake', '~> 10.0'
+  spec.add_development_dependency 'sqlite3'
 end
 # rubocop:enable Metrics/BlockLength
