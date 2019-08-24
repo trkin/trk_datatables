@@ -19,6 +19,7 @@ ActiveRecord::Schema.define do
     t.string :title
     t.text :body
     t.integer :status
+    t.date :published_at
 
     t.timestamps
   end

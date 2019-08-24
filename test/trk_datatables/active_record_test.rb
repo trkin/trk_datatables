@@ -9,6 +9,7 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
     def columns
       {
         'posts.title': {},
+        'posts.published_at': {},
         'users.email': {},
       }
     end
@@ -17,6 +18,7 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
       filtered.map do |post|
         [
           post.title,
+          posts.published_at,
           post.user&.email,
         ]
       end
@@ -51,20 +53,19 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
 
     assert_equal_with_message [first, second, third], trk_dt(:order_and_paginate_items, order: { 0 => { column: 0, dir: 'asc' } }), :title
 
-    assert_equal_with_message [third, first, second], trk_dt(:order_and_paginate_items, order: { 0 => { column: 1, dir: 'desc' }, 1 => { column: 0, dir: 'asc' } }), :title
+    assert_equal_with_message [third, first, second], trk_dt(:order_and_paginate_items, order: { 0 => { column: 2, dir: 'desc' }, 1 => { column: 0, dir: 'asc' } }), :title
   end
 
-  def test_search_all
+  def test_filter_by_search_all
     first_user = User.create email: '1@email.com'
-    first = Post.create title: '1_post', user: first_user
-    second = Post.create title: '2_post', user: first_user
+    first = Post.create title: '1_post', user: first_user, published_at: '2020-01-01'
+    second = Post.create title: '2_post', user: first_user, published_at: '2021-01-01'
     second_user = User.create email: '2@email.com'
-    third = Post.create title: '3_post', user: second_user
+    third = Post.create title: '3_post', user: second_user, published_at: '2022-01-01'
 
     assert_equal_with_message [second], trk_dt(:filter_by_search_all, search: { value: '2_post' }), :title
-
-    assert_equal_with_message [second, third], trk_dt(:filter_by_search_all, search: { value: '2' }), :title
-
+    assert_equal_with_message [first, second, third], trk_dt(:filter_by_search_all, search: { value: '2' }), :title
+    assert_equal_with_message [third], trk_dt(:filter_by_search_all, search: { value: '2022-01-01' }), :title
     assert_equal_with_message [first, second, third], trk_dt(:filter_by_search_all, search: { value: '_' }), :title
   end
 end

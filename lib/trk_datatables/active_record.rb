@@ -1,13 +1,18 @@
 module TrkDatatables
   class ActiveRecord < Base
+    # Global search. All columns are typecasted to string. Search string is
+    # splited by space and "and"-ed.
     def filter_by_search_all(filtered_items)
       conditions = @dt_params.search_all.split(' ').inject([]) do |cond, search_string|
-        cond << searchable_columns.map do |column_key, _column_option|
-          table_name, column_name = column_key.to_s.split '.'
-          table = table_name.singularize.camelcase.constantize
-          casted_column = ::Arel::Nodes::NamedFunction.new('CAST', [table.arel_table[column_name].as(@type_cast)])
+        type_cast = @column_key_options.global_search_type_cast
+        cond << @column_key_options.searchable.map do |column_key_option|
+          casted_column = ::Arel::Nodes::NamedFunction.new(
+            'CAST', [
+              column_key_option[:table_class].arel_table[column_key_option[:column_name]].as(type_cast)
+            ]
+          )
           casted_column.matches("%#{search_string}%")
-        end.reduce('or')
+        end.reduce(:or)
       end.compact.reduce(:and)
 
       filtered_items.where conditions
@@ -27,11 +32,10 @@ module TrkDatatables
       return filtered_items if @dt_params.orders.blank?
 
       order_by = @dt_params.orders.each_with_object([]) do |order, queries|
-        column_key, column_options = _get_column_key_and_column_options_by_index order[:column_index]
-        raise TrkDatatables::Error, "Columns does not have element #{order[:column_index]}" unless column_key
-        next if column_options[:order] == false
+        column_key_option = @column_key_options[order[:column_index]]
+        next if column_key_option[:column_options][:order] == false
 
-        queries << "#{column_key} #{order[:direction]}"
+        queries << "#{column_key_option[:column_key]} #{order[:direction]}"
       end
       filtered_items.order(Arel.sql(order_by.join(', ')))
     end

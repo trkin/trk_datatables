@@ -94,10 +94,20 @@ And finally in a view, use `render_html` to have first page show up prerendered
 <%= @datatable.render_html %>
 ```
 
-## More examples
+## Docs
 
-Search can be global ie search all columns or it can search for specific
-column.
+There are two types of search: global (search all columns), and column search
+(search is done for specific column).
+
+For global search, any type of a column is casted to a string.
+
+For column search we have some advance filtering:
+* number: if search contains Separator than it is using interval between
+* date, datetime: if search contains Separator than it is between
+* string: when there is an `multiselect` or `select` column_option than it
+  matches if it is `col IN (option1|option2)`.
+* boolean: any text that is in `true` matches (`t`, `tr`)
+
 
 ## Development
 

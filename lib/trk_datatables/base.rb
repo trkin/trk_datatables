@@ -3,30 +3,10 @@ module TrkDatatables
   end
 
   class Base
-    TYPE_CAST_POSTGRES = 'VARCHAR'.freeze
-    TYPE_CAST_MYSQL    = 'CHAR'.freeze
-    TYPE_CAST_SQLITE   = 'TEXT'.freeze
-    TYPE_CAST_ORACLE   = 'VARCHAR2(4000)'.freeze
-
-    DB_ADAPTER_TYPE_CAST = {
-      psql: TYPE_CAST_POSTGRES,
-      mysql: TYPE_CAST_MYSQL,
-      mysql2: TYPE_CAST_MYSQL,
-      sqlite: TYPE_CAST_SQLITE,
-      sqlite3: TYPE_CAST_SQLITE,
-      oracle: TYPE_CAST_ORACLE,
-      oracleenhanced: TYPE_CAST_ORACLE
-    }.freeze
-
     def initialize(view)
       @view = view
       @dt_params = DtParams.new view.params
-      @type_cast = if defined?(ActiveRecord::Base)
-                     DB_ADAPTER_TYPE_CAST[ActiveRecord::Base.connection_config[:adapter]]
-
-                   else
-                     TYPE_CAST_POSTGRES
-                   end
+      @column_key_options = ColumnKeyOptions.new columns
     end
 
     # Get all items from db
@@ -53,20 +33,6 @@ module TrkDatatables
     # @return Array of Hash
     def columns
       raise NotImplementedError, "You should implement #{__method__} method #{link_to_rdoc self.class, __method__}"
-    end
-
-    def _get_column_key_and_column_options_by_index(index)
-      # https://stackoverflow.com/a/7040927/287166
-      cols = columns
-      # if someone use Array instead of hash, we will use first element
-      cols = columns.first if columns.is_a? Array
-      cols.to_a[index]
-    end
-
-    def searchable_columns
-      columns.reject do |_column_key, column_options|
-        column_options[:search]
-      end
     end
 
     # Define page data

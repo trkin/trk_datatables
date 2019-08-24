@@ -3,6 +3,8 @@ module TrkDatatables
   #
   # In future we can use some another datatables like
   # https://github.com/gregnb/mui-datatables
+  # https://github.com/handsontable/handsontable
+  # https://github.com/cloudflarearchive/backgrid (archived)
   class DtParams
     DEFAULT_PAGE_LENGTH = 10
     DEFAULT_SORT_DIR = :desc
@@ -36,7 +38,7 @@ module TrkDatatables
         # here we ignore index and assume all columns are present in params
         a << {
           column_index: order[:column].to_i,
-          direction: order[:dir].casecmp('ASC').zero? ? :asc : :desc,
+          direction: order[:dir]&.casecmp('ASC')&.zero? ? :asc : :desc,
         }
       end
     end
