@@ -7,8 +7,8 @@ module TrkDatatables
   # https://github.com/cloudflarearchive/backgrid (archived)
   class DtParams
     DEFAULT_PAGE_LENGTH = 10
-    DEFAULT_SORT_DIR = :desc
-    DEFAULT_SORT_COL = 0
+    DEFAULT_ORDER_DIR = :desc
+    BETWEEN_SEPARATOR = ' - '.freeze
 
     def initialize(params)
       @params = ActiveSupport::HashWithIndifferentAccess.new params
@@ -31,16 +31,38 @@ module TrkDatatables
       (offset / per_page) + 1
     end
 
-    # This is typecast so we can safelly use order[:column]
-    # @return array of { column_index: 0, direction: :asc }
-    def orders
-      @params[:order].each_with_object([]) do |(_index, order), a|
-        # here we ignore index and assume all columns are present in params
-        a << {
-          column_index: order[:column].to_i,
-          direction: order[:dir]&.casecmp('ASC')&.zero? ? :asc : :desc,
-        }
-      end
+    # Typecast so we can safelly use dt_order[:column_index] (Integer) and
+    # dt_order[:direction] (:asc/:desc)
+    # @return array of { column_index: 2, direction: :asc }
+    def dt_orders
+      @dt_orders ||= \
+        @params[:order].each_with_object([]) do |(_index, dt_order), a|
+          # here we ignore index
+          a << {
+            column_index: dt_order[:column].to_i,
+            direction: dt_order[:dir]&.casecmp('ASC')&.zero? ? :asc : :desc,
+          }
+        end
+    end
+
+    # Typecast so we can safelly use dt_column[:searchable] (Boolean),
+    # dt_column[:orderable] (Boolean), dt_column[:search_value] (String)
+    #
+    # We assume that the size is the same as columns size
+    # @return
+    #   [
+    #     { index: 0, searchable: true, orderable: true, search_value: 'dule' },
+    #   ]
+    def dt_columns
+      @dt_columns ||= \
+        @params[:columns].each_with_index.map do |(_, dt_column), index| # ignore index
+          {
+            index: index,
+            searchable: dt_column[:searchable] == true,
+            orderable: dt_column[:orderable] == true,
+            search_value: (dt_column[:search] && dt_column[:search][:value]) || '',
+          }
+        end
     end
 
     def search_all
@@ -53,34 +75,38 @@ module TrkDatatables
       )
     end
 
+    # [:columns] should have the same size as column_key_options
     def self.sample_params(options = {})
       HashWithIndifferentAccess.new(
-        'draw' => '1',
-        'start' => '0',
-        'length' => '10',
-        'search' => {
-          'value' => '', 'regex' => 'false'
+        draw: '1',
+        start: '0',
+        length: '10',
+        search: {
+          value: '', regex: 'false'
         },
-        'order' => {
-          '0' => { 'column' => '0', 'dir' => 'desc' }
+        order: {
+          '0': { column: '0', dir: 'desc' }
         },
-        'columns' => {
-          '0' => {
-            'data' => 'username', 'name' => '', 'searchable' => 'true', 'orderable' => 'true',
-            'search' => {
-              'value' => '', 'regex' => 'false'
+        columns: {
+          '0': {
+            searchable: 'true',
+            orderable: 'true',
+            search: {
+              value: '', regex: 'false'
             }
           },
-          '1' => {
-            'data' => 'email', 'name' => '', 'searchable' => 'true', 'orderable' => 'true',
-            'search' => {
-              'value' => '', 'regex' => 'false'
+          '1': {
+            searchable: 'true',
+            orderable: 'true',
+            search: {
+              value: '', regex: 'false'
             }
           },
-          '2' => {
-            'data' => 'first_name', 'name' => '', 'searchable' => 'true', 'orderable' => 'false',
-            'search' => {
-              'value' => '', 'regex' => 'false'
+          '2': {
+            searchable: 'true',
+            orderable: 'false',
+            search: {
+              value: '', regex: 'false'
             }
           },
         },

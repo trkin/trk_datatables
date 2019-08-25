@@ -101,11 +101,16 @@ There are two types of search: global (search all columns), and column search
 
 For global search, any type of a column is casted to a string.
 
-For column search we have some advance filtering:
-* number: if search contains Separator than it is using interval between
-* date, datetime: if search contains Separator than it is between
-* string: when there is an `multiselect` or `select` column_option than it
-  matches if it is `col IN (option1|option2)`.
+For column search, if search does not contain Separator than it is casted to
+string.
+For column_type_in_db in :date, :datetime, :integer, :float and if Separator is present
+than condition is between (including).
+You can use column_option `search: :date` or `search: :datetime` to load date
+picker which will use Separator.
+You can use column_option `search: :select` or `search: :multiselect` with
+`options: [['name1', 'value1']]` so select and multiselect will be loaded and
+match will use `col IN (value1|value2)`. If column_type_in_db is :integer (when
+you use enum in Rails than it will convert to `col IN (integer1|integer2)`.
 * boolean: any text that is in `true` matches (`t`, `tr`)
 
 

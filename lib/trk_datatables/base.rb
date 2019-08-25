@@ -7,6 +7,11 @@ module TrkDatatables
       @view = view
       @dt_params = DtParams.new view.params
       @column_key_options = ColumnKeyOptions.new columns
+
+      # if @dt_params.dt_columns.size != @column_key_options.size
+      #   raise Error, "dt_columns size of columns is #{@dt_params.dt_columns.size} \
+      #   but column_key_options size is #{@column_key_options.size}"
+      # end
     end
 
     # Get all items from db
