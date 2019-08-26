@@ -1,4 +1,6 @@
 module TrkDatatables
+  # rubocop:disable Metrics/ClassLength
+
   # This class wraps databases format https://datatables.net/manual/server-side#Returned-data
   #
   # In future we can use some another datatables like
@@ -6,42 +8,46 @@ module TrkDatatables
   # https://github.com/handsontable/handsontable
   # https://github.com/cloudflarearchive/backgrid (archived)
   class DtParams
-    DEFAULT_PAGE_LENGTH = 10
-    DEFAULT_ORDER_DIR = :desc
-
     def initialize(params)
       @params = ActiveSupport::HashWithIndifferentAccess.new params
-      # we can store somewhere per_page and order params
     end
 
-    def offset
+    def dt_offset
       @params[:start].to_i
     end
 
-    def per_page
-      if @params[:length].present?
-        @params[:length].to_i
-      else
-        DEFAULT_PAGE_LENGTH
-      end
+    def dt_per_page
+      return if @params[:length].blank?
+
+      @params[:length].to_i
     end
 
-    def page
-      (offset / per_page) + 1
-    end
+    # def page
+    #   (dt_offset / dt_per_page) + 1
+    # end
 
     # Typecast so we can safelly use dt_order[:column_index] (Integer) and
     # dt_order[:direction] (:asc/:desc)
-    # @return array of { column_index: 2, direction: :asc }
+    # @return
+    #   [
+    #     { column_index: 2, direction: :asc }.
+    #     { column_index: 1, direction: :desc },
+    #   ]
     def dt_orders
-      @dt_orders ||= \
+      return @dt_orders if defined? @dt_orders
+
+      @dt_orders = []
+      return @dt_orders if @params[:order].blank?
+
+      @dt_orders = \
         @params[:order].each_with_object([]) do |(_index, dt_order), a|
           # for order we ignore key (index) since order is preserved
           a << {
             column_index: dt_order[:column].to_i,
-            direction: dt_order[:dir]&.casecmp('ASC')&.zero? ? :asc : :desc,
+            direction: dt_order[:dir]&.to_s&.casecmp('ASC')&.zero? ? :asc : :desc,
           }
         end
+      @dt_orders
     end
 
     # Typecast so we can safelly use dt_column[:searchable] (Boolean),
@@ -144,4 +150,5 @@ module TrkDatatables
       ).merge options
     end
   end
+  # rubocop:enable Metrics/ClassLength
 end

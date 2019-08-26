@@ -83,14 +83,12 @@ module TrkDatatables
 
     def order_and_paginate_items(filtered_items)
       filtered_items = order_items filtered_items
-      filtered_items = filtered_items.offset(@dt_params.offset).limit(@dt_params.per_page)
+      filtered_items = filtered_items.offset(@dt_params.dt_offset).limit(dt_per_page_or_default)
       filtered_items
     end
 
     def order_items(filtered_items)
-      return filtered_items if @dt_params.dt_orders.blank?
-
-      order_by = @dt_params.dt_orders.each_with_object([]) do |dt_order, queries|
+      order_by = dt_orders_or_default.each_with_object([]) do |dt_order, queries|
         column_key_option = @column_key_options[dt_order[:column_index]]
         next if column_key_option[:column_options][ColumnKeyOptions::ORDER_OPTION] == false
 

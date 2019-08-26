@@ -155,6 +155,37 @@ If you need, you can fetch params with this helper
 PostsDatatable.param_get('users.email', params)
 ```
 
+## Saved Preferences (optional)
+
+You can save column order and page length in User.preferences field so
+next time user navigate to same page will see the same order and page length. It
+can be `string` or `text`, or some advance `hstore` or `jsonb`.
+
+```
+rails g migration add_preferences_to_users preferences:string
+
+# app/models/user.rb
+class User
+  # no need to serialize if it is hstore or jsonb
+  serialize :preferences, Hash
+end
+
+# app/datatables/posts_datatable.rb
+class PostsDatatable
+  def preferences_holder
+    @view.current_user
+  end
+
+  def preferences_field
+    # this is default so do not need to define unless you use different field
+    :preferences
+  end
+end
+```
+
+It will store order and page lenght inside `dt_preferences` on
+`user.preferences`.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

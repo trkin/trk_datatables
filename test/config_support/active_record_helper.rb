@@ -13,6 +13,7 @@ ActiveRecord::Schema.define do
     t.float :latitude
     t.float :longitude
     t.datetime :registered_at
+    t.text :preferences
   end
 
   create_table :posts, force: true do |t|
@@ -31,6 +32,8 @@ ActiveRecord::Schema.define do
 end
 
 class User < ActiveRecord::Base
+  serialize :preferences, Hash
+
   has_many :posts
 end
 

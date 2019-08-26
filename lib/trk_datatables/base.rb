@@ -1,10 +1,14 @@
 module TrkDatatables
   BETWEEN_SEPARATOR = ' - '.freeze
+  DEFAULT_ORDER = [{ column_index: 0, direction: :desc }].freeze
+  DEFAULT_PAGE_LENGTH = 10
 
   class Error < StandardError
   end
 
   class Base
+    include TrkDatatables::Preferences
+
     def initialize(view)
       @view = view
       @dt_params = DtParams.new view.params
@@ -86,10 +90,41 @@ module TrkDatatables
       raise 'order_and_paginate_items_is_defined_in_specific_orm'
     end
 
+    # Returns dt_orders or default
+    # @return
+    #   [
+    #     { column_index: 0, direction: :desc },
+    #   ]
+    def dt_orders_or_default
+      return @dt_orders_or_default if defined? @dt_orders_or_default
+
+      if @dt_params.dt_orders.present?
+        @dt_orders_or_default = @dt_params.dt_orders
+        set_preference :order, @dt_params.dt_orders
+      else
+        @dt_orders_or_default = get_preference(:order) || DEFAULT_ORDER
+      end
+      @dt_orders_or_default
+    end
+
+    def dt_per_page_or_default
+      return @dt_per_page_or_default if defined? @dt_per_page_or_default
+
+      @dt_per_page_or_default = \
+        if @dt_params.dt_per_page.present?
+          set_preference :per_page, @dt_params.dt_per_page
+          @dt_params.dt_per_page
+        else
+          get_preference(:per_page) || DEFAULT_PAGE_LENGTH
+        end
+    end
+
     # Set params for columns.
     #
     # @example
-    #   link_to 'Published posts for my@email.com', posts_path(PostsDatatable.params('posts.status': :published, 'users.email: 'my@email.com')
+    #   link_to 'Published posts for my@email.com',
+    #   posts_path(PostsDatatable.params('posts.status': :published,
+    #   'users.email: 'my@email.com')
     #
     # You can always use your params for filtering outside of datatable
     # @example
