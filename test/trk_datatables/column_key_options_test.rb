@@ -36,6 +36,12 @@ class ColumnKeyOptionTest < Minitest::Test
     assert_equal 'You asked for column index=1 but there is only 1 columns', e.message
   end
 
+  def test_array_notation
+    cols = %w[posts.title posts.body]
+    column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
+    assert_equal %i[posts.title posts.body], (column_key_options.searchable.map { |c| c[:column_key] })
+  end
+
   def test_searchable
     cols = {
       'posts.title': {},

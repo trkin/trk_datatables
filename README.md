@@ -96,19 +96,36 @@ And finally in a view, use `render_html` to have first page show up prerendered
 
 ## Configuration
 
+### Global search
+
 There are two types of search: global (search all columns) and column search
 (search is done for specific column).
 
 For global search, any type of a column is casted to a string and we use `ILIKE`
-(in ActiveRecord it is `ILIKE`.
+(in ActiveRecord it is `.matches`).
+If you want to add more columns to global search you can define
+
+```
+class PostsDatatable < TrkDatatables::ActiveRecord
+  def global_search_columns
+    %w[users.name posts.body]
+  end
+end
+```
+
+That will be used only to match global search.
+
+## Column search
 
 For column search, when search does not contain Separator (` - `) than column is
 casted to string and we use `ILIKE`.
-When search contains Separator we use `BETWEEN` for for column_type_in_db in
-`:date`, `:datetime`, `:integer` and `:float`. For other column_type_in_db we
-use ILIKE.
+When search contains Separator and for column_type_in_db in
+`:date`, `:datetime`, `:integer` and `:float` than we use `BETWEEN`. For other
+column_type_in_db we use ILIKE.
 For columns `:date` and `:datetime` bootstrap datepicker will be automatically
 loaded.
+
+## Custom column search
 
 You can use column_option `search: :select` or `search: :multiselect` with
 `options: [['name1', 'value1']]` so select box will be loaded and

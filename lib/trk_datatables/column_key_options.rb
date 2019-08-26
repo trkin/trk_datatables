@@ -37,8 +37,6 @@ module TrkDatatables
 
     attr_accessor :string_cast
 
-    # rubocop: disable Metrics/AbcSize
-
     # @return
     #   {
     #     column_key: 'users.name',
@@ -49,8 +47,17 @@ module TrkDatatables
     #   }
     def initialize(cols, global_search_cols)
       # if someone use Array instead of hash, we will use first element
-      cols = cols.first if cols.is_a? Array
+      if cols.is_a? Array
+        cols = cols.each_with_object({}) do |column_key, hash|
+          hash[column_key.to_sym] = {}
+        end
+      end
+      _set_data(cols)
+      _set_global_search_cols(global_search_cols)
       @string_cast = _determine_string_type_cast
+    end
+
+    def _set_data(cols)
       @data = cols.each_with_object([]) do |(column_key, column_options), arr|
         raise Error, 'Column options needs to be a Hash' unless column_options.is_a? Hash
 
@@ -65,6 +72,9 @@ module TrkDatatables
           column_type_in_db: _determine_db_type_for_column(table_class, column_name),
         }
       end
+    end
+
+    def _set_global_search_cols(global_search_cols)
       @global_search_cols = global_search_cols.each_with_object([]) do |column_key, arr|
         table_name, column_name = column_key.to_s.split '.'
         table_class = table_name.singularize.camelcase.constantize
@@ -77,7 +87,6 @@ module TrkDatatables
         }
       end
     end
-    # rubocop: enable Metrics/AbcSize
 
     # This is helper
     def _determine_string_type_cast # :nodoc:

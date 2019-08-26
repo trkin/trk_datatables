@@ -27,8 +27,14 @@ module TrkDatatables
       raise NotImplementedError, "You should implement #{__method__} method"
     end
 
-    # Define columns of a table, column_key => { column_options }
+    # Define columns of a table
+    # For simplest version you can notate column_keys as Array of strings
+    # @example
+    #   def column
+    #     %w[posts.id posts.status users.name]
+    #   end
     #
+    # When you need customisation of some columns, you need to define Hash of column_key => { column_options }
     # @example
     #   def columns
     #     {
