@@ -10,8 +10,9 @@ ActiveRecord::Schema.define do
   create_table :users, force: true do |t|
     t.string :email
     t.string :name
-
-    t.timestamps null: false
+    t.float :latitude
+    t.float :longitude
+    t.datetime :registered_at
   end
 
   create_table :posts, force: true do |t|
@@ -19,17 +20,13 @@ ActiveRecord::Schema.define do
     t.string :title
     t.text :body
     t.integer :status
-    t.date :published_at
-
-    t.timestamps
+    t.date :published_date
   end
 
   create_table :comments, force: true do |t|
     t.integer :post_id
     t.text :body
     t.integer :likes, default: 0
-
-    t.timestamps
   end
 end
 
@@ -41,7 +38,7 @@ class Post < ActiveRecord::Base
   belongs_to :user
   has_many :comments
 
-  enum status: %i[draft published]
+  enum status: %i[draft published promoted landing]
 end
 
 class Comment < ActiveRecord::Base

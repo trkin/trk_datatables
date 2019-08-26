@@ -38,7 +38,7 @@ class ColumnKeyOptionTest < Minitest::Test
     cols = {
       'posts.title': {},
       'posts.body': { search: true },
-      'posts.published_at': { search: false },
+      'posts.published_date': { search: false },
     }
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols
     assert_equal 2, column_key_options.searchable.size

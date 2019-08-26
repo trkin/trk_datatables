@@ -8,7 +8,6 @@ module TrkDatatables
   class DtParams
     DEFAULT_PAGE_LENGTH = 10
     DEFAULT_ORDER_DIR = :desc
-    BETWEEN_SEPARATOR = ' - '.freeze
 
     def initialize(params)
       @params = ActiveSupport::HashWithIndifferentAccess.new params
@@ -75,7 +74,6 @@ module TrkDatatables
       )
     end
 
-    # [:columns] should have the same size as column_key_options
     def self.sample_params(options = {})
       HashWithIndifferentAccess.new(
         draw: '1',
@@ -87,6 +85,8 @@ module TrkDatatables
         order: {
           '0': { column: '0', dir: 'desc' }
         },
+        # [:columns] should have the same size as column_key_options since we
+        # ignore keys, and use positions
         columns: {
           '0': {
             searchable: 'true',

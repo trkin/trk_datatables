@@ -1,4 +1,6 @@
 module TrkDatatables
+  BETWEEN_SEPARATOR = ' - '.freeze
+
   class Error < StandardError
   end
 

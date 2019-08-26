@@ -96,17 +96,20 @@ And finally in a view, use `render_html` to have first page show up prerendered
 
 ## Docs
 
-There are two types of search: global (search all columns), and column search
+There are two types of search: global (search all columns) and column search
 (search is done for specific column).
 
-For global search, any type of a column is casted to a string.
+For global search, any type of a column is casted to a string and we use `ILIKE`
+(in ActiveRecord it is `ILIKE`.
 
-For column search, if search does not contain Separator than it is casted to
-string.
-For column_type_in_db in :date, :datetime, :integer, :float and if Separator is present
-than condition is between (including).
-You can use column_option `search: :date` or `search: :datetime` to load date
-picker which will use Separator.
+For column search, when search does not contain Separator (` - `) than column is
+casted to string and we use `ILIKE`.
+When search contains Separator we use `BETWEEN` for for column_type_in_db in
+`:date`, `:datetime`, `:integer` and `:float`. For other column_type_in_db we
+use ILIKE.
+
+For columns `:date` and `:datetime` bootstrap datepicker will be automatically
+loaded.
 You can use column_option `search: :select` or `search: :multiselect` with
 `options: [['name1', 'value1']]` so select and multiselect will be loaded and
 match will use `col IN (value1|value2)`. If column_type_in_db is :integer (when

@@ -11,8 +11,8 @@ module TrkDatatables
     #     }
     SEARCH_OPTION = :search
     # this will load date picker
-    SEARCH_OPTION_DATE_VALUE = :date
-    SEARCH_OPTION_DATETIME_VALUE = :datetime
+    # SEARCH_OPTION_DATE_VALUE = :date
+    # SEARCH_OPTION_DATETIME_VALUE = :datetime
     # this will load select
     SEARCH_OPTION_SELECT = :select
     SEARCH_OPTION_MULTISELECT = :multiselect
