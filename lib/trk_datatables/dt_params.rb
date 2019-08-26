@@ -36,7 +36,7 @@ module TrkDatatables
     def dt_orders
       @dt_orders ||= \
         @params[:order].each_with_object([]) do |(_index, dt_order), a|
-          # here we ignore index
+          # for order we ignore key (index) since order is preserved
           a << {
             column_index: dt_order[:column].to_i,
             direction: dt_order[:dir]&.casecmp('ASC')&.zero? ? :asc : :desc,
@@ -47,25 +47,56 @@ module TrkDatatables
     # Typecast so we can safelly use dt_column[:searchable] (Boolean),
     # dt_column[:orderable] (Boolean), dt_column[:search_value] (String)
     #
-    # We assume that the size is the same as columns size
+    # Returned size could be different from columns size, we match key from params to
+    # insert in appropriate place, and all other values are default
     # @return
     #   [
     #     { index: 0, searchable: true, orderable: true, search_value: 'dule' },
     #   ]
     def dt_columns
-      @dt_columns ||= \
-        @params[:columns].each_with_index.map do |(_, dt_column), index| # ignore index
-          {
-            index: index,
-            searchable: dt_column[:searchable] == true,
-            orderable: dt_column[:orderable] == true,
-            search_value: (dt_column[:search] && dt_column[:search][:value]) || '',
-          }
-        end
+      return @dt_columns if defined? @dt_columns
+
+      @dt_columns = []
+      @params[:columns].each.map do |(dt_position, dt_column)|
+        @dt_columns[dt_position.to_i] = {
+          index: dt_position.to_i,
+          searchable: dt_column[:searchable] == true,
+          orderable: dt_column[:orderable] == true,
+          search_value: (dt_column[:search] && dt_column[:search][:value]) || '',
+        }
+      end
+      @dt_columns.each_with_index do |dt_column, i|
+        next unless dt_column.nil?
+
+        @dt_columns[i] = {
+          index: i,
+          searchable: true,
+          orderable: true,
+          search_value: '',
+        }
+      end
     end
 
     def search_all
       @params.dig(:search, :value) || ''
+    end
+
+    def as_json(all_count, filtered_items_count, data)
+      draw = @params[:draw].to_i
+      {
+        draw: draw,
+        recordsTotal: all_count,
+        recordsFiltered: filtered_items_count,
+        data: data,
+      }
+    end
+
+    def param_set(column_index, value)
+      { columns: { column_index.to_s => { search: { value: value } } } }
+    end
+
+    def param_get(column_index)
+      @params.dig :columns, column_index.to_s, :search, :value
     end
 
     def self.sample_view_params(options = {})

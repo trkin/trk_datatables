@@ -52,7 +52,7 @@ module TrkDatatables
     # global search
     # @example
     #   def global_search_columns
-    #     %w[users.name posts.body]
+    #     %w[name email].map {|col| "users.#{col}" } + %w[posts.body]
     #   end
     def global_search_columns
       []
@@ -86,17 +86,53 @@ module TrkDatatables
       raise 'order_and_paginate_items_is_defined_in_specific_orm'
     end
 
+    # Set params for columns.
+    #
+    # @example
+    #   link_to 'Published posts for my@email.com', posts_path(PostsDatatable.params('posts.status': :published, 'users.email: 'my@email.com')
+    #
+    # You can always use your params for filtering outside of datatable
+    # @example
+    #   link_to 'Published posts for user1',
+    #   posts_path(PostsDatatable.params_set('posts.status': :published).merge(user_id: user1.id))
+    def self.params_set(attr)
+      datatable = new OpenStruct.new(params: {})
+      result = {}
+      attr.each do |column_key, value|
+        column_index = datatable.index_by_column_key column_key
+        result = result.deep_merge datatable.param_set column_index, value
+      end
+      result
+    end
+
+    def self.param_get(column_key, params)
+      datatable = new OpenStruct.new(params: params)
+      column_index = datatable.index_by_column_key column_key
+      datatable.param_get column_index
+    end
+
+    def index_by_column_key(column_key)
+      @column_key_options.index_by_column_key column_key
+    end
+
+    def param_set(column_index, value)
+      @dt_params.param_set column_index, value
+    end
+
+    def param_get(column_index)
+      @dt_params.param_get column_index
+    end
+
     def as_json
       # get the value if it is not a relation
       all_count = all_items.count
       filtered_items = filter_by_search_all filter_by_columns all_items
       ordered_paginated_filtered_items = order_and_paginate_items filtered_items
-      {
-        draw: @view.params[:draw].to_i,
-        recordsTotal: all_count,
-        recordsFiltered: filtered_items.count,
-        data: rows(ordered_paginated_filtered_items),
-      }
+      @dt_params.as_json(
+        all_count,
+        filtered_items.count,
+        rows(ordered_paginated_filtered_items)
+      )
     end
 
     def link_to_rdoc(klass, method)

@@ -39,7 +39,7 @@ module TrkDatatables
 
     # @return
     #   {
-    #     column_key: 'users.name',
+    #     column_key: :'users.name',
     #     column_options: { order: false },
     #     table_class: User,
     #     column_name: :name,
@@ -65,7 +65,7 @@ module TrkDatatables
         table_name, column_name = column_key.to_s.split '.'
         table_class = table_name.singularize.camelcase.constantize
         arr << {
-          column_key: column_key,
+          column_key: column_key.to_sym,
           column_options: column_options,
           table_class: table_class,
           column_name: column_name,
@@ -79,7 +79,7 @@ module TrkDatatables
         table_name, column_name = column_key.to_s.split '.'
         table_class = table_name.singularize.camelcase.constantize
         arr << {
-          column_key: column_key,
+          column_key: column_key.to_sym,
           column_options: {},
           table_class: table_class,
           column_name: column_name,
@@ -124,6 +124,15 @@ module TrkDatatables
 
     def size
       @data.size
+    end
+
+    def index_by_column_key(column_key)
+      i = @data.find_index do |column_key_option|
+        column_key_option[:column_key] == column_key.to_sym
+      end
+      raise Error, "Can't find index for #{column_key} in #{@data.map { |d| d[:column_key] }.join(', ')}" if i.nil?
+
+      i
     end
   end
 end

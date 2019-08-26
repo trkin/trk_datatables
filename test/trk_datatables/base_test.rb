@@ -23,6 +23,21 @@ class TrkDatatablesBaseTest < Minitest::Test
     end
   end
 
+  class PostsDatatable < TrkDatatables::Base
+    def all_items
+      Post.left_joins(:user)
+    end
+
+    def columns
+      {
+        'posts.title': {},
+        'posts.published_date': {},
+        'posts.status': {},
+        'users.email': {},
+      }
+    end
+  end
+
   def test_all_items_not_defined
     assert_raises(NotImplementedError) { NotCompletedDatatable.new(view).all_items }
   end
@@ -51,5 +66,50 @@ class TrkDatatablesBaseTest < Minitest::Test
         end
       end
     end
+  end
+
+  def test_params_set
+    actual = PostsDatatable.params_set('users.email' => 'my@email.com', 'posts.title': 'my_title').merge(user_id: 1)
+    expected = {
+      user_id: 1,
+      columns: {
+        '0' => {
+          search: {
+            value: 'my_title'
+          }
+        },
+        '3' => {
+          search: {
+            value: 'my@email.com'
+          }
+        }
+      }
+    }
+    assert_equal expected, actual
+
+    e = assert_raises(TrkDatatables::Error) { PostsDatatable.params_set('non_existing.table' => 'my@email.com') }
+    assert_match "Can't find index for non_existing.table in posts.title", e.message
+  end
+
+  def test_param_get
+    params = {
+      columns: {
+        '0' => {
+          search: {
+            value: 'my_title'
+          }
+        },
+        '3' => {
+          search: {
+            value: 'my@email.com'
+          }
+        }
+      }
+    }
+    actual = PostsDatatable.param_get('users.email', params)
+    assert_equal 'my@email.com', actual
+
+    e = assert_raises(TrkDatatables::Error) { PostsDatatable.param_get('non_existing.table', params) }
+    assert_match "Can't find index for non_existing.table in posts.title", e.message
   end
 end

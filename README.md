@@ -1,16 +1,16 @@
 # Trk Datatables
 
-[trk_datatables](https://github.com/trkin/trk_datatables) is a gem that you can use with [Datatables](https://datatables.net) along with trk_datatables
-npm package.
-It can help generating first page in html (so non-js crawlers can see it),
-filtering and sorting by one or more columns, adding map and other reporting
-based on GET params.
+This is a [trk_datatables gem](https://github.com/trkin/trk_datatables) that you
+can use with trk_datatables npm package for easier usage of [Datatables js library](https://datatables.net)
+
+It gives you one liner command to generate first page in html (so non-js
+crawlers can see it), global search, filtering and sorting by one or more
+columns, adding map and other complex listing based on GET params.
 
 There are alternatives, for example:
 * [jbox-web/ajax-datatables-rails](https://github.com/jbox-web/ajax-datatables-rails)
 excellent gem but it's scope is only to produce JSON. I wanted to have server
-side rendering and more advance reporting
-
+side rendering and more advance listing
 
 ## Installation
 
@@ -27,11 +27,10 @@ can use Rails generator)
 ```
 ```
 
-## Usage
+## Usage example in Ruby on Rails
 
 In datatable class you need to define three methods: `all_items`, `columns` and
 `rows`.
-For example in Ruby on Rails:
 
 ```
 # app/datatables/posts_datatable.rb
@@ -99,33 +98,36 @@ And finally in a view, use `render_html` to have first page show up prerendered
 ### Global search
 
 There are two types of search: global (search all columns) and column search
-(search is done for specific column).
+(search is done for specific columns).
 
-For global search, any type of a column is casted to a string and we use `ILIKE`
-(in ActiveRecord it is `.matches`).
-If you want to add more columns to global search you can define
+For global search any type of a column is casted to a string and we use `ILIKE`
+(ie `.matches`).
+
+You can add more columns to global search by overriding `global_search_columns`
+method.
 
 ```
 class PostsDatatable < TrkDatatables::ActiveRecord
   def global_search_columns
-    %w[users.name posts.body]
+    # those fields will be used only to match global search
+    %w[posts.body users.name]
   end
 end
 ```
 
-That will be used only to match global search.
+### Column search
 
-## Column search
+For column search when search string does not contain Separator (` - `) than
+all columns are casted to string and `ILIKE` is perfomed.
 
-For column search, when search does not contain Separator (` - `) than column is
-casted to string and we use `ILIKE`.
-When search contains Separator and for column_type_in_db in
-`:date`, `:datetime`, `:integer` and `:float` than we use `BETWEEN`. For other
-column_type_in_db we use ILIKE.
+When search contains Separator and for column_type_in_db as one of the:
+`:date`, `:datetime`, `:integer` and `:float` than `BETWEEN` is perfomed. For
+other column_type_in_db we use `ILIKE`.
+
 For columns `:date` and `:datetime` bootstrap datepicker will be automatically
 loaded.
 
-## Custom column search
+### Custom column search
 
 You can use column_option `search: :select` or `search: :multiselect` with
 `options: [['name1', 'value1']]` so select box will be loaded and
@@ -136,15 +138,21 @@ You can use column_option `search: :checkbox` so for column_type_in_db `:boolean
 it will provide checkbox. For other column_type_in_db it will match if value is
 NULL or NOT NULL.
 
-## Documentation
+## Params
 
-Run
+To set parameters that you can use for links to set column search value, use this helpers
 
 ```
-yard server
+PostsDatatable.params_set('users.id': 1, 'posts.body': 'Hi')
+# in view
+link_to 'Posts for my@email.com and my_title', posts_path(PostsDatatable.params_set('users.email' => 'my@email.com', 'posts.title': 'my_title').merge(user_id: 1))
+# will generate
+```
 
-# clear cache
-rm -rf .yardoc/
+If you need, you can fetch params with this helper
+
+```
+PostsDatatable.param_get('users.email', params)
 ```
 
 ## Development
@@ -152,6 +160,15 @@ rm -rf .yardoc/
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+
+To generate docs you can run
+
+```
+yard server
+
+# clear cache
+rm -rf .yardoc/
+```
 
 ## Contributing
 
