@@ -17,6 +17,10 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
       }
     end
 
+    def global_search_columns
+      %w[users.name posts.body]
+    end
+
     def rows(_filtered); end
   end
 
@@ -110,11 +114,14 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
     assert_equal_with_message [post1a, post1b], trk_dt(:filter_by_columns, columns: { '0': {}, '1': {}, '2': { searchable: true, search: { value: "#{TrkDatatables::BETWEEN_SEPARATOR}1" } }, '3': {}, '4': { searchable: true, search: { value: '.1' } } }), :title
   end
 
+  # rubocop:disable Rails/TimeZone
+  # since in test we use UTC in db, we need to Time.parse so it is your current
+  # timezone. In params you can add timezone info (+0100)
   def test_filter_column_between_date_and_datetime
-    user1 = User.create email: '1@email.com', registered_at: '2010-01-01 07:00:00'
+    user1 = User.create email: '1@email.com', registered_at: Time.parse('2010-01-01 07:00:00')
     post1a = Post.create title: '1a_post', user: user1, published_date: '2020-01-01'
     post1b = Post.create title: '1b_post', user: user1, published_date: '2020-02-01'
-    user2 = User.create email: '2@email.com', registered_at: '2015-01-01 07:00:00'
+    user2 = User.create email: '2@email.com', registered_at: Time.parse('2015-01-01 07:00:00')
     post2a = Post.create title: '2a_post', user: user2, published_date: '2020-03-01'
     post2b = Post.create title: '2b_post', user: user2, published_date: '2020-04-01'
 
@@ -123,8 +130,23 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
     assert_equal_with_message [post2a, post2b], trk_dt(:filter_by_columns, columns: { '0': {}, '1': { searchable: true, search: { value: "2020-03-01#{TrkDatatables::BETWEEN_SEPARATOR}" } } }), :published_date
 
     # datetime
+    assert_equal_with_message [post1a, post1b], trk_dt(:filter_by_columns, columns: { '0': {}, '1': {}, '2': {}, '3': {}, '4': {}, '5': { searchable: true, search: { value: "2010-01-01 07:00:00#{TrkDatatables::BETWEEN_SEPARATOR}2010-01-01 07:00:00" } } }), :published_date
+    # in CEST timezone offset if 1h
+    # assert_equal_with_message [post1a, post1b], trk_dt(:filter_by_columns, columns: { '0': {}, '1': {}, '2': {}, '3': {}, '4': {}, '5': { searchable: true, search: { value: "2010-01-01 06:00:00 +0000#{TrkDatatables::BETWEEN_SEPARATOR}2010-01-01 06:00:00 +0000" } } }), :published_date
 
     # both date and datetime
-    assert_equal_with_message [post1b], trk_dt(:filter_by_columns, columns: { '0': {}, '1': { searchable: true, search: { value: "2020-02-01#{TrkDatatables::BETWEEN_SEPARATOR}" } }, '2': {}, '3': {}, '4': {}, '5': { searchable: true, search: { value: "#{TrkDatatables::BETWEEN_SEPARATOR}2010-01-01 08:00:00" } } }), :title
+    assert_equal_with_message [post1b], trk_dt(:filter_by_columns, columns: { '0': {}, '1': { searchable: true, search: { value: "2020-02-01#{TrkDatatables::BETWEEN_SEPARATOR}" } }, '2': {}, '3': {}, '4': {}, '5': { searchable: true, search: { value: "#{TrkDatatables::BETWEEN_SEPARATOR}2010-01-01 07:00:00" } } }), :title
+  end
+  # rubocop:enable Rails/TimeZone
+
+  def test_global_search
+    user1 = User.create email: '1@email.com', name: 'user1_name'
+    post1a = Post.create title: '1a_post', user: user1, body: '1a_body'
+    post1b = Post.create title: '1b_post', user: user1, body: '1b_body'
+    user2 = User.create email: '2@email.com', name: 'user2_name'
+    _post2 = Post.create title: '2a_post', user: user2, body: '2a_body'
+
+    assert_equal_with_message [post1b], trk_dt(:filter_by_search_all, search: { value: '1b_body' }), :title
+    assert_equal_with_message [post1a, post1b], trk_dt(:filter_by_search_all, search: { value: '_body user1_name' }), :title
   end
 end

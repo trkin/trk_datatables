@@ -5,7 +5,8 @@ class ColumnKeyOptionTest < Minitest::Test
     cols = {
       'posts.title': nil,
     }
-    e = assert_raises(TrkDatatables::Error) { TrkDatatables::ColumnKeyOptions.new cols }
+    global_search_cols = %w[posts.body]
+    e = assert_raises(TrkDatatables::Error) { TrkDatatables::ColumnKeyOptions.new cols, global_search_cols }
 
     assert_equal 'Column options needs to be a Hash', e.message
   end
@@ -14,7 +15,8 @@ class ColumnKeyOptionTest < Minitest::Test
     cols = {
       'posts.title': { wrong: true },
     }
-    e = assert_raises(ArgumentError) { TrkDatatables::ColumnKeyOptions.new cols }
+    global_search_cols = []
+    e = assert_raises(ArgumentError) { TrkDatatables::ColumnKeyOptions.new cols, global_search_cols }
 
     assert_match 'Unknown key: :wrong. Valid keys are:', e.message
   end
@@ -40,7 +42,7 @@ class ColumnKeyOptionTest < Minitest::Test
       'posts.body': { search: true },
       'posts.published_date': { search: false },
     }
-    column_key_options = TrkDatatables::ColumnKeyOptions.new cols
+    column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
     assert_equal 2, column_key_options.searchable.size
     assert_equal %i[posts.title posts.body], (column_key_options.searchable.map { |c| c[:column_key] })
   end

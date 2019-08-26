@@ -94,7 +94,7 @@ And finally in a view, use `render_html` to have first page show up prerendered
 <%= @datatable.render_html %>
 ```
 
-## Docs
+## Configuration
 
 There are two types of search: global (search all columns) and column search
 (search is done for specific column).
@@ -107,15 +107,28 @@ casted to string and we use `ILIKE`.
 When search contains Separator we use `BETWEEN` for for column_type_in_db in
 `:date`, `:datetime`, `:integer` and `:float`. For other column_type_in_db we
 use ILIKE.
-
 For columns `:date` and `:datetime` bootstrap datepicker will be automatically
 loaded.
-You can use column_option `search: :select` or `search: :multiselect` with
-`options: [['name1', 'value1']]` so select and multiselect will be loaded and
-match will use `col IN (value1|value2)`. If column_type_in_db is :integer (when
-you use enum in Rails than it will convert to `col IN (integer1|integer2)`.
-* boolean: any text that is in `true` matches (`t`, `tr`)
 
+You can use column_option `search: :select` or `search: :multiselect` with
+`options: [['name1', 'value1']]` so select box will be loaded and
+match if `col IN (value1|value2)`. If column_type_in_db is :integer (when
+you use enum in Rails than it will convert to `col IN (integer1|integer2)`.
+
+You can use column_option `search: :checkbox` so for column_type_in_db `:boolean`
+it will provide checkbox. For other column_type_in_db it will match if value is
+NULL or NOT NULL.
+
+## Documentation
+
+Run
+
+```
+yard server
+
+# clear cache
+rm -rf .yardoc/
+```
 
 ## Development
 

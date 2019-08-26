@@ -4,7 +4,7 @@ module TrkDatatables
     # splited by space and "and"-ed.
     def filter_by_search_all(filtered_items)
       conditions = @dt_params.search_all.split(' ').map do |search_string|
-        @column_key_options.searchable.map do |column_key_option|
+        @column_key_options.searchable_and_global_search.map do |column_key_option|
           filter_column_as_string column_key_option, search_string
         end.reduce(:or) # any searchable column is 'or'-ed
       end.reduce(:and) # 'and' for each search_string
@@ -76,6 +76,7 @@ module TrkDatatables
 
     # rubocop:disable Rails/TimeZone
     def _parse_in_zone(time)
+      # without rails we will parse without zone so make sure params are correct
       Time.zone ? Time.zone.parse(time) : Time.parse(time)
     end
     # rubocop:enable Rails/TimeZone

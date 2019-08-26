@@ -8,7 +8,7 @@ module TrkDatatables
     def initialize(view)
       @view = view
       @dt_params = DtParams.new view.params
-      @column_key_options = ColumnKeyOptions.new columns
+      @column_key_options = ColumnKeyOptions.new columns, global_search_columns
 
       # if @dt_params.dt_columns.size != @column_key_options.size
       #   raise Error, "dt_columns size of columns is #{@dt_params.dt_columns.size} \
@@ -40,6 +40,16 @@ module TrkDatatables
     # @return Array of Hash
     def columns
       raise NotImplementedError, "You should implement #{__method__} method #{link_to_rdoc self.class, __method__}"
+    end
+
+    # Define columns that are not returned to page but only used as mathing for
+    # global search
+    # @example
+    #   def global_search_columns
+    #     %w[users.name posts.body]
+    #   end
+    def global_search_columns
+      []
     end
 
     # Define page data

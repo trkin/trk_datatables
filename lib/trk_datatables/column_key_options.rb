@@ -37,6 +37,8 @@ module TrkDatatables
 
     attr_accessor :string_cast
 
+    # rubocop: disable Metrics/AbcSize
+
     # @return
     #   {
     #     column_key: 'users.name',
@@ -45,7 +47,7 @@ module TrkDatatables
     #     column_name: :name,
     #     column_type_in_db: :string,
     #   }
-    def initialize(cols)
+    def initialize(cols, global_search_cols)
       # if someone use Array instead of hash, we will use first element
       cols = cols.first if cols.is_a? Array
       @string_cast = _determine_string_type_cast
@@ -63,9 +65,22 @@ module TrkDatatables
           column_type_in_db: _determine_db_type_for_column(table_class, column_name),
         }
       end
+      @global_search_cols = global_search_cols.each_with_object([]) do |column_key, arr|
+        table_name, column_name = column_key.to_s.split '.'
+        table_class = table_name.singularize.camelcase.constantize
+        arr << {
+          column_key: column_key,
+          column_options: {},
+          table_class: table_class,
+          column_name: column_name,
+          column_type_in_db: _determine_db_type_for_column(table_class, column_name),
+        }
+      end
     end
+    # rubocop: enable Metrics/AbcSize
 
-    def _determine_string_type_cast
+    # This is helper
+    def _determine_string_type_cast # :nodoc:
       raise NotImplementedError unless defined?(::ActiveRecord::Base)
 
       DB_ADAPTER_STRING_TYPE_CAST[::ActiveRecord::Base.connection_config[:adapter].to_sym]
@@ -86,6 +101,10 @@ module TrkDatatables
       @data.reject do |column_key_option|
         column_key_option[:column_options][SEARCH_OPTION] == false
       end
+    end
+
+    def searchable_and_global_search
+      searchable + @global_search_cols
     end
 
     def [](index)
