@@ -8,6 +8,7 @@ module TrkDatatables
 
   class Base
     include TrkDatatables::Preferences
+    attr_accessor :column_key_options
 
     def initialize(view)
       @view = view
@@ -172,6 +173,15 @@ module TrkDatatables
 
     def link_to_rdoc(klass, method)
       "http://localhost:8808/docs/TrkDatatables/#{klass.name}##{method}-instance_method"
+    end
+
+    def render_html(search_link = nil, html_options = {})
+      if search_link.is_a? Hash
+        html_options = search_link
+        search_link = nil
+      end
+      render = RenderHtml.new(search_link, self, html_options)
+      render.result
     end
   end
 end

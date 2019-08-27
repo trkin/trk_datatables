@@ -1,5 +1,7 @@
 module TrkDatatables
   class ColumnKeyOptions
+    include Enumerable
+
     # All options that you can use for columns:
     #
     # search: if you want to enable global and column search, default is true
@@ -18,7 +20,8 @@ module TrkDatatables
     SEARCH_OPTION_MULTISELECT = :multiselect
     SEARCH_OPTION_OPTIONS_FOR_SELECT = :options
     ORDER_OPTION = :order
-    COLUMN_OPTIONS = [SEARCH_OPTION, ORDER_OPTION].freeze
+    TITLE_OPTION = :title
+    COLUMN_OPTIONS = [SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION].freeze
 
     STRING_TYPE_CAST_POSTGRES = 'VARCHAR'.freeze
     STRING_TYPE_CAST_MYSQL    = 'CHAR'.freeze
@@ -44,6 +47,8 @@ module TrkDatatables
     #     table_class: User,
     #     column_name: :name,
     #     column_type_in_db: :string,
+    #     title: 'Name',
+    #     html_options: 'my-class',
     #   }
     def initialize(cols, global_search_cols)
       # if someone use Array instead of hash, we will use first element
@@ -63,6 +68,8 @@ module TrkDatatables
 
         column_options.assert_valid_keys(*COLUMN_OPTIONS)
         table_name, column_name = column_key.to_s.split '.'
+        raise Error, 'Column key needs to have one dot table.column' if column_name.nil?
+
         table_class = table_name.singularize.camelcase.constantize
         arr << {
           column_key: column_key.to_sym,
@@ -70,6 +77,8 @@ module TrkDatatables
           table_class: table_class,
           column_name: column_name,
           column_type_in_db: _determine_db_type_for_column(table_class, column_name),
+          title: column_options[TITLE_OPTION] || column_name.humanize,
+          html_options: html_options(column_options),
         }
       end
     end
@@ -122,6 +131,10 @@ module TrkDatatables
       @data[index]
     end
 
+    def each(&block)
+      @data.each(&block)
+    end
+
     def size
       @data.size
     end
@@ -133,6 +146,13 @@ module TrkDatatables
       raise Error, "Can't find index for #{column_key} in #{@data.map { |d| d[:column_key] }.join(', ')}" if i.nil?
 
       i
+    end
+
+    def html_options(column_options)
+      res = {}
+      res['data-searchable'] = false if column_options[SEARCH_OPTION] == false
+      res['data-orderable'] = false if column_options[ORDER_OPTION] == false
+      res
     end
   end
 end

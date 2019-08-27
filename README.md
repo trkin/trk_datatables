@@ -29,8 +29,10 @@ can use Rails generator)
 
 ## Usage example in Ruby on Rails
 
-In datatable class you need to define three methods: `all_items`, `columns` and
-`rows`.
+For a table you need to define `rows` and `columns` (well that is obvious 😌).
+In datatable class you also need to define `all_items` method which will  be
+used to populate `rows` with paginated, sorted and filtered items (we will call
+them `filtered`)
 
 ```
 # app/datatables/posts_datatable.rb
@@ -90,7 +92,7 @@ And finally in a view, use `render_html` to have first page show up prerendered
 ```
 # app/views/posts/index.html
 <h1>Posts</h1>
-<%= @datatable.render_html %>
+<%= @datatable.render_html search_posts_path(format: :json) %>
 ```
 
 ## Configuration
