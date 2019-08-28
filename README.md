@@ -117,7 +117,7 @@ class PostsDatatable < TrkDatatables::ActiveRecord
 end
 ```
 
-### Column search
+### Column 'ILIKE' and 'BETWEEN' search
 
 For column search when search string does not contain BETWEEN_SEPARATOR (` - `) than
 all columns are casted to string and `ILIKE` is perfomed.
@@ -129,7 +129,7 @@ otherwise it is `ILIKE`).
 For columns `:date` and `:datetime` there will be `data-datatable-range='true'`
 attribute so bootstrap datepicker will be automatically loaded.
 
-### Custom column search
+### Column 'IN' search
 
 You can use column_option `search: :select` or `search: :multiselect` with
 `options: [['name1', 'value1']]` so select box will be loaded and
@@ -139,6 +139,29 @@ you use enum in Rails than it will convert to `col IN (integer1|integer2)`.
 You can use column_option `search: :checkbox` so for column_type_in_db `:boolean`
 it will provide checkbox. For other column_type_in_db it will match if value is
 NULL or NOT NULL.
+
+## Action column
+
+You can use one column for actions (so it is not related to any db column) just
+use empty column_key
+
+```
+  def columns
+    {
+      'posts.title': {},
+      '': { title: "<a href='#'>Check all</a>" },
+    }
+  end
+
+  def rows(filtered)
+    filtered.each do |post|
+      [
+        post.title,
+        "@view"
+      ]
+    end
+  end
+```
 
 ## Params
 
@@ -190,6 +213,20 @@ end
 
 It will store order and page lenght inside `dt_preferences` on
 `user.preferences`.
+
+## Debug
+
+You can override some of the methos and put byebug, for example
+```
+# app/datatables/posts_datatable.rb
+class PostsDatatable < TrkDatatables::ActiveRecord
+  def as_json(_ = nil)
+    byebug
+    super
+  end
+end
+
+```
 
 ## Development
 

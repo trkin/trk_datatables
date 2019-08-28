@@ -63,11 +63,13 @@ module TrkDatatables
       return @dt_columns if defined? @dt_columns
 
       @dt_columns = []
+      return @dt_columns unless @params[:columns].respond_to? :each
+
       @params[:columns].each.map do |(dt_position, dt_column)|
         @dt_columns[dt_position.to_i] = {
           index: dt_position.to_i,
-          searchable: dt_column[:searchable] == true,
-          orderable: dt_column[:orderable] == true,
+          searchable: dt_column[:searchable].to_s == 'true',
+          orderable: dt_column[:orderable].to_s == 'true',
           search_value: (dt_column[:search] && dt_column[:search][:value]) || '',
         }
       end

@@ -35,6 +35,8 @@ module TrkDatatables
         else
           filter_column_as_string(column_key_option, search_value)
         end
+      when nil # here is when we use action columns, usually not column searchable
+        nil
       else
         filter_column_as_string(column_key_option, search_value)
       end
@@ -74,12 +76,10 @@ module TrkDatatables
       [from, to]
     end
 
-    # rubocop:disable Rails/TimeZone
     def _parse_in_zone(time)
       # without rails we will parse without zone so make sure params are correct
       Time.zone ? Time.zone.parse(time) : Time.parse(time)
     end
-    # rubocop:enable Rails/TimeZone
 
     def order_and_paginate_items(filtered_items)
       filtered_items = order_items filtered_items

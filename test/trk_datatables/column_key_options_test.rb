@@ -52,4 +52,13 @@ class ColumnKeyOptionTest < Minitest::Test
     assert_equal 2, column_key_options.searchable.size
     assert_equal %i[posts.title posts.body], (column_key_options.searchable.map { |c| c[:column_key] })
   end
+
+  def test_action_column
+    cols = {
+      'posts.title': {},
+      '': {},
+    }
+    column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
+    assert_equal 2, column_key_options.searchable.size
+  end
 end

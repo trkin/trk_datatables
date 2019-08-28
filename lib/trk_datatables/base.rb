@@ -84,7 +84,8 @@ module TrkDatatables
     end
 
     def filter_by_columns(_all)
-      raise 'filter_by_columns_is_defined_in_specific_orm'
+      raise 'filter_by_columns_is_defined_in_specific_orm' \
+        "\n  Extent from TrkDatatables::ActiveRecord instead of TrkDatatables::Base"
     end
 
     def order_and_paginate_items(_filtered_items)
@@ -157,7 +158,8 @@ module TrkDatatables
       @dt_params.param_get column_index
     end
 
-    def as_json
+    # _attr is given by Rails template, prefix, layout... not used
+    def as_json(_attr = nil)
       # get the value if it is not a relation
       all_count = all_items.count
       filtered_items = filter_by_search_all filter_by_columns all_items

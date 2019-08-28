@@ -69,10 +69,14 @@ module TrkDatatables
 
         column_options.assert_valid_keys(*COLUMN_OPTIONS)
         table_name, column_name = column_key.to_s.split '.'
-        raise Error, 'Column key needs to have one dot table.column' if column_name.nil?
+        raise Error, 'Column key needs to have one dot table.column' if table_name.present? && column_name.nil?
 
-        table_class = table_name.singularize.camelcase.constantize
-        column_type_in_db = _determine_db_type_for_column(table_class, column_name)
+        if table_name.blank?
+          column_name = 'actions' # some default name for a title
+        else
+          table_class = table_name.singularize.camelcase.constantize
+          column_type_in_db = _determine_db_type_for_column(table_class, column_name)
+        end
         arr << {
           column_key: column_key.to_sym,
           column_options: column_options,

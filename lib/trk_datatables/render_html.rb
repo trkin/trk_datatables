@@ -20,6 +20,13 @@ module TrkDatatables
       attr_accessor :indent
     end
 
+    # https://github.com/rails/rails/blob/master/actionview/lib/action_view/helpers/output_safety_helper.rb#L33
+    def safe_join(array, sep = $,)
+      sep = ERB::Util.unwrapped_html_escape(sep)
+
+      array.map { |i| ERB::Util.unwrapped_html_escape(i) }.join(sep).html_safe
+    end
+
     # _content_tag :p, 'Hi'
     # _content_tag :p, class: 'button', 'Hi'
     # _content_tag :div, do
@@ -33,15 +40,14 @@ module TrkDatatables
         inline = true
       end
       self.class.indent += 1
-      tag = tag.to_s
-      html = "#{'  ' * self.class.indent}<#{tag}"
+      html = "#{'  ' * self.class.indent}<#{tag}".html_safe
       options.each do |attribute, value|
-        html << " #{attribute}='#{value}'"
+        html << " #{attribute}='".html_safe << value.to_s << "'".html_safe
       end
       html << if inline
-                ">#{content}</#{tag}>\n"
+                '>'.html_safe << content.to_s << "</#{tag}>\n".html_safe
               else
-                ">\n#{yield}\n#{'  ' * self.class.indent}</#{tag}>"
+                ">\n".html_safe << yield << "\n#{'  ' * self.class.indent}</#{tag}>".html_safe
               end
       self.class.indent -= 1
       html
@@ -54,22 +60,22 @@ module TrkDatatables
         'data-datatable': true,
         'data-datatable-ajax-url': @search_link,
         'data-datatable-page-length': @datatable.dt_per_page_or_default,
-        'data-datatable-order': @datatable.dt_orders_or_default.to_json,
+        'data-datatable-order': @datatable.dt_orders_or_default.map {|dt_order| [dt_order[:column_index], dt_order[:direction].to_s.html_safe]}.to_json, # TODO: legacy
         'data-datatable-total-length': @datatable.all_items.count
       ) do
-        thead + "\n" + tbody
+        thead << "\n".html_safe << tbody
       end
     end
 
     def thead
       _content_tag 'thead' do
         _content_tag :tr do
-          @datatable.column_key_options.map do |column_key_option|
+          safe_join(@datatable.column_key_options.map do |column_key_option|
             options = column_key_option[:html_options]
             search_value = @datatable.param_get(column_key_option[:column_key]) if options['data-searchable'] != false
             options['data-datatable-search-value'] = search_value if search_value.present?
             _content_tag :th, options, column_key_option[:title]
-          end.join
+          end)
         end
       end
     end
@@ -80,13 +86,13 @@ module TrkDatatables
       ordered_paginated_filtered_items = @datatable.order_and_paginate_items \
         @datatable.filter_by_search_all @datatable.filter_by_columns @datatable.all_items
       _content_tag :tbody do
-        @datatable.rows(ordered_paginated_filtered_items).map do |row|
+        safe_join(@datatable.rows(ordered_paginated_filtered_items).map do |row|
           _content_tag :tr do
-            row.map do |col|
+            safe_join(row.map do |col|
               _content_tag :td, col
-            end.join
+            end)
           end
-        end.join("\n")
+        end, "\n".html_safe)
       end
     end
 
