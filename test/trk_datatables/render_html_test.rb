@@ -28,7 +28,7 @@ class RenderHtmlTest < Minitest::Test
   def test_render_basic
     Post.create title: 'Post1', status: :draft
     Post.create title: 'Post2', status: :published, user: User.create(email: 'my@email.com')
-    datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params
+    datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params columns: { '2': { search: { value: 'my' } } }
     result = datatable.render_html 'link', class: 'blue'
     expected = <<~HTML
       <table class='table table-bordered table-striped blue' data-datatable='true' data-datatable-ajax-url='link' data-datatable-page-length='10' data-datatable-order='[{"column_index":0,"direction":"desc"}]' data-datatable-total-length='2'>
@@ -36,7 +36,7 @@ class RenderHtmlTest < Minitest::Test
           <tr>
             <th>Title</th>
             <th data-searchable='false' data-orderable='false'>Status</th>
-            <th>Imejl</th>
+            <th data-datatable-search-value='my'>Imejl</th>
 
           </tr>
         </thead>

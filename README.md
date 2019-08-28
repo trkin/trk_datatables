@@ -142,12 +142,15 @@ NULL or NOT NULL.
 
 ## Params
 
-To set parameters that you can use for links to set column search value, use this helpers
+To set parameters that you can use for links to set column search value, use
+this `PostsDatatable.param_set` for example
 
 ```
-PostsDatatable.params_set('users.id': 1, 'posts.body': 'Hi')
-# in view
-link_to 'Posts for my@email.com and my_title', posts_path(PostsDatatable.params_set('users.email' => 'my@email.com', 'posts.title': 'my_title').merge(user_id: 1))
+link_to 'Posts for my@email.com and my_title', \
+  posts_path(
+    PostsDatatable.params_set('users.email': 'my@email.com', 'posts.title': 'my_title')
+      .merge(user_id: 1)
+  )
 # will generate
 ```
 

@@ -48,7 +48,7 @@ module TrkDatatables
     #     column_name: :name,
     #     column_type_in_db: :string,
     #     title: 'Name',
-    #     html_options: 'my-class',
+    #     html_options: { class: 'my-class' },
     #   }
     def initialize(cols, global_search_cols)
       # if someone use Array instead of hash, we will use first element

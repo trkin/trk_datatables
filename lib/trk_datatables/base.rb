@@ -120,7 +120,8 @@ module TrkDatatables
         end
     end
 
-    # Set params for columns.
+    # Set params for columns. This is class method so you do not need datatable
+    # instance.
     #
     # @example
     #   link_to 'Published posts for my@email.com',
@@ -136,26 +137,23 @@ module TrkDatatables
       result = {}
       attr.each do |column_key, value|
         column_index = datatable.index_by_column_key column_key
-        result = result.deep_merge datatable.param_set column_index, value
+        result = result.deep_merge DtParams.param_set column_index, value
       end
       result
     end
 
-    def self.param_get(column_key, params)
-      datatable = new OpenStruct.new(params: params)
-      column_index = datatable.index_by_column_key column_key
-      datatable.param_get column_index
-    end
-
+    # We need this method publicly available since we use it for class method
+    # params_set
     def index_by_column_key(column_key)
       @column_key_options.index_by_column_key column_key
     end
 
-    def param_set(column_index, value)
-      @dt_params.param_set column_index, value
-    end
-
-    def param_get(column_index)
+    # Helper to populate column search from params, used in
+    # RenderHtml#thead
+    # @example
+    #   @datatable.param_get('users.email')
+    def param_get(column_key)
+      column_index = index_by_column_key column_key
       @dt_params.param_get column_index
     end
 

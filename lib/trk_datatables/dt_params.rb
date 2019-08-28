@@ -97,7 +97,7 @@ module TrkDatatables
       }
     end
 
-    def param_set(column_index, value)
+    def self.param_set(column_index, value)
       { columns: { column_index.to_s => { search: { value: value } } } }
     end
 
