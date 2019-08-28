@@ -13,16 +13,13 @@ module TrkDatatables
     #       'users.name': { search: false }
     #     }
     SEARCH_OPTION = :search
+    ORDER_OPTION = :order
+    TITLE_OPTION = :title
+    SELECT_OPTIONS = :select_options
     # this will load date picker
     # SEARCH_OPTION_DATE_VALUE = :date
     # SEARCH_OPTION_DATETIME_VALUE = :datetime
-    # this will load select
-    SEARCH_OPTION_SELECT = :select
-    SEARCH_OPTION_MULTISELECT = :multiselect
-    SEARCH_OPTION_OPTIONS_FOR_SELECT = :options
-    ORDER_OPTION = :order
-    TITLE_OPTION = :title
-    COLUMN_OPTIONS = [SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION].freeze
+    COLUMN_OPTIONS = [SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION, SELECT_OPTIONS].freeze
 
     STRING_TYPE_CAST_POSTGRES = 'VARCHAR'.freeze
     STRING_TYPE_CAST_MYSQL    = 'CHAR'.freeze
@@ -44,7 +41,7 @@ module TrkDatatables
     # @return
     #   {
     #     column_key: :'users.name',
-    #     column_options: { order: false },
+    #     column_options: { order: false, select_options: User.statuses },
     #     table_class: User,
     #     column_name: :name,
     #     column_type_in_db: :string,

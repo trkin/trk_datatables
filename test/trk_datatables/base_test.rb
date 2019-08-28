@@ -32,7 +32,7 @@ class TrkDatatablesBaseTest < Minitest::Test
       {
         'posts.title': {},
         'posts.published_date': {},
-        'posts.status': {},
+        'posts.status': { select_options: Post.statuses },
         'users.email': {},
       }
     end
@@ -69,13 +69,18 @@ class TrkDatatablesBaseTest < Minitest::Test
   end
 
   def test_params_set
-    actual = PostsDatatable.params_set('users.email' => 'my@email.com', 'posts.title': 'my_title').merge(user_id: 1)
+    actual = PostsDatatable.params_set('users.email' => 'my@email.com', 'posts.title': 'my_title', 'posts.status': Post.statuses.values_at(:published, :promoted)).merge(user_id: 1)
     expected = {
       user_id: 1,
       columns: {
         '0' => {
           search: {
             value: 'my_title'
+          }
+        },
+        '2' => {
+          search: {
+            value: '1|2'
           }
         },
         '3' => {

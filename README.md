@@ -131,10 +131,21 @@ attribute so bootstrap datepicker will be automatically loaded.
 
 ### Column 'IN' search
 
-You can use column_option `search: :select` or `search: :multiselect` with
-`options: [['name1', 'value1']]` so select box will be loaded and
-match if `col IN (value1|value2)`. If column_type_in_db is :integer (when
-you use enum in Rails than it will convert to `col IN (integer1|integer2)`.
+You can use column_option `select_options: [['name1', 'value1']]` so select box
+will be loaded and match if `col IN (value1|value2)`.
+
+```
+def columns
+  {
+    'posts.title': {},
+    'posts.status': { select_options: Post.statuses },
+  }
+end
+
+# in view
+link_to 'Active', search_posts_path(PostsDatatable.params_set('posts.status':
+Post.statues.values_at(:published, :promoted)))
+```
 
 You can use column_option `search: :checkbox` so for column_type_in_db `:boolean`
 it will provide checkbox. For other column_type_in_db it will match if value is

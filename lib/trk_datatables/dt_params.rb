@@ -68,8 +68,8 @@ module TrkDatatables
       @params[:columns].each.map do |(dt_position, dt_column)|
         @dt_columns[dt_position.to_i] = {
           index: dt_position.to_i,
-          searchable: dt_column[:searchable].to_s == 'true',
-          orderable: dt_column[:orderable].to_s == 'true',
+          searchable: dt_column[:searchable].to_s != 'false', # if nil as it is in set_params, than use true
+          orderable: dt_column[:orderable].to_s != 'false', # if nil as it is in set_params, than use true
           search_value: (dt_column[:search] && dt_column[:search][:value]) || '',
         }
       end

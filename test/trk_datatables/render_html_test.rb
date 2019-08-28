@@ -26,7 +26,7 @@ class RenderHtmlTest < Minitest::Test
   end
 
   def test_render_basic
-    Post.create title: 'Post1', status: :draft
+    Post.create title: 'Post1', status: :draft, published_date: '2020-01-01'
     Post.create title: 'Post2', status: :published, published_date: '2020-10-10'
     datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params columns: { '1': { search: { value: '2020' } } }
     result = datatable.render_html 'link', class: 'blue'
@@ -49,7 +49,7 @@ class RenderHtmlTest < Minitest::Test
           </tr>
           <tr>
             <td>Post1</td>
-            <td></td>
+            <td>2020-01-01</td>
             <td>draft</td>
 
           </tr>
@@ -104,5 +104,37 @@ class RenderHtmlTest < Minitest::Test
       </table>
     HTML
     assert_equal expected.split.join, result.split.join, result
+  end
+
+  class MultiselectsDatatable < TrkDatatables::ActiveRecord
+    def columns
+      {
+        'posts.title': {},
+        'posts.status': { title: 'POS', select_options: Post.statuses },
+      }
+    end
+  end
+
+  def test_render_select
+    datatable = MultiselectsDatatable.new TrkDatatables::DtParams.sample_view_params columns: { '1': { search: { value: 'published|promoted' } } }
+    # Post.statuses.values_at(:published, :promoted).join(TrkDatatables::MULTIPLE_OPTION_SEPARATOR),
+    render_html = TrkDatatables::RenderHtml.new 'link', datatable, class: 'blue'
+    expected = <<~HTML
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th data-datatable-search-value='published|promoted' data-datatable-multiselect='    &lt;select multiple=&quot;multiple&quot;&gt;
+            &lt;option value=&quot;0&quot;&gt;draft&lt;/option&gt;
+            &lt;option value=&quot;1&quot;&gt;published&lt;/option&gt;
+            &lt;option value=&quot;2&quot;&gt;promoted&lt;/option&gt;
+            &lt;option value=&quot;3&quot;&gt;landing&lt;/option&gt;
+
+          &lt;/select&gt;'>POS</th>
+
+        </tr>
+      </thead>
+    HTML
+    result = render_html.thead
+    assert_equal expected.strip, result
   end
 end

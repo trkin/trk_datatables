@@ -1,5 +1,6 @@
 module TrkDatatables
   BETWEEN_SEPARATOR = ' - '.freeze
+  MULTIPLE_OPTION_SEPARATOR = '|'.freeze
   DEFAULT_ORDER = [{ column_index: 0, direction: :desc }].freeze
   DEFAULT_PAGE_LENGTH = 10
 
@@ -44,7 +45,7 @@ module TrkDatatables
     #   def columns
     #     {
     #       'posts.id': {},
-    #       'posts.status' => { multiselect: true },
+    #       'posts.status' => { search: false },
     #       'users.name' => { order: false },
     #     }
     #   end
@@ -137,6 +138,7 @@ module TrkDatatables
       datatable = new OpenStruct.new(params: {})
       result = {}
       attr.each do |column_key, value|
+        value = value.join MULTIPLE_OPTION_SEPARATOR if value.is_a? Array
         column_index = datatable.index_by_column_key column_key
         result = result.deep_merge DtParams.param_set column_index, value
       end

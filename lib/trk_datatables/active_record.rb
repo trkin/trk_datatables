@@ -27,16 +27,16 @@ module TrkDatatables
     end
 
     def build_condition_for_column(column_key_option, search_value)
-      case column_key_option[:column_type_in_db]
-      when :date, :datetime, :integer, :float
-        if search_value.include? BETWEEN_SEPARATOR
-          from, to = search_value.split BETWEEN_SEPARATOR
-          filter_column_as_between(column_key_option, from, to)
-        else
-          filter_column_as_string(column_key_option, search_value)
-        end
-      when nil # here is when we use action columns, usually not column searchable
-        nil
+      # nil is when we use action columns, usually not column searchable
+      return nil if column_key_option[:column_type_in_db].nil?
+
+      select_options = column_key_option[:column_options][ColumnKeyOptions::SELECT_OPTIONS]
+      if select_options.present?
+        filter_column_as_in(column_key_option, search_value)
+      elsif %i[date datetime integer float].include?(column_key_option[:column_type_in_db]) && \
+            search_value.include?(BETWEEN_SEPARATOR)
+        from, to = search_value.split BETWEEN_SEPARATOR
+        filter_column_as_between(column_key_option, from, to)
       else
         filter_column_as_string(column_key_option, search_value)
       end
@@ -61,8 +61,12 @@ module TrkDatatables
       elsif to.present?
         _arel_column(column_key_option).lteq(to)
         # else
-        # nil will reesult in true relation
+        # nil will result in true relation
       end
+    end
+
+    def filter_column_as_in(column_key_option, search_value)
+      _arel_column(column_key_option).in search_value.split(MULTIPLE_OPTION_SEPARATOR)
     end
 
     def _parse_from_to(from, to, column_key_option)
@@ -76,10 +80,12 @@ module TrkDatatables
       [from, to]
     end
 
+    # rubocop:disable Rails/TimeZone
     def _parse_in_zone(time)
       # without rails we will parse without zone so make sure params are correct
       Time.zone ? Time.zone.parse(time) : Time.parse(time)
     end
+    # rubocop:enable Rails/TimeZone
 
     def order_and_paginate_items(filtered_items)
       filtered_items = order_items filtered_items
