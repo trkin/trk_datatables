@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    trk_datatables (0.1.0)
+    trk_datatables (0.1.1)
       activesupport
 
 GEM
@@ -24,8 +24,6 @@ GEM
     i18n (1.6.0)
       concurrent-ruby (~> 1.0)
     minitest (5.11.3)
-    minitest-around (0.5.0)
-      minitest (~> 5.0)
     minitest-color (0.0.2)
       minitest (~> 5)
     pg (1.1.4)
@@ -45,7 +43,6 @@ DEPENDENCIES
   byebug
   database_cleaner
   minitest (~> 5.0)
-  minitest-around
   minitest-color
   pg
   rake (~> 10.0)

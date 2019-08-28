@@ -75,7 +75,14 @@ module TrkDatatables
       # we do not need to cast from string since range will do automatically
       when :date, :datetime
         from = _parse_in_zone(from) if from.present?
-        to = _parse_in_zone(to) if to.present?
+        if to.present?
+          to = if to.include?('AM') || to.include?('PM')
+                 _parse_in_zone(to)
+               else
+                 # we need to add one day since it looks at begining of a day 2010-10-10 00:00:00
+                 _parse_in_zone(to) + 60 * 60 * 24 - 1
+               end
+        end
       end
       [from, to]
     end

@@ -24,7 +24,7 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
     def rows(_filtered); end
   end
 
-  def posts_dt(method, options)
+  def posts_dt(method, options = {})
     datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params options
     datatable.send method, datatable.all_items
   end
@@ -165,5 +165,13 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
 
     datatable = MultiselectsDatatable.new TrkDatatables::DtParams.sample_view_params columns: { '0': { searchable: true, search: { value: 'published|promoted' } } }
     assert_equal_with_message [post2, post3], datatable.filter_by_columns(Post.all), :status
+  end
+
+  def test_parse_from_to_dates
+    datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params
+    from = '2000-01-01'
+    to = '2000-01-02'
+    column_key_option = { column_type_in_db: :date }
+    assert_equal ['2000-01-01 00:00:00', '2000-01-02 23:59:59'], (datatable._parse_from_to(from, to, column_key_option).map { |t| t.strftime '%Y-%m-%d %H:%M:%S' })
   end
 end
