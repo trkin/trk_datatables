@@ -112,10 +112,8 @@ module TrkDatatables
     def tbody
       # use raw html_safe only for <td>, not for data since it could be injection
       # hole if we show, for example some params
-      ordered_paginated_filtered_items = @datatable.order_and_paginate_items \
-        @datatable.filter_by_search_all @datatable.filter_by_columns @datatable.all_items
       _content_tag :tbody do
-        safe_join(@datatable.rows(ordered_paginated_filtered_items).map do |row|
+        safe_join(@datatable.rows(@datatable.ordered_paginated_filtered_items).map do |row|
           _content_tag :tr do
             safe_join(row.map do |col|
               _content_tag :td, col

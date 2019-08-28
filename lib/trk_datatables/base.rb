@@ -165,12 +165,15 @@ module TrkDatatables
       # get the value if it is not a relation
       all_count = all_items.count
       filtered_items = filter_by_search_all filter_by_columns all_items
-      ordered_paginated_filtered_items = order_and_paginate_items filtered_items
       @dt_params.as_json(
         all_count,
         filtered_items.count,
         rows(ordered_paginated_filtered_items)
       )
+    end
+
+    def ordered_paginated_filtered_items
+      order_and_paginate_items filter_by_search_all filter_by_columns all_items
     end
 
     def link_to_rdoc(klass, method)
