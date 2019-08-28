@@ -66,8 +66,8 @@ module TrkDatatables
         _content_tag :tr do
           @datatable.column_key_options.map do |column_key_option|
             options = column_key_option[:html_options]
-            column_search_value = @datatable.param_get(column_key_option[:column_key])
-            options['data-datatable-search-value'] = column_search_value if column_search_value.present?
+            search_value = @datatable.param_get(column_key_option[:column_key]) if options['data-searchable'] != false
+            options['data-datatable-search-value'] = search_value if search_value.present?
             _content_tag :th, options, column_key_option[:title]
           end.join
         end

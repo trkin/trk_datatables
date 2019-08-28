@@ -1,4 +1,5 @@
 module TrkDatatables
+  # rubocop:disable ClassLength
   class ColumnKeyOptions
     include Enumerable
 
@@ -71,14 +72,16 @@ module TrkDatatables
         raise Error, 'Column key needs to have one dot table.column' if column_name.nil?
 
         table_class = table_name.singularize.camelcase.constantize
+        column_type_in_db = _determine_db_type_for_column(table_class, column_name)
         arr << {
           column_key: column_key.to_sym,
           column_options: column_options,
           table_class: table_class,
           column_name: column_name,
-          column_type_in_db: _determine_db_type_for_column(table_class, column_name),
+          column_type_in_db: column_type_in_db,
+          # the following are used for RenderHtml
           title: column_options[TITLE_OPTION] || column_name.humanize,
-          html_options: html_options(column_options),
+          html_options: html_options(column_options, column_type_in_db),
         }
       end
     end
@@ -87,12 +90,13 @@ module TrkDatatables
       @global_search_cols = global_search_cols.each_with_object([]) do |column_key, arr|
         table_name, column_name = column_key.to_s.split '.'
         table_class = table_name.singularize.camelcase.constantize
+        column_type_in_db = _determine_db_type_for_column(table_class, column_name)
         arr << {
           column_key: column_key.to_sym,
           column_options: {},
           table_class: table_class,
           column_name: column_name,
-          column_type_in_db: _determine_db_type_for_column(table_class, column_name),
+          column_type_in_db: column_type_in_db,
         }
       end
     end
@@ -148,11 +152,13 @@ module TrkDatatables
       i
     end
 
-    def html_options(column_options)
+    def html_options(column_options, column_type_in_db)
       res = {}
       res['data-searchable'] = false if column_options[SEARCH_OPTION] == false
       res['data-orderable'] = false if column_options[ORDER_OPTION] == false
+      res['data-datatable-range'] = true if %i[date datetime].include? column_type_in_db
       res
     end
   end
+  # rubocop:enable ClassLength
 end

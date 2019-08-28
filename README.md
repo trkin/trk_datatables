@@ -119,15 +119,15 @@ end
 
 ### Column search
 
-For column search when search string does not contain Separator (` - `) than
+For column search when search string does not contain BETWEEN_SEPARATOR (` - `) than
 all columns are casted to string and `ILIKE` is perfomed.
 
-When search contains Separator and for column_type_in_db as one of the:
-`:date`, `:datetime`, `:integer` and `:float` than `BETWEEN` is perfomed. For
-other column_type_in_db we use `ILIKE`.
+When column_type_in_db as one of the: `:date`, `:datetime`, `:integer` and
+`:float` than `BETWEEN` is perfomed (when search contains BETWEEN_SEPARATOR,
+otherwise it is `ILIKE`).
 
-For columns `:date` and `:datetime` bootstrap datepicker will be automatically
-loaded.
+For columns `:date` and `:datetime` there will be `data-datatable-range='true'`
+attribute so bootstrap datepicker will be automatically loaded.
 
 ### Custom column search
 

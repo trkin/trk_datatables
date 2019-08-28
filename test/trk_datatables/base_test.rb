@@ -106,10 +106,11 @@ class TrkDatatablesBaseTest < Minitest::Test
         }
       }
     }
-    actual = PostsDatatable.param_get('users.email', params)
+    datatable = PostsDatatable.new OpenStruct.new params: params
+    actual = datatable.param_get('users.email')
     assert_equal 'my@email.com', actual
 
-    e = assert_raises(TrkDatatables::Error) { PostsDatatable.param_get('non_existing.table', params) }
+    e = assert_raises(TrkDatatables::Error) { datatable.param_get('non_existing.table') }
     assert_match "Can't find index for non_existing.table in posts.title", e.message
   end
 end
