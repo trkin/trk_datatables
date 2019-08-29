@@ -1,37 +1,28 @@
 module TrkDatatables
-  module Preferences
-    # Override this to set model where you can store order, index, page length
-    # @example
-    #   def preferences_holder
-    #     @view.current_user
-    #   end
-    def preferences_holder
-      nil
+  class Preferences
+    def initialize(holder, field)
+      @holder = holder
+      @field = field
     end
 
-    # Override if you use different than :preferences
-    # You can generate with this command:
-    # @code
-    #   rails g migration add_preferences_to_users preferences:jsonb
-    def preferences_field
-      :preferences
-    end
+    # Get the key from holder
+    # Use check_value proc to ignore wrong format. This is usefull when you
+    # change format and you do not want to clear all existing values
+    def get(key, check_value = nil)
+      return unless @holder
 
-    def get_preference(key, check_value = nil)
-      return unless preferences_holder
-
-      result = preferences_holder.send(preferences_field).dig :dt_preferences, self.class.name, key
+      result = @holder.send(@field).dig :dt_preferences, self.class.name, key
       return result if check_value.nil?
       return result if check_value.call result
     end
 
-    def set_preference(key, value)
-      return unless preferences_holder
+    def set(key, value)
+      return unless @holder
 
       h = { dt_preferences: { self.class.name => { key => value } } }
-      preferences_holder.send("#{preferences_field}=", {}) if preferences_holder.send(preferences_field).nil?
-      preferences_holder.send(preferences_field).deep_merge! h
-      preferences_holder.save!
+      @holder.send("#{@field}=", {}) if @holder.send(@field).nil?
+      @holder.send(@field).deep_merge! h
+      @holder.save!
     end
   end
 end

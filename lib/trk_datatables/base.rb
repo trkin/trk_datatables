@@ -8,13 +8,13 @@ module TrkDatatables
   end
 
   class Base
-    include TrkDatatables::Preferences
     attr_accessor :column_key_options
 
     def initialize(view)
       @view = view
       @dt_params = DtParams.new view.params
       @column_key_options = ColumnKeyOptions.new columns, global_search_columns
+      @preferences = Preferences.new preferences_holder, preferences_field
 
       # if @dt_params.dt_columns.size != @column_key_options.size
       #   raise Error, "dt_columns size of columns is #{@dt_params.dt_columns.size} \
@@ -104,9 +104,10 @@ module TrkDatatables
 
       if @dt_params.dt_orders.present?
         @dt_orders_or_default = @dt_params.dt_orders
-        set_preference :order, @dt_params.dt_orders
+        @preferences.set :order, @dt_params.dt_orders
       else
-        @dt_orders_or_default = get_preference(:order) || DEFAULT_ORDER
+        check_value = ->(r) { r.is_a?(Array) && r[0].is_a?(Array) && r[0][0].is_a?(Integer) }
+        @dt_orders_or_default = @preferences.get(:order, check_value) || DEFAULT_ORDER
       end
       @dt_orders_or_default
     end
@@ -116,10 +117,10 @@ module TrkDatatables
 
       @dt_per_page_or_default = \
         if @dt_params.dt_per_page.present?
-          set_preference :per_page, @dt_params.dt_per_page
+          @preferences.set :per_page, @dt_params.dt_per_page
           @dt_params.dt_per_page
         else
-          get_preference(:per_page) || DEFAULT_PAGE_LENGTH
+          @preferences.get(:per_page) || DEFAULT_PAGE_LENGTH
         end
     end
 
@@ -191,6 +192,23 @@ module TrkDatatables
       end
       render = RenderHtml.new(search_link, self, html_options)
       render.result
+    end
+
+    # Override this to set model where you can store order, index, page length
+    # @example
+    #   def preferences_holder
+    #     @view.current_user
+    #   end
+    def preferences_holder
+      nil
+    end
+
+    # Override if you use different than :preferences
+    # You can generate with this command:
+    # @code
+    #   rails g migration add_preferences_to_users preferences:jsonb
+    def preferences_field
+      :preferences
     end
   end
 end

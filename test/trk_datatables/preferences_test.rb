@@ -74,4 +74,18 @@ class Preferences < Minitest::Test
     results = datatable.order_and_paginate_items datatable.all_items
     assert_equal [post3], results.all
   end
+
+  def test_check_value
+    user = User.create
+    preferences = TrkDatatables::Preferences.new user, :preferences
+    assert_nil preferences.get :my_key
+    preferences.set :my_key, 1
+    assert_equal 1, preferences.get(:my_key)
+
+    check_value = ->(v) { v.is_a?(Array) && v[0].is_a?(String) }
+    assert_nil preferences.get(:my_key, check_value)
+
+    preferences.set :my_key, ['Hi']
+    assert_equal ['Hi'], preferences.get(:my_key, check_value)
+  end
 end
