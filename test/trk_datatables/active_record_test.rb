@@ -112,6 +112,9 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
 
     # integer and float without separator
     assert_equal_with_message [post1a, post1b], posts_dt(:filter_by_columns, columns: { '2': { searchable: true, search: { value: "#{TrkDatatables::BETWEEN_SEPARATOR}1" } }, '4': { searchable: true, search: { value: '.1' } } }), :title
+
+    # invalid format
+    assert_equal_with_message Post.all.to_a, posts_dt(:filter_by_columns, columns: { '2': { searchable: true, search: { value: " #{TrkDatatables::BETWEEN_SEPARATOR}a2" } } }), :title
   end
 
   # rubocop:disable Rails/TimeZone
@@ -138,6 +141,13 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
     assert_equal_with_message [post1b], posts_dt(:filter_by_columns, columns: { '1': { searchable: true, search: { value: "2020-02-01#{TrkDatatables::BETWEEN_SEPARATOR}" } }, '5': { searchable: true, search: { value: "#{TrkDatatables::BETWEEN_SEPARATOR}2010-01-01 07:00:00" } } }), :title
   end
   # rubocop:enable Rails/TimeZone
+
+  def test_invalid_date
+    post1a = Post.create title: '1a_post', published_date: '2020-01-01'
+    assert_equal_with_message [post1a], posts_dt(:filter_by_columns, columns: { '1': { searchable: true, search: { value: "2020-01-45#{TrkDatatables::BETWEEN_SEPARATOR}2020-03-02" } } }), :published_date
+    assert_equal_with_message [post1a], posts_dt(:filter_by_columns, columns: { '1': { searchable: true, search: { value: "#{TrkDatatables::BETWEEN_SEPARATOR} " } } }), :published_date
+    assert_equal_with_message [post1a], posts_dt(:filter_by_columns, columns: { '1': { searchable: true, search: { value: "-#{TrkDatatables::BETWEEN_SEPARATOR} " } } }), :published_date
+  end
 
   def test_global_search
     user1 = User.create email: '1@email.com', name: 'user1_name'
@@ -173,5 +183,13 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
     to = '2000-01-02'
     column_key_option = { column_type_in_db: :date }
     assert_equal ['2000-01-01 00:00:00', '2000-01-02 23:59:59'], (datatable._parse_from_to(from, to, column_key_option).map { |t| t.strftime '%Y-%m-%d %H:%M:%S' })
+  end
+
+  def test_parse_from_to_date_with_am
+    datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params
+    from = '2000-01-01'
+    to = '2000-01-02 22:22:22 PM'
+    column_key_option = { column_type_in_db: :date }
+    assert_equal ['2000-01-01 00:00:00', '2000-01-02 22:22:22'], (datatable._parse_from_to(from, to, column_key_option).map { |t| t.strftime '%Y-%m-%d %H:%M:%S' })
   end
 end

@@ -71,26 +71,29 @@ module TrkDatatables
 
     def _parse_from_to(from, to, column_key_option)
       case column_key_option[:column_type_in_db]
-      # when :integer, :float
-      # we do not need to cast from string since range will do automatically
+      when :integer, :float
+        # we do not need to cast from string since range will do automatically
+        parsed_from = from
+        parsed_to = to
       when :date, :datetime
-        from = _parse_in_zone(from) if from.present?
-        if to.present?
-          to = if to.include?('AM') || to.include?('PM')
-                 _parse_in_zone(to)
-               else
-                 # we need to add one day since it looks at begining of a day 2010-10-10 00:00:00
-                 _parse_in_zone(to) + 60 * 60 * 24 - 1
-               end
+        parsed_from = _parse_in_zone(from)
+        parsed_to = _parse_in_zone(to)
+        if parsed_to.present? && !to.match(/AM|PM/)
+          # we need to add one day since it looks at begining of a day 2010-10-10 00:00:00
+          parsed_to += 60 * 60 * 24 - 1
         end
       end
-      [from, to]
+      [parsed_from, parsed_to]
     end
 
     # rubocop:disable Rails/TimeZone
     def _parse_in_zone(time)
+      return nil if time.blank?
+
       # without rails we will parse without zone so make sure params are correct
       Time.zone ? Time.zone.parse(time) : Time.parse(time)
+    rescue ArgumentError
+      nil
     end
     # rubocop:enable Rails/TimeZone
 
