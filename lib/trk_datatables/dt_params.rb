@@ -26,12 +26,12 @@ module TrkDatatables
     #   (dt_offset / dt_per_page) + 1
     # end
 
-    # Typecast so we can safelly use dt_order[:column_index] (Integer) and
-    # dt_order[:direction] (:asc/:desc)
+    # Typecast so we can safelly use dt_order[0] (Integer) and
+    # dt_order[1] (:asc/:desc)
     # @return
     #   [
-    #     { column_index: 2, direction: :asc }.
-    #     { column_index: 1, direction: :desc },
+    #     [ 2, :asc ],
+    #     [ 1, :desc ],
     #   ]
     def dt_orders
       return @dt_orders if defined? @dt_orders
@@ -41,11 +41,11 @@ module TrkDatatables
 
       @dt_orders = \
         @params[:order].each_with_object([]) do |(_index, dt_order), a|
-          # for order we ignore key (index) since order is preserved
-          a << {
-            column_index: dt_order[:column].to_i,
-            direction: dt_order[:dir]&.to_s&.casecmp('ASC')&.zero? ? :asc : :desc,
-          }
+          # for order we ignore key (_index) since order is preserved
+          a << [
+            dt_order[:column].to_i,
+            dt_order[:dir]&.to_s&.casecmp('ASC')&.zero? ? :asc : :desc,
+          ]
         end
       @dt_orders
     end

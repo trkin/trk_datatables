@@ -85,10 +85,10 @@ module TrkDatatables
         'data-datatable': true,
         'data-datatable-ajax-url': @search_link,
         'data-datatable-page-length': @datatable.dt_per_page_or_default,
-        'data-datatable-order': (@datatable.dt_orders_or_default.map do |dt_order|
-          [dt_order[:column_index], dt_order[:direction].to_s.html_safe]
-        end).to_json, # TODO: legacy, better is to use simple @datatable.dt_orders_or_default.to_json
-        'data-datatable-total-length': @datatable.all_items.count
+        'data-datatable-order': @datatable.dt_orders_or_default_index_and_direction.to_json,
+        # for initial page load we do not have ability to show recordsTotal
+        # https://github.com/trkin/trk_datatables_js/issues/1
+        'data-datatable-total-length': @datatable.filtered_items.count,
       ) do
         thead << "\n".html_safe << tbody
       end

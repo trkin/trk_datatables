@@ -34,13 +34,13 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
 
     first_post = Post.find_by! title: 'post00'
     last_post = Post.find_by! title: 'post14'
-    filtered_items = posts_dt :order_and_paginate_items, order: { 0 => { column: 0, dir: 'desc' } }
-    refute_includes filtered_items, first_post
-    assert_includes filtered_items, last_post
+    filtered = posts_dt :order_and_paginate_items, order: { 0 => { column: 0, dir: 'desc' } }
+    refute_includes filtered, first_post
+    assert_includes filtered, last_post
 
-    filtered_items = posts_dt :order_and_paginate_items, order: { 0 => { column: 0, dir: 'asc' } }
-    assert_includes filtered_items, first_post
-    refute_includes filtered_items, last_post
+    filtered = posts_dt :order_and_paginate_items, order: { 0 => { column: 0, dir: 'asc' } }
+    assert_includes filtered, first_post
+    refute_includes filtered, last_post
   end
 
   def test_order_items_by_two_columns

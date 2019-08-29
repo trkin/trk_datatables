@@ -1,7 +1,7 @@
 module TrkDatatables
   BETWEEN_SEPARATOR = ' - '.freeze
   MULTIPLE_OPTION_SEPARATOR = '|'.freeze
-  DEFAULT_ORDER = [{ column_index: 0, direction: :desc }].freeze
+  DEFAULT_ORDER = [[0, :desc]].freeze
   DEFAULT_PAGE_LENGTH = 10
 
   class Error < StandardError
@@ -93,12 +93,13 @@ module TrkDatatables
       raise 'order_and_paginate_items_is_defined_in_specific_orm'
     end
 
-    # Returns dt_orders or default
+    # Returns dt_orders or default as array of index and direction
+    # https://datatables.net/reference/option/order
     # @return
     #   [
-    #     { column_index: 0, direction: :desc },
+    #     [0, :desc],
     #   ]
-    def dt_orders_or_default
+    def dt_orders_or_default_index_and_direction
       return @dt_orders_or_default if defined? @dt_orders_or_default
 
       if @dt_params.dt_orders.present?
@@ -164,12 +165,15 @@ module TrkDatatables
     def as_json(_attr = nil)
       # get the value if it is not a relation
       all_count = all_items.count
-      filtered_items = filter_by_search_all filter_by_columns all_items
       @dt_params.as_json(
         all_count,
         filtered_items.count,
         rows(ordered_paginated_filtered_items)
       )
+    end
+
+    def filtered_items
+      filter_by_search_all filter_by_columns all_items
     end
 
     def ordered_paginated_filtered_items

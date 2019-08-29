@@ -17,10 +17,12 @@ module TrkDatatables
       :preferences
     end
 
-    def get_preference(key)
+    def get_preference(key, check_value = nil)
       return unless preferences_holder
 
-      preferences_holder.send(preferences_field).dig :dt_preferences, self.class.name, key
+      result = preferences_holder.send(preferences_field).dig :dt_preferences, self.class.name, key
+      return result if check_value.nil?
+      return result if check_value.call result
     end
 
     def set_preference(key, value)
