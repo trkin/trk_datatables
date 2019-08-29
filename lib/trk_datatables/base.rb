@@ -10,6 +10,8 @@ module TrkDatatables
   class Base
     attr_accessor :column_key_options
 
+    # In tests you can use `spy(:view)` when you want to initialize without
+    # exceptions when view.params is called
     def initialize(view)
       @view = view
       @dt_params = DtParams.new view.params
@@ -164,10 +166,8 @@ module TrkDatatables
 
     # _attr is given by Rails template, prefix, layout... not used
     def as_json(_attr = nil)
-      # get the value if it is not a relation
-      all_count = all_items.count
       @dt_params.as_json(
-        all_count,
+        all_items.count,
         filtered_items.count,
         rows(ordered_paginated_filtered_items)
       )
