@@ -60,6 +60,7 @@ class TrkDatatablesBaseTest < Minitest::Test
             draw: 0,
             recordsTotal: 0,
             recordsFiltered: 0,
+            columns: {},
             data: [],
           }
           assert_equal exp, act
