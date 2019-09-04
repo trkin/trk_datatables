@@ -1,16 +1,34 @@
 # Trk Datatables
 
-This is a [trk_datatables gem](https://github.com/trkin/trk_datatables) that you
+This is a [trk_datatables gem](https://rubygems.org/gems/trk_datatables) that you
 can use with trk_datatables npm package for easier usage of [Datatables js library](https://datatables.net)
 
-It gives you one liner command to generate first page in html (so non-js
-crawlers can see it), global search, filtering and sorting by one or more
-columns, adding map and other complex listing based on GET params.
+After [configuring one
+datatable](https://github.com/trkin/trk_datatables#configuration), it gives you
+one liner command to generate first page in html (so non-js crawlers can see
+it), global search, filtering and sorting by one or more columns, adding map and
+other complex listing based on GET params.
 
-There are alternatives, for example:
-* [jbox-web/ajax-datatables-rails](https://github.com/jbox-web/ajax-datatables-rails)
-excellent gem but it's scope is only to produce JSON. I wanted to have server
-side rendering and more advance listing
+Table of Contents
+=================
+
+   * [Trk Datatables](#trk-datatables)
+   * [Table of Contents](#table-of-contents)
+      * [Installation](#installation)
+      * [Usage example in Ruby on Rails](#usage-example-in-ruby-on-rails)
+      * [Configuration](#configuration)
+         * [Global search](#global-search)
+         * [Column 'ILIKE' and 'BETWEEN' search](#column-ilike-and-between-search)
+         * [Column 'IN' search](#column-in-search)
+         * [Action column](#action-column)
+         * [Params](#params)
+         * [Saved Preferences (optional)](#saved-preferences-optional)
+      * [Debug](#debug)
+      * [Alternatives](#alternatives)
+      * [Development](#development)
+      * [Contributing](#contributing)
+      * [License](#license)
+      * [Code of Conduct](#code-of-conduct)
 
 ## Installation
 
@@ -97,13 +115,13 @@ And finally in a view, use `render_html` to have first page show up prerendered
 
 ## Configuration
 
+Datatable will search all columns that you defined as keys in `columns` using a
+`ILIKE` (ie `.matches` in Arel ActiveRecord).
+
+On frontend there are two types of search: global (search all columns) and
+column search (search is done for specific columns).
+
 ### Global search
-
-There are two types of search: global (search all columns) and column search
-(search is done for specific columns).
-
-For global search any type of a column is casted to a string and we use `ILIKE`
-(ie `.matches`).
 
 You can add more columns to global search by overriding `global_search_columns`
 method.
@@ -151,7 +169,7 @@ You can use column_option `search: :checkbox` so for column_type_in_db `:boolean
 it will provide checkbox. For other column_type_in_db it will match if value is
 NULL or NOT NULL.
 
-## Action column
+### Action column
 
 You can use one column for actions (so it is not related to any db column) just
 use empty column_key
@@ -174,7 +192,7 @@ use empty column_key
   end
 ```
 
-## Params
+### Params
 
 To set parameters that you can use for links to set column search value, use
 this `PostsDatatable.param_set` for example
@@ -194,7 +212,7 @@ If you need, you can fetch params with this helper
 PostsDatatable.param_get('users.email', params)
 ```
 
-## Saved Preferences (optional)
+### Saved Preferences (optional)
 
 You can save column order and page length in User.preferences field so
 next time user navigate to same page will see the same order and page length. It
@@ -238,6 +256,13 @@ class PostsDatatable < TrkDatatables::ActiveRecord
 end
 
 ```
+
+## Alternatives
+
+There are alternatives, for example:
+* [jbox-web/ajax-datatables-rails](https://github.com/jbox-web/ajax-datatables-rails)
+excellent gem but it's scope is only to produce JSON. I wanted to have server
+side rendering and more advance listing
 
 ## Development
 
