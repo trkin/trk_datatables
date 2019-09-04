@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    trk_datatables (0.1.4)
+    trk_datatables (0.1.5)
       activesupport
 
 GEM

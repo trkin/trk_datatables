@@ -95,6 +95,7 @@ module TrkDatatables
         draw: draw,
         recordsTotal: all_count,
         recordsFiltered: filtered_items_count,
+        columns: columns,
         data: data,
       }.merge additional
     end
