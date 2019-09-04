@@ -89,15 +89,14 @@ module TrkDatatables
       @params.dig(:search, :value) || ''
     end
 
-    def as_json(all_count, filtered_items_count, columns, data)
+    def as_json(all_count, filtered_items_count, data, additional = {})
       draw = @params[:draw].to_i
       {
         draw: draw,
         recordsTotal: all_count,
         recordsFiltered: filtered_items_count,
-        columns: columns,
         data: data,
-      }
+      }.merge additional
     end
 
     def self.param_set(column_index, value)

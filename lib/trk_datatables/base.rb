@@ -169,9 +169,13 @@ module TrkDatatables
       @dt_params.as_json(
         all_items.count,
         filtered_items.count,
-        columns,
         rows(ordered_paginated_filtered_items),
+        additional_data_for_json
       )
+    end
+
+    def additional_data_for_json
+      {}
     end
 
     def filtered_items

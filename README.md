@@ -243,6 +243,76 @@ end
 It will store order and page lenght inside `dt_preferences` on
 `user.preferences`.
 
+### Additional data to json response
+
+You can override `additional_data_for_json` that will be included in json
+response
+```
+# app/datatables/posts_datatable.rb
+class PostsDatatable < TrkDatatables::ActiveRecord
+  def additional_data_for_json
+    { columns: columns }
+  end
+end
+```
+
+## Different response for mobile app
+
+You can use condition to provide different data, for example let's assume
+`@view.api_user?` returns true for json requests from mobile app. Here is
+example that provides different columns for normal and api_user:
+
+```
+# app/datatables/posts_datatable.rb
+class PostsDatatable < TrkDatatables::ActiveRecord
+  def columns
+    @view.api_user? ? columns_for_api : columns_for_html
+  end
+
+  def columns_for_html
+    {
+      'subscribers.subscriberid': {},
+      'subscribers.name': {},
+    }
+  end
+
+  def columns_for_api
+    {
+      'subscribers.id': {},
+      'subscribers.subscriberid': {},
+      'subscribers.name': {},
+    }
+  end
+
+  def rows(filtered)
+    @view.api_user? ? rows_for_api(filtered) : rows_for_html(filtered)
+  end
+
+  def rows_for_html(filtered)
+    filtered.map do |subscriber|
+      [
+        @view.link_to(subscriber.subscriberid, subscriber),
+        subscriber.name,
+      ]
+    end
+  end
+
+  def rows_for_api(filtered)
+    filtered.map do |subscriber|
+      [
+        subscriber.id,
+        subscriber.subscriberid,
+        subscriber.name,
+      ]
+    end
+  end
+
+  def additional_data_for_json
+    @view.api_user? ? columns_for_api : nil
+  end
+end
+```
+
 ## Debug
 
 You can override some of the methos and put byebug, for example

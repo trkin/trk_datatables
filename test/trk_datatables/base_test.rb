@@ -23,7 +23,7 @@ class TrkDatatablesBaseTest < Minitest::Test
     end
   end
 
-  class PostsDatatable < TrkDatatables::Base
+  class PostsDatatable < TrkDatatables::ActiveRecord
     def all_items
       Post.left_joins(:user)
     end
@@ -34,6 +34,16 @@ class TrkDatatablesBaseTest < Minitest::Test
         'posts.published_date': {},
         'posts.status': { select_options: Post.statuses },
         'users.email': {},
+      }
+    end
+
+    def rows(filtered)
+      []
+    end
+
+    def additional_data_for_json
+      {
+        columns: columns,
       }
     end
   end
@@ -60,7 +70,6 @@ class TrkDatatablesBaseTest < Minitest::Test
             draw: 0,
             recordsTotal: 0,
             recordsFiltered: 0,
-            columns: {},
             data: [],
           }
           assert_equal exp, act
@@ -118,5 +127,18 @@ class TrkDatatablesBaseTest < Minitest::Test
 
     e = assert_raises(TrkDatatables::Error) { datatable.param_get('non_existing.table') }
     assert_match "Can't find index for non_existing.table in posts.title", e.message
+  end
+
+  def test_additional_data
+    blank = PostsDatatable.new(view)
+    act = blank.as_json
+    exp = {
+      draw: 0,
+      recordsTotal: 0,
+      recordsFiltered: 0,
+      columns: PostsDatatable.new(view).columns,
+      data: [],
+    }
+    assert_equal exp, act
   end
 end
