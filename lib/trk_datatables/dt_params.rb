@@ -90,13 +90,17 @@ module TrkDatatables
     end
 
     def as_json(all_count, filtered_items_count, data, additional = {})
+      additional = {} if additional.nil?
+      raise ArgumentError, 'additional_data_for_json needs to be a hash' unless additional.is_a? Hash
+
       draw = @params[:draw].to_i
       {
         draw: draw,
         recordsTotal: all_count,
         recordsFiltered: filtered_items_count,
+        **additional,
         data: data,
-      }.merge additional
+      }
     end
 
     def self.param_set(column_index, value)
