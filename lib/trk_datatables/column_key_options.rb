@@ -16,10 +16,11 @@ module TrkDatatables
     ORDER_OPTION = :order
     TITLE_OPTION = :title
     SELECT_OPTIONS = :select_options
+    PREDEFINED_RANGES = :predefined_ranges
     # this will load date picker
     # SEARCH_OPTION_DATE_VALUE = :date
     # SEARCH_OPTION_DATETIME_VALUE = :datetime
-    COLUMN_OPTIONS = [SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION, SELECT_OPTIONS].freeze
+    COLUMN_OPTIONS = [SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION, SELECT_OPTIONS, PREDEFINED_RANGES].freeze
 
     STRING_TYPE_CAST_POSTGRES = 'VARCHAR'.freeze
     STRING_TYPE_CAST_MYSQL    = 'CHAR'.freeze
@@ -48,11 +49,17 @@ module TrkDatatables
     #     title: 'Name',
     #     html_options: { class: 'my-class' },
     #   }
-    def initialize(cols, global_search_cols)
-      # if someone use Array instead of hash, we will use first element
+    def initialize(cols, global_search_cols, predefined_ranges = {})
+      @predefined_ranges = predefined_ranges
+      # short notation is when we use array of keys.
+      # In case first element is hash than we will use that hash
       if cols.is_a? Array
-        cols = cols.each_with_object({}) do |column_key, hash|
-          hash[column_key.to_sym] = {}
+        if cols.first.is_a? Hash
+          cols = cols.first
+        else
+          cols = cols.each_with_object({}) do |column_key, hash|
+            hash[column_key.to_sym] = {}
+          end
         end
       end
       _set_data(cols)
@@ -157,9 +164,22 @@ module TrkDatatables
       res = {}
       res['data-searchable'] = false if column_options[SEARCH_OPTION] == false
       res['data-orderable'] = false if column_options[ORDER_OPTION] == false
-      res['data-datatable-range'] = true if %i[date datetime].include? column_type_in_db
+      if %i[date datetime].include? column_type_in_db
+        res['data-datatable-range'] = column_type_in_db == :datetime ? :datetime : true
+        if column_options[PREDEFINED_RANGES].present? || @predefined_ranges.present?
+          res['data-datatable-predefined-ranges'] = if column_options[PREDEFINED_RANGES].is_a? Hash
+                                                      column_options[PREDEFINED_RANGES]
+                                                    else
+                                                      @predefined_ranges
+                                                    end
+          res['data-datatable-predefined-ranges'].transform_values! do |range|
+            [range.first.to_s, range.last.to_s]
+          end
+        end
+      end
       res
     end
+
   end
   # rubocop:enable ClassLength
 end

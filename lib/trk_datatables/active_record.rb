@@ -90,7 +90,7 @@ module TrkDatatables
     def _parse_in_zone(time)
       return nil if time.blank?
 
-      # without rails we will parse without zone so make sure params are correct
+      # without zone we will parse without zone so make sure params are correct
       Time.zone ? Time.zone.parse(time) : Time.parse(time)
     rescue ArgumentError
       nil

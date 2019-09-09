@@ -1,4 +1,4 @@
-## Trk Datatables
+# Trk Datatables
 
 This is a source for [trk_datatables gem](https://rubygems.org/gems/trk_datatables) that you
 can use with [trk_datatables npm package](https://www.npmjs.com/package/trk_datatables) for easier usage of [Datatables plug-in for jQuery library](https://datatables.net)
@@ -51,7 +51,7 @@ can use Rails generator)
 
 ## Usage example in Ruby on Rails
 
-For a table you need to define `rows` and `columns` (well that is obvious 😌).
+For a table you need to define `columns` and `rows` (well that is obvious 😌).
 In datatable class you also need to define `all_items` method which will  be
 used to populate `rows` with paginated, sorted and filtered items (we will call
 them `filtered`)
@@ -59,10 +59,6 @@ them `filtered`)
 ```
 # app/datatables/posts_datatable.rb
 class PostsDatatable < TrkDatatables::ActiveRecord
-  def all_items
-    Post.left_joins(:user)
-  end
-
   def columns
     {
       'posts.title': {},
@@ -77,6 +73,10 @@ class PostsDatatable < TrkDatatables::ActiveRecord
         post.user&.email,
       ]
     end
+  end
+
+  def all_items
+    Post.left_joins(:user)
   end
 end
 ```
@@ -119,10 +119,10 @@ And finally in a view, use `render_html` to have first page show up prerendered
 
 ## Configuration
 
-Datatable will search all columns that you defined as keys in `columns` using a
+Datatables will search all columns that you defined as keys in `columns` using a
 `ILIKE` (ie `.matches` in Arel ActiveRecord).
 
-On frontend there are two types of search: global (search all columns) and
+In datatables there are two types of search: global (search all columns) and
 column search (search is done for specific columns).
 
 ### Global search
@@ -133,23 +133,96 @@ method.
 ```
 class PostsDatatable < TrkDatatables::ActiveRecord
   def global_search_columns
-    # those fields will be used only to match global search
+    # in addition to columns those fields will be used to match global search
     %w[posts.body users.name]
   end
 end
 ```
 
-### Column 'ILIKE' and 'BETWEEN' search
+### Column 'ILIKE' search
 
-For column search when search string does not contain BETWEEN_SEPARATOR (` - `) than
-all columns are casted to string and `ILIKE` is perfomed.
+All columns are by default caster to string and `ILIKE` is perfomed.
+There is short notation if you do not need any specific column configuration,
+for example custom title (in which case you need to define columns as key/value
+pairs).
 
-When column_type_in_db as one of the: `:date`, `:datetime`, `:integer` and
-`:float` than `BETWEEN` is perfomed (when search contains BETWEEN_SEPARATOR,
-otherwise it is `ILIKE`).
+```
+# app/datatables/posts_datatable.rb
+class PostsDatatable < TrkDatatables::ActiveRecord
+  def columns
+    # %w[posts.id posts.title posts.body] or even shorter using map
+    %i[id title body].map { |col| "posts.#{col}" }
+  end
+end
+```
+### Column 'BETWEEN' search
 
-For columns `:date` and `:datetime` there will be `data-datatable-range='true'`
-attribute so bootstrap datepicker will be automatically loaded.
+For column search when search string contains BETWEEN_SEPARATOR (` - `) and
+column_type_in_db as one of the: `:date`, `:datetime`, `:integer` and
+`:float` than `BETWEEN` is perfomed.
+
+For columns `:date` there will be `data-datatable-range='true'`
+attribute so [data range picker](http://www.daterangepicker.com/) will be
+automatically loaded. For `:datetime` you can enable time picker in addition to
+date.
+
+```
+# app/datatables/posts_datatable.rb
+class PostsDatatable < TrkDatatables::ActiveRecord
+  def columns
+    {
+      'posts.created_at': { time_picker: true },
+    }
+  end
+end
+```
+
+To enable shortcuts for selecting ranges, you can override predefined ranges
+
+```
+# app/datatables/base_trk_datatable.rb
+class BaseTrkDatable < TrkDatatables::ActiveRecord
+  def predefined_ranges
+    # defaults are defined in https://github.com/trkin/trk_datatables/blob/master/lib/trk_datatables/base.rb
+    default_predefined_ranges
+  end
+end
+```
+or you can override for specific datatable
+```
+class PostsDatatable < TrkDatatables::ActiveRecord
+  def columns
+    {
+      'posts.created_at': { predefined_ranges: true },
+    }
+  end
+
+  def predefined_ranges
+    {
+      'Today': Time.zone.now.beginning_of_day..Time.zone.now.end_of_day,
+      'Yesterday': [Time.zone.now.beginning_of_day - 1.day, Time.zone.now.end_of_day - 1.day],
+      'This Month': Time.zone.today.beginning_of_month...Time.zone.now.end_of_day,
+      'Last Month': Time.zone.today.prev_month.beginning_of_month...Time.zone.today.prev_month.end_of_month.end_of_day,
+      'This Year': Time.zone.today.beginning_of_year...Time.zone.today.end_of_day,
+    }
+  end
+end
+```
+or you can define for specific column
+```
+# app/datatables/posts_datatable.rb
+class PostsDatatable < TrkDatatables::ActiveRecord
+  def columns
+    {
+      'posts.created_at': { predefined_ranges: { 'Today': Time.zone.now.beginning_of_day...Time.zone.now.end_of_day } },
+    }
+  end
+end
+```
+
+We use
+[ActiveSupport::TimeZone](https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html)
+so if you use different than UTC you need to set `Time.zone =` in your app [example values](https://github.com/rails/rails/blob/master/activesupport/lib/active_support/values/time_zone.rb#L31). Whenever Time.parse is used (and we use `Time.zone.parse` for params) it needs correct zone (in Rails you can set timezone in `config.time_zone` or use [browser timezone rails gem](https://github.com/kbaum/browser-timezone-rails)).
 
 ### Column 'IN' search
 
@@ -188,9 +261,10 @@ use empty column_key
 
   def rows(filtered)
     filtered.each do |post|
+      actions = @view.link_to('View', post)
       [
         post.title,
-        "@view"
+        actions,
       ]
     end
   end

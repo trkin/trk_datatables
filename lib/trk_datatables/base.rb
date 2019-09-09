@@ -15,7 +15,7 @@ module TrkDatatables
     def initialize(view)
       @view = view
       @dt_params = DtParams.new view.params
-      @column_key_options = ColumnKeyOptions.new columns, global_search_columns
+      @column_key_options = ColumnKeyOptions.new columns, global_search_columns, predefined_ranges
       @preferences = Preferences.new preferences_holder, preferences_field
 
       # if @dt_params.dt_columns.size != @column_key_options.size
@@ -214,6 +214,21 @@ module TrkDatatables
     #   rails g migration add_preferences_to_users preferences:jsonb
     def preferences_field
       :preferences
+    end
+
+    def predefined_ranges
+      {}
+    end
+
+    def default_predefined_ranges
+      Time.zone ||= 'UTC'
+      {
+        'Today': Time.zone.now.beginning_of_day..Time.zone.now.end_of_day,
+        'Yesterday': [Time.zone.now.beginning_of_day - 1.day, Time.zone.now.end_of_day - 1.day],
+        'This Month': Time.zone.today.beginning_of_month...Time.zone.now.end_of_day,
+        'Last Month': Time.zone.today.prev_month.beginning_of_month...Time.zone.today.prev_month.end_of_month.end_of_day,
+        'This Year': Time.zone.today.beginning_of_year...Time.zone.today.end_of_day,
+      }
     end
   end
 end

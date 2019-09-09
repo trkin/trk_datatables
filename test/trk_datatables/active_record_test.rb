@@ -118,27 +118,29 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
   end
 
   # rubocop:disable Rails/TimeZone
-  # since in test we use UTC in db, we need to Time.parse so it is your current
-  # timezone. In params you can add timezone info (+0100)
+  # since in test we use UTC in db, we need to Time.zone.parse (Time.parse will use your current
+  # timezone but in db it is UTC). In params you can add timezone info (+0100)
   def test_filter_column_between_date_and_datetime
-    user1 = User.create email: '1@email.com', registered_at: Time.parse('2010-01-01 07:00:00')
-    post1a = Post.create title: '1a_post', user: user1, published_date: '2020-01-01'
-    post1b = Post.create title: '1b_post', user: user1, published_date: '2020-02-01'
-    user2 = User.create email: '2@email.com', registered_at: Time.parse('2015-01-01 07:00:00')
-    post2a = Post.create title: '2a_post', user: user2, published_date: '2020-03-01'
-    post2b = Post.create title: '2b_post', user: user2, published_date: '2020-04-01'
+    Time.use_zone('Belgrade') do
+      user1 = User.create email: '1@email.com', registered_at: Time.zone.parse('2010-01-01 07:00:00')
+      post1a = Post.create title: '1a_post', user: user1, published_date: '2020-01-01'
+      post1b = Post.create title: '1b_post', user: user1, published_date: '2020-02-01'
+      user2 = User.create email: '2@email.com', registered_at: Time.zone.parse('2015-01-01 07:00:00')
+      post2a = Post.create title: '2a_post', user: user2, published_date: '2020-03-01'
+      post2b = Post.create title: '2b_post', user: user2, published_date: '2020-04-01'
 
-    # date
-    assert_equal_with_message [post1b, post2a], posts_dt(:filter_by_columns, columns: { '1': { searchable: true, search: { value: "2020-01-15#{TrkDatatables::BETWEEN_SEPARATOR}2020-03-02" } } }), :published_date
-    assert_equal_with_message [post2a, post2b], posts_dt(:filter_by_columns, columns: { '1': { searchable: true, search: { value: "2020-03-01#{TrkDatatables::BETWEEN_SEPARATOR}" } } }), :published_date
+      # date
+      assert_equal_with_message [post1b, post2a], posts_dt(:filter_by_columns, columns: { '1': { searchable: true, search: { value: "2020-01-15#{TrkDatatables::BETWEEN_SEPARATOR}2020-03-02" } } }), :published_date
+      assert_equal_with_message [post2a, post2b], posts_dt(:filter_by_columns, columns: { '1': { searchable: true, search: { value: "2020-03-01#{TrkDatatables::BETWEEN_SEPARATOR}" } } }), :published_date
 
-    # datetime
-    assert_equal_with_message [post1a, post1b], posts_dt(:filter_by_columns, columns: { '5': { searchable: true, search: { value: "2010-01-01 07:00:00#{TrkDatatables::BETWEEN_SEPARATOR}2010-01-01 07:00:00" } } }), :published_date
-    # in CEST timezone offset if 1h
-    # assert_equal_with_message [post1a, post1b], posts_dt(:filter_by_columns, columns: { '5': { searchable: true, search: { value: "2010-01-01 06:00:00 +0000#{TrkDatatables::BETWEEN_SEPARATOR}2010-01-01 06:00:00 +0000" } } }), :published_date
+      # datetime
+      assert_equal [post1a, post1b], posts_dt(:filter_by_columns, columns: { '5': { searchable: true, search: { value: "2010-01-01 07:00:00#{TrkDatatables::BETWEEN_SEPARATOR}2010-01-01 07:00:00" } } }), "it should match #{post1a.user.registered_at} #{post1b.user.registered_at}"
+      # in CEST timezone offset if 1h
+      # assert_equal_with_message [post1a, post1b], posts_dt(:filter_by_columns, columns: { '5': { searchable: true, search: { value: "2010-01-01 06:00:00 +0000#{TrkDatatables::BETWEEN_SEPARATOR}2010-01-01 06:00:00 +0000" } } }), :published_date
 
-    # both date and datetime
-    assert_equal_with_message [post1b], posts_dt(:filter_by_columns, columns: { '1': { searchable: true, search: { value: "2020-02-01#{TrkDatatables::BETWEEN_SEPARATOR}" } }, '5': { searchable: true, search: { value: "#{TrkDatatables::BETWEEN_SEPARATOR}2010-01-01 07:00:00" } } }), :title
+      # both date and datetime
+      assert_equal_with_message [post1b], posts_dt(:filter_by_columns, columns: { '1': { searchable: true, search: { value: "2020-02-01#{TrkDatatables::BETWEEN_SEPARATOR}" } }, '5': { searchable: true, search: { value: "#{TrkDatatables::BETWEEN_SEPARATOR}2010-01-01 07:00:00" } } }), :title
+    end
   end
   # rubocop:enable Rails/TimeZone
 

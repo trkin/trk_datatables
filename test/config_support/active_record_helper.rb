@@ -22,6 +22,7 @@ ActiveRecord::Schema.define do
     t.text :body
     t.integer :status
     t.date :published_date
+    t.datetime :created_at
   end
 
   create_table :comments, force: true do |t|

@@ -36,18 +36,18 @@ class ColumnKeyOptionTest < Minitest::Test
     assert_equal 'You asked for column index=1 but there is only 1 columns', e.message
   end
 
-  def test_array_notation
-    cols = %w[posts.title posts.body]
+  def test_short_notation
+    cols = %i[title body].map { |col| "posts.#{col}" }
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
     assert_equal %i[posts.title posts.body], (column_key_options.searchable.map { |c| c[:column_key] })
   end
 
-  def test_searchable
-    cols = {
+  def test_array_notation
+    cols = [
       'posts.title': {},
       'posts.body': { search: true },
       'posts.published_date': { search: false },
-    }
+    ]
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
     assert_equal 2, column_key_options.searchable.size
     assert_equal %i[posts.title posts.body], (column_key_options.searchable.map { |c| c[:column_key] })
@@ -60,5 +60,31 @@ class ColumnKeyOptionTest < Minitest::Test
     }
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
     assert_equal 2, column_key_options.searchable.size
+  end
+
+  def test_default_predefined_ranges
+    cols = {
+      'posts.created_at': { predefined_ranges: true },
+    }
+    predefined_ranges = { 'Today': Time.now.beginning_of_day..Time.now.end_of_day }
+    column_key_options = TrkDatatables::ColumnKeyOptions.new cols, [], predefined_ranges
+    expected = {
+      'data-datatable-range' => :datetime,
+      'data-datatable-predefined-ranges' => { 'Today': [predefined_ranges[:'Today'].first.to_s, predefined_ranges[:'Today'].last.to_s] }
+    }
+    assert_equal expected, column_key_options[0][:html_options]
+  end
+
+  def test_column_predefined_ranges
+    predefined_ranges = { 'Today': Time.now.beginning_of_day..Time.now.end_of_day }
+    cols = {
+      'posts.created_at': { predefined_ranges: predefined_ranges },
+    }
+    column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
+    expected = {
+      'data-datatable-range' => :datetime,
+      'data-datatable-predefined-ranges' => { 'Today': [predefined_ranges[:'Today'].first.to_s, predefined_ranges[:'Today'].last.to_s] }
+    }
+    assert_equal expected, column_key_options[0][:html_options]
   end
 end
