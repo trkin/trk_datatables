@@ -1,19 +1,17 @@
-# Trk Datatables
+## Trk Datatables
 
-This is a [trk_datatables gem](https://rubygems.org/gems/trk_datatables) that you
-can use with trk_datatables npm package for easier usage of [Datatables js library](https://datatables.net)
+This is a source for [trk_datatables gem](https://rubygems.org/gems/trk_datatables) that you
+can use with [trk_datatables npm package](https://www.npmjs.com/package/trk_datatables) for easier usage of [Datatables plug-in for jQuery library](https://datatables.net)
 
-After [configuring one
-datatable](https://github.com/trkin/trk_datatables#configuration), it gives you
-one liner command to generate first page in html (so non-js crawlers can see
-it), global search, filtering and sorting by one or more columns, adding map and
-other complex listing based on GET params.
+After [configuration](https://github.com/trkin/trk_datatables#configuration) you can use
+one line commands (like `@datatable.render_html`) to generate first page in html
+(so non-js crawlers can see it), global search, filtering and sorting, adding
+map and other complex listing based on GET params.
 
-Table of Contents
-=================
-
+## Table of Contents
+<!--ts-->
    * [Trk Datatables](#trk-datatables)
-   * [Table of Contents](#table-of-contents)
+      * [Table of Contents](#table-of-contents)
       * [Installation](#installation)
       * [Usage example in Ruby on Rails](#usage-example-in-ruby-on-rails)
       * [Configuration](#configuration)
@@ -23,12 +21,18 @@ Table of Contents
          * [Action column](#action-column)
          * [Params](#params)
          * [Saved Preferences (optional)](#saved-preferences-optional)
+         * [Additional data to json response](#additional-data-to-json-response)
+      * [Different response for mobile app](#different-response-for-mobile-app)
       * [Debug](#debug)
       * [Alternatives](#alternatives)
       * [Development](#development)
       * [Contributing](#contributing)
       * [License](#license)
       * [Code of Conduct](#code-of-conduct)
+
+<!-- Added by: orlovic, at: Mon Sep  9 09:38:44 CEST 2019 -->
+
+<!--te-->
 
 ## Installation
 
