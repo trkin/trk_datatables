@@ -77,7 +77,7 @@ class Preferences < Minitest::Test
 
   def test_check_value
     user = User.create
-    preferences = TrkDatatables::Preferences.new user, :preferences
+    preferences = TrkDatatables::Preferences.new user, :preferences, 'some_class'
     assert_nil preferences.get :my_key
     preferences.set :my_key, 1
     assert_equal 1, preferences.get(:my_key)
@@ -87,5 +87,8 @@ class Preferences < Minitest::Test
 
     preferences.set :my_key, ['Hi']
     assert_equal ['Hi'], preferences.get(:my_key, check_value)
+
+    other_preferences = TrkDatatables::Preferences.new user, :preferences, 'other_class'
+    assert_nil other_preferences.get(:my_key)
   end
 end

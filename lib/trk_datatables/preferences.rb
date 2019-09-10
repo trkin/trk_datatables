@@ -1,8 +1,9 @@
 module TrkDatatables
   class Preferences
-    def initialize(holder, field)
+    def initialize(holder, field, class_name)
       @holder = holder
       @field = field
+      @class_name = class_name
     end
 
     # Get the key from holder
@@ -11,7 +12,7 @@ module TrkDatatables
     def get(key, check_value = nil)
       return unless @holder
 
-      result = @holder.send(@field).dig :dt_preferences, self.class.name, key
+      result = @holder.send(@field).dig :dt_preferences, @class_name, key
       return result if check_value.nil?
       return result if check_value.call result
     end
@@ -19,7 +20,7 @@ module TrkDatatables
     def set(key, value)
       return unless @holder
 
-      h = { dt_preferences: { self.class.name => { key => value } } }
+      h = { dt_preferences: { @class_name => { key => value } } }
       @holder.send("#{@field}=", {}) if @holder.send(@field).nil?
       @holder.send(@field).deep_merge! h
       @holder.save!

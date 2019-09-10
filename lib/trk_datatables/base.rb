@@ -16,7 +16,7 @@ module TrkDatatables
       @view = view
       @dt_params = DtParams.new view.params
       @column_key_options = ColumnKeyOptions.new columns, global_search_columns, predefined_ranges
-      @preferences = Preferences.new preferences_holder, preferences_field
+      @preferences = Preferences.new preferences_holder, preferences_field, self.class.name
 
       # if @dt_params.dt_columns.size != @column_key_options.size
       #   raise Error, "dt_columns size of columns is #{@dt_params.dt_columns.size} \
