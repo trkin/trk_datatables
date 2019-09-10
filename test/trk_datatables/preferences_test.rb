@@ -27,7 +27,7 @@ class Preferences < Minitest::Test
     post1 = Post.create published_date: Time.parse('2020-01-01'), title: 'b'
     post2 = Post.create published_date: Time.parse('2020-03-01'), title: 'a'
     post3 = Post.create published_date: Time.parse('2020-02-01'), title: 'c'
-    assert_nil user.preferences[:dt_preferences]
+    assert_nil user.preferences[TrkDatatables::Preferences::KEY_IN_PREFERENCES]
 
     datatable = PostsDatatable.new OpenStruct.new params: {}, current_user: user
     results = datatable.order_and_paginate_items datatable.all_items
@@ -35,7 +35,7 @@ class Preferences < Minitest::Test
 
     datatable = PostsDatatable.new OpenStruct.new params: { order: { '0': { column: '1', dir: 'desc' } } }, current_user: user
     results = datatable.order_and_paginate_items datatable.all_items
-    refute_nil user.preferences[:dt_preferences]
+    refute_nil user.preferences[TrkDatatables::Preferences::KEY_IN_PREFERENCES]
     assert_equal [post2, post3, post1], results.all
 
     # use saved params
@@ -60,7 +60,7 @@ class Preferences < Minitest::Test
     post1 = Post.create title: 'a'
     post2 = Post.create title: 'b'
     post3 = Post.create title: 'c'
-    assert_nil user.preferences[:dt_preferences]
+    assert_nil user.preferences[TrkDatatables::Preferences::KEY_IN_PREFERENCES]
 
     datatable = PostsDatatable.new OpenStruct.new params: {}, current_user: user
     results = datatable.order_and_paginate_items datatable.all_items
