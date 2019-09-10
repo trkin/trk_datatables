@@ -9,6 +9,7 @@ module TrkDatatables
   # https://github.com/cloudflarearchive/backgrid (archived)
   class DtParams
     def initialize(params)
+      params.permit! if params.respond_to? :permit!
       @params = ActiveSupport::HashWithIndifferentAccess.new params
     end
 

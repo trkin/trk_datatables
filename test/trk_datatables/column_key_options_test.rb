@@ -63,9 +63,7 @@ class ColumnKeyOptionTest < Minitest::Test
   end
 
   def test_default_predefined_ranges
-    cols = {
-      'posts.created_at': { predefined_ranges: true },
-    }
+    cols = %i[posts.created_at]
     predefined_ranges = { 'Today': Time.now.beginning_of_day..Time.now.end_of_day }
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols, [], predefined_ranges
     expected = {
@@ -79,6 +77,7 @@ class ColumnKeyOptionTest < Minitest::Test
     predefined_ranges = { 'Today': Time.now.beginning_of_day..Time.now.end_of_day }
     cols = {
       'posts.created_at': { predefined_ranges: predefined_ranges },
+      'posts.published_date': { predefined_ranges: false },
     }
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
     expected = {
@@ -86,5 +85,9 @@ class ColumnKeyOptionTest < Minitest::Test
       'data-datatable-predefined-ranges' => { 'Today': [predefined_ranges[:'Today'].first.to_s, predefined_ranges[:'Today'].last.to_s] }
     }
     assert_equal expected, column_key_options[0][:html_options]
+    expected = {
+      'data-datatable-range' => true,
+    }
+    assert_equal expected, column_key_options[1][:html_options]
   end
 end

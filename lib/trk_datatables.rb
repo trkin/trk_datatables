@@ -4,6 +4,7 @@ require 'trk_datatables/preferences.rb'
 
 require 'trk_datatables/base'
 require 'trk_datatables/active_record'
+require 'trk_datatables/neo4j'
 require 'trk_datatables/dt_params'
 require 'trk_datatables/column_key_options.rb'
 require 'trk_datatables/render_html.rb'

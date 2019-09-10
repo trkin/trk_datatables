@@ -91,7 +91,7 @@ class PostsController < ApplicationController
   end
 
   def search
-    render json: PostsDatatable.new(view_context).as_json
+    render json: PostsDatatable.new(view_context)
   end
 end
 ```
@@ -103,7 +103,7 @@ In controller add a route to `:search`
 Rails.application.routes.draw do
   resources :posts do
     colletion do
-      get :search
+      post :search
     end
   end
 end
@@ -177,7 +177,8 @@ class PostsDatatable < TrkDatatables::ActiveRecord
 end
 ```
 
-To enable shortcuts for selecting ranges, you can override predefined ranges
+To enable shortcuts for selecting ranges, you can override predefined ranges and
+enable for all `date` and `datetime` column
 
 ```
 # app/datatables/base_trk_datatable.rb
@@ -188,15 +189,10 @@ class BaseTrkDatable < TrkDatatables::ActiveRecord
   end
 end
 ```
-or you can override for specific datatable
+or you can enable for all `date` and `datetime columns` for specific datatable
+by defining `predefined_ranges` on that datatable. You can disable for specific columns also
 ```
 class PostsDatatable < TrkDatatables::ActiveRecord
-  def columns
-    {
-      'posts.created_at': { predefined_ranges: true },
-    }
-  end
-
   def predefined_ranges
     {
       'Today': Time.zone.now.beginning_of_day..Time.zone.now.end_of_day,
@@ -205,6 +201,12 @@ class PostsDatatable < TrkDatatables::ActiveRecord
       'Last Month': Time.zone.today.prev_month.beginning_of_month...Time.zone.today.prev_month.end_of_month.end_of_day,
       'This Year': Time.zone.today.beginning_of_year...Time.zone.today.end_of_day,
     }
+  end
+
+  def columns
+    {
+      'posts.created_at': {}, # this column will have predefined_ranges
+      'posts.published_date': { predefined_ranges: false }
   end
 end
 ```

@@ -111,20 +111,26 @@ module TrkDatatables
 
     # This is helper
     def _determine_string_type_cast # :nodoc:
-      raise NotImplementedError unless defined?(::ActiveRecord::Base)
-
-      DB_ADAPTER_STRING_TYPE_CAST[::ActiveRecord::Base.connection_config[:adapter].to_sym]
+      if defined?(::ActiveRecord::Base)
+        DB_ADAPTER_STRING_TYPE_CAST[::ActiveRecord::Base.connection_config[:adapter].to_sym]
+      else
+        'not_used'
+      end
     end
 
     # @return
     #   :string, :integer, :date, :datetime
     def _determine_db_type_for_column(table_class, column_name)
-      raise NotImplementedError unless defined?(::ActiveRecord::Base)
+      if defined?(::ActiveRecord::Base)
+        ar_column = table_class.columns_hash[column_name]
+        raise Error, "Can't find column #{column_name} in #{table_class.name}" unless ar_column
 
-      ar_column = table_class.columns_hash[column_name]
-      raise Error, "Can't find column #{column_name} in #{table_class.name}" unless ar_column
-
-      ar_column.type
+        ar_column.type
+      elsif defined?(::Neo4j::ActiveNode)
+        (table_class.declared_properties[column_name][:type] || String).name.downcase
+      else
+        raise NotImplementedError, 'I work only with ActiveRecord and Neo4j'
+      end
     end
 
     def searchable
@@ -166,7 +172,8 @@ module TrkDatatables
       res['data-orderable'] = false if column_options[ORDER_OPTION] == false
       if %i[date datetime].include? column_type_in_db
         res['data-datatable-range'] = column_type_in_db == :datetime ? :datetime : true
-        if column_options[PREDEFINED_RANGES].present? || @predefined_ranges.present?
+        if column_options[PREDEFINED_RANGES].present? ||
+            (@predefined_ranges.present? && column_options[PREDEFINED_RANGES] != false)
           res['data-datatable-predefined-ranges'] = if column_options[PREDEFINED_RANGES].is_a? Hash
                                                       column_options[PREDEFINED_RANGES]
                                                     else
