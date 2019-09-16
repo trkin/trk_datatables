@@ -62,6 +62,21 @@ class ColumnKeyOptionTest < Minitest::Test
     assert_equal 2, column_key_options.searchable.size
   end
 
+  def test_html_options
+    cols = {
+      'posts.user_id': { order: false },
+      'posts.title': { search: false },
+      'posts.body': { order: true },
+      'posts.status': {},
+    }
+    column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
+
+    assert_equal({'data-orderable'=> false}, column_key_options[0][:html_options])
+    assert_equal({'data-searchable'=> false}, column_key_options[1][:html_options])
+    assert_equal({}, column_key_options[2][:html_options])
+    assert_equal({}, column_key_options[3][:html_options])
+  end
+
   def test_default_predefined_ranges
     cols = %i[posts.created_at]
     predefined_ranges = { 'Today': Time.now.beginning_of_day..Time.now.end_of_day }

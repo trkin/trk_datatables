@@ -79,14 +79,11 @@ class TrkDatatablesBaseTest < Minitest::Test
   end
 
   def test_param_set
-    actual = PostsDatatable.param_set('users.email', 'my@email.com').deep_merge(PostsDatatable.param_set('posts.title', 'my_title')).deep_merge(PostsDatatable.param_set('posts.status', Post.statuses.values_at(:published, :promoted))).deep_merge(user_id: 1)
+    actual = PostsDatatable.param_set('users.email', 'my@email.com')
+      .deep_merge(PostsDatatable.param_set('posts.status', Post.statuses.values_at(:published, :promoted)))
+      .deep_merge(user_id: 1)
     expected = {
       columns: {
-        '0' => {
-          search: {
-            value: 'my_title'
-          }
-        },
         '2' => {
           search: {
             value: '1|2'

@@ -17,10 +17,11 @@ module TrkDatatables
     TITLE_OPTION = :title
     SELECT_OPTIONS = :select_options
     PREDEFINED_RANGES = :predefined_ranges
+    HIDE_OPTION = :hide
     # this will load date picker
     # SEARCH_OPTION_DATE_VALUE = :date
     # SEARCH_OPTION_DATETIME_VALUE = :datetime
-    COLUMN_OPTIONS = [SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION, SELECT_OPTIONS, PREDEFINED_RANGES].freeze
+    COLUMN_OPTIONS = [SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION, SELECT_OPTIONS, PREDEFINED_RANGES, HIDE_OPTION].freeze
 
     STRING_TYPE_CAST_POSTGRES = 'VARCHAR'.freeze
     STRING_TYPE_CAST_MYSQL    = 'CHAR'.freeze
@@ -170,6 +171,7 @@ module TrkDatatables
       res = {}
       res['data-searchable'] = false if column_options[SEARCH_OPTION] == false
       res['data-orderable'] = false if column_options[ORDER_OPTION] == false
+      res['data-datatable-hide-column'] = true if column_options[HIDE_OPTION] == true
       if %i[date datetime].include? column_type_in_db
         res['data-datatable-range'] = column_type_in_db == :datetime ? :datetime : true
         if column_options[PREDEFINED_RANGES].present? ||

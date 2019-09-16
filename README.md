@@ -164,6 +164,16 @@ class PostsDatatable < TrkDatatables::ActiveRecord
   end
 end
 ```
+
+For specific columns you can use following keys
+
+* `title: 'My Title'` set up column header
+* `search: false` disable searching for this column
+* `order: false` disable ordering for this column
+* `predefined_ranges: {}` add ranges for datetime fields
+* `select_options: Post.statuses` generate select box
+* `hide: true` hide column
+
 ### Column 'BETWEEN' search
 
 For column search when search string contains BETWEEN_SEPARATOR (` - `) and
@@ -308,17 +318,15 @@ To set parameters that you can use for links to set column search value, use
 this `PostsDatatable.param_set` for example
 
 ```
-link_to 'Posts for my@email.com and my_title', \
+link_to 'Active posts for my@email.com', \
   posts_path(
     PostsDatatable.param_set('users.email', 'my@email.com')
-      .deep_merge(PostsDatatable.param_set('posts.title', 'my_title')
+      .deep_merge(PostsDatatable.param_set('posts.status', Post.statuses.values_at(:published, :promoted))
       .deep_merge(user_id: 1)
   )
 ```
 
-This will generate
-```
-```
+This will fill proper column search values so you do not need to do it manually (`post_path(:columns=>{"3"=>{:search=>{:value=>"my@email.com"}}, "2"=>{:search=>{:value=>"1|2"}}}, :user_id=>1)`)
 
 If you need, you can fetch params with this helper
 
