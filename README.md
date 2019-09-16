@@ -141,16 +141,25 @@ end
 
 ### Column 'ILIKE' search
 
-All columns are by default caster to string and `ILIKE` is perfomed.
-There is short notation if you do not need any specific column configuration,
-for example custom title (in which case you need to define columns as key/value
-pairs).
+All columns are by default casted to string and `ILIKE` is perfomed.
+
+If you do not need any specific column configuration,
+for example custom `title`, than instead of defining columns as key/value
+pairs, you can define them in one line as array of column_key.
 
 ```
 # app/datatables/posts_datatable.rb
 class PostsDatatable < TrkDatatables::ActiveRecord
   def columns
-    # %w[posts.id posts.title posts.body] or even shorter using map
+    # instead of
+    # {
+    #   id: {},
+    #   title: {},
+    #   body: {},
+    # }.each_with_object({}) { |(key, value), obj| obj["posts.#{key}"] = value }
+    # you can use one liner
+    # %w[posts.id posts.title posts.body]
+    # or even shorter using map
     %i[id title body].map { |col| "posts.#{col}" }
   end
 end
@@ -240,7 +249,7 @@ def columns
 end
 
 # in view
-link_to 'Active', search_posts_path(PostsDatatable.params_set('posts.status':
+link_to 'Active', search_posts_path(PostsDatatable.param_set('posts.status':
 Post.statues.values_at(:published, :promoted)))
 ```
 
@@ -272,6 +281,27 @@ use empty column_key
   end
 ```
 
+### Default order and page length
+
+You can override default order (index and direction) and default page length so
+if user did not request some order or page length (and if it is not found in
+save preferences) and this default values will be used
+
+```
+# app/datatables/posts_datatable.rb
+class PostsDatatable
+  # when we show some invoice_no on first column, and that is reset every year
+  # on first april, thatn it is better is to use date column ordering
+  def default_order
+    [[3, :desc]]
+  end
+
+  def default_page_length
+    20
+  end
+end
+```
+
 ### Params
 
 To set parameters that you can use for links to set column search value, use
@@ -280,10 +310,14 @@ this `PostsDatatable.param_set` for example
 ```
 link_to 'Posts for my@email.com and my_title', \
   posts_path(
-    PostsDatatable.params_set('users.email': 'my@email.com', 'posts.title': 'my_title')
-      .merge(user_id: 1)
+    PostsDatatable.param_set('users.email', 'my@email.com')
+      .deep_merge(PostsDatatable.param_set('posts.title', 'my_title')
+      .deep_merge(user_id: 1)
   )
-# will generate
+```
+
+This will generate
+```
 ```
 
 If you need, you can fetch params with this helper
@@ -419,6 +453,15 @@ side rendering and more advance listing
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+
+Instead of installing you can point directly to your path
+```
+# Gemfile
+# for index, ordering, pagination and searching
+# gem 'trk_datatables', '~>0.1'
+# no need to `bundle update trk_datatables` when switch to local
+gem 'trk_datatables', path: '~/gems/trk_datatables'
+```
 
 To generate docs you can run
 

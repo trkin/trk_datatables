@@ -1,8 +1,8 @@
 module TrkDatatables
+  # TODO: extract those to configuration options
   BETWEEN_SEPARATOR = ' - '.freeze
   MULTIPLE_OPTION_SEPARATOR = '|'.freeze
-  DEFAULT_ORDER = [[0, :desc]].freeze
-  DEFAULT_PAGE_LENGTH = 10
+  # maximum page length = 100 (we should not believe params)
 
   class Error < StandardError
   end
@@ -109,9 +109,17 @@ module TrkDatatables
         @preferences.set :order, @dt_params.dt_orders
       else
         check_value = ->(r) { r.is_a?(Array) && r[0].is_a?(Array) && r[0][0].is_a?(Integer) }
-        @dt_orders_or_default = @preferences.get(:order, check_value) || DEFAULT_ORDER
+        @dt_orders_or_default = @preferences.get(:order, check_value) || default_order
       end
       @dt_orders_or_default
+    end
+
+    def default_order
+      [[0, :desc]].freeze
+    end
+
+    def default_page_length
+      10
     end
 
     def dt_per_page_or_default
@@ -122,7 +130,7 @@ module TrkDatatables
           @preferences.set :per_page, @dt_params.dt_per_page
           @dt_params.dt_per_page
         else
-          @preferences.get(:per_page) || DEFAULT_PAGE_LENGTH
+          @preferences.get(:per_page) || default_page_length
         end
     end
 
@@ -134,23 +142,20 @@ module TrkDatatables
     #   posts_path(PostsDatatable.params('posts.status': :published,
     #   'users.email: 'my@email.com')
     #
-    # You can always use your params for filtering outside of datatable
+    # You can always use your params for filtering outside of datatable and
+    # merge to params
     # @example
     #   link_to 'Published posts for user1',
-    #   posts_path(PostsDatatable.params_set('posts.status': :published).merge(user_id: user1.id))
-    def self.params_set(attr)
+    #   posts_path(PostsDatatable.param_set('posts.status', :published).merge(user_id: user1.id))
+    def self.param_set(column_key, value)
       datatable = new OpenStruct.new(params: {})
-      result = {}
-      attr.each do |column_key, value|
-        value = value.join MULTIPLE_OPTION_SEPARATOR if value.is_a? Array
-        column_index = datatable.index_by_column_key column_key
-        result = result.deep_merge DtParams.param_set column_index, value
-      end
-      result
+      value = value.join MULTIPLE_OPTION_SEPARATOR if value.is_a? Array
+      column_index = datatable.index_by_column_key column_key
+      DtParams.param_set column_index, value
     end
 
     # We need this method publicly available since we use it for class method
-    # params_set
+    # param_set
     def index_by_column_key(column_key)
       @column_key_options.index_by_column_key column_key
     end

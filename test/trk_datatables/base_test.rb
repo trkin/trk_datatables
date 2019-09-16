@@ -78,10 +78,9 @@ class TrkDatatablesBaseTest < Minitest::Test
     end
   end
 
-  def test_params_set
-    actual = PostsDatatable.params_set('users.email' => 'my@email.com', 'posts.title': 'my_title', 'posts.status': Post.statuses.values_at(:published, :promoted)).merge(user_id: 1)
+  def test_param_set
+    actual = PostsDatatable.param_set('users.email', 'my@email.com').deep_merge(PostsDatatable.param_set('posts.title', 'my_title')).deep_merge(PostsDatatable.param_set('posts.status', Post.statuses.values_at(:published, :promoted))).deep_merge(user_id: 1)
     expected = {
-      user_id: 1,
       columns: {
         '0' => {
           search: {
@@ -98,11 +97,12 @@ class TrkDatatablesBaseTest < Minitest::Test
             value: 'my@email.com'
           }
         }
-      }
+      },
+      user_id: 1,
     }
     assert_equal expected, actual
 
-    e = assert_raises(TrkDatatables::Error) { PostsDatatable.params_set('non_existing.table' => 'my@email.com') }
+    e = assert_raises(TrkDatatables::Error) { PostsDatatable.param_set('non_existing.table', 'my@email.com') }
     assert_match "Can't find index for non_existing.table in posts.title", e.message
   end
 
