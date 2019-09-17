@@ -170,9 +170,9 @@ For specific columns you can use following keys
 * `title: 'My Title'` set up column header
 * `search: false` disable searching for this column
 * `order: false` disable ordering for this column
-* `predefined_ranges: {}` add ranges for datetime fields
-* `select_options: Post.statuses` generate select box
-* `hide: true` hide column
+* `predefined_ranges: {}` for datetime fiels add ranges to pick up from
+* `select_options: Post.statuses` generate select box instead of text input
+* `hide: true` hide column with display none
 
 ### Column 'BETWEEN' search
 
@@ -267,7 +267,7 @@ You can use column_option `search: :checkbox` so for column_type_in_db `:boolean
 it will provide checkbox. For other column_type_in_db it will match if value is
 NULL or NOT NULL.
 
-### Action column
+### Action and non database columns
 
 You can use one column for actions (so it is not related to any db column) just
 use empty column_key
@@ -290,6 +290,34 @@ use empty column_key
     end
   end
 ```
+
+If you have more columns that are not actually columns in database (for example
+links or Ruby calculated values) than you can not use empty column_key since
+there could be only one in hash. When you disable `order` and `search` than you
+can use any column name since that column will not be used in queries. For
+example this column key `posts.body_size` is not in database nor in Ruby code.
+
+```
+  def columns
+    {
+      'posts.id': {},
+      'posts.body_size': { search: false, order: false},
+    }
+  end
+
+  def rows(filtered)
+    filtered.each do |post|
+      [
+        post.id,
+        post.body.size,
+      ]
+    end
+  end
+```
+
+### Values calculated in database
+
+For values that
 
 ### Default order and page length
 

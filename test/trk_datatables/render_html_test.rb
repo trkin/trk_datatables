@@ -11,6 +11,7 @@ class RenderHtmlTest < Minitest::Test
         'posts.title': {},
         'posts.published_date': { title: 'Released' },
         'posts.status': { order: false, search: false },
+        '': { title: 'Links' },
       }
     end
 
@@ -20,6 +21,7 @@ class RenderHtmlTest < Minitest::Test
           post.title,
           post.published_date,
           post.status,
+          'my_link',
         ]
       end
     end
@@ -37,6 +39,7 @@ class RenderHtmlTest < Minitest::Test
             <th>Title</th>
             <th data-datatable-range='true' data-datatable-search-value='2020'>Released</th>
             <th data-searchable='false' data-orderable='false'>Status</th>
+            <th>Links</th>
 
           </tr>
         </thead>
@@ -45,12 +48,14 @@ class RenderHtmlTest < Minitest::Test
             <td>Post2</td>
             <td>2020-10-10</td>
             <td>published</td>
+            <td>my_link</td>
 
           </tr>
           <tr>
             <td>Post1</td>
             <td>2020-01-01</td>
             <td>draft</td>
+            <td>my_link</td>
 
           </tr>
         </tbody>

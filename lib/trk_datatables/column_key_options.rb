@@ -23,6 +23,15 @@ module TrkDatatables
     # SEARCH_OPTION_DATETIME_VALUE = :datetime
     COLUMN_OPTIONS = [SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION, SELECT_OPTIONS, PREDEFINED_RANGES, HIDE_OPTION].freeze
 
+    # for columns that as calculated in db query
+    STRING_CALCULATED_IN_DB = :string_calculcated_in_db
+    INTEGER_CALCULATED_IN_DB = :integer_calculated_in_db
+    DATE_CALCULATED_IN_DB = :date_calculated_in_db
+    DATETIME_CALCULATED_IN_DB = :datetime_calculcated_in_db
+
+    # for 'columns' that are calculated in Ruby you need to disable search and
+    # order and than it will not be used in queries
+
     STRING_TYPE_CAST_POSTGRES = 'VARCHAR'.freeze
     STRING_TYPE_CAST_MYSQL    = 'CHAR'.freeze
     STRING_TYPE_CAST_SQLITE   = 'TEXT'.freeze
@@ -74,13 +83,13 @@ module TrkDatatables
 
         column_options.assert_valid_keys(*COLUMN_OPTIONS)
         table_name, column_name = column_key.to_s.split '.'
-        raise Error, 'Column key needs to have one dot table.column' if table_name.present? && column_name.nil?
+        raise Error, 'Column key needs to have one dot for example: posts.name' if table_name.present? && column_name.nil?
 
         if table_name.blank?
-          column_name = 'actions' # some default name for a title
+          column_name = column_options[TITLE_OPTION] || 'actions' # some default name for a title
         else
           table_class = table_name.singularize.camelcase.constantize
-          column_type_in_db = _determine_db_type_for_column(table_class, column_name)
+          column_type_in_db = _determine_db_type_for_column(table_class, column_name) unless (column_options[SEARCH_OPTION] == false && column_options[ORDER_OPTION] == false)
         end
         arr << {
           column_key: column_key.to_sym,
@@ -171,7 +180,7 @@ module TrkDatatables
       res = {}
       res['data-searchable'] = false if column_options[SEARCH_OPTION] == false
       res['data-orderable'] = false if column_options[ORDER_OPTION] == false
-      res['data-datatable-hide-column'] = true if column_options[HIDE_OPTION] == true
+      res['data-datatable-hidden-column'] = true if column_options[HIDE_OPTION] == true
       if %i[date datetime].include? column_type_in_db
         res['data-datatable-range'] = column_type_in_db == :datetime ? :datetime : true
         if column_options[PREDEFINED_RANGES].present? ||
