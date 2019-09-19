@@ -38,7 +38,7 @@ module TrkDatatables
     STRING_TYPE_CAST_ORACLE   = 'VARCHAR2(4000)'.freeze
 
     DB_ADAPTER_STRING_TYPE_CAST = {
-      psql: STRING_TYPE_CAST_POSTGRES,
+      postgresql: STRING_TYPE_CAST_POSTGRES,
       mysql: STRING_TYPE_CAST_MYSQL,
       mysql2: STRING_TYPE_CAST_MYSQL,
       sqlite: STRING_TYPE_CAST_SQLITE,
@@ -64,13 +64,13 @@ module TrkDatatables
       # short notation is when we use array of keys.
       # In case first element is hash than we will use that hash
       if cols.is_a? Array
-        if cols.first.is_a? Hash
-          cols = cols.first
-        else
-          cols = cols.each_with_object({}) do |column_key, hash|
-            hash[column_key.to_sym] = {}
-          end
-        end
+        cols = if cols.first.is_a? Hash
+                 cols.first
+               else
+                 cols.each_with_object({}) do |column_key, hash|
+                   hash[column_key.to_sym] = {}
+                 end
+               end
       end
       _set_data(cols)
       _set_global_search_cols(global_search_cols)
@@ -87,9 +87,11 @@ module TrkDatatables
 
         if table_name.blank?
           column_name = column_options[TITLE_OPTION] || 'actions' # some default name for a title
+          column_options[SEARCH_OPTION] = false
+          column_options[ORDER_OPTION] = false
         else
           table_class = table_name.singularize.camelcase.constantize
-          column_type_in_db = _determine_db_type_for_column(table_class, column_name) unless (column_options[SEARCH_OPTION] == false && column_options[ORDER_OPTION] == false)
+          column_type_in_db = _determine_db_type_for_column(table_class, column_name) unless column_options[SEARCH_OPTION] == false && column_options[ORDER_OPTION] == false
         end
         arr << {
           column_key: column_key.to_sym,
