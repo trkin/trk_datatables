@@ -59,7 +59,7 @@ class ColumnKeyOptionTest < Minitest::Test
       '': {},
     }
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
-    assert_equal 2, column_key_options.searchable.size
+    assert_equal 1, column_key_options.searchable.size
   end
 
   def test_html_options
@@ -71,8 +71,8 @@ class ColumnKeyOptionTest < Minitest::Test
     }
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
 
-    assert_equal({'data-orderable'=> false}, column_key_options[0][:html_options])
-    assert_equal({'data-searchable'=> false}, column_key_options[1][:html_options])
+    assert_equal({ 'data-orderable' => false }, column_key_options[0][:html_options])
+    assert_equal({ 'data-searchable' => false }, column_key_options[1][:html_options])
     assert_equal({}, column_key_options[2][:html_options])
     assert_equal({}, column_key_options[3][:html_options])
   end

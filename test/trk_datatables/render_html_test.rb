@@ -39,7 +39,7 @@ class RenderHtmlTest < Minitest::Test
             <th>Title</th>
             <th data-datatable-range='true' data-datatable-search-value='2020'>Released</th>
             <th data-searchable='false' data-orderable='false'>Status</th>
-            <th>Links</th>
+            <th data-searchable='false' data-orderable='false'>Links</th>
 
           </tr>
         </thead>

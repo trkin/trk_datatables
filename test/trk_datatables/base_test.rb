@@ -9,7 +9,7 @@ class TrkDatatablesBaseTest < Minitest::Test
 
   class NotCompletedDatatable < TrkDatatables::Base; end
 
-  class BlankDatatable < TrkDatatables::Base
+  class BlankDatatable < TrkDatatables::ActiveRecord
     def columns
       {}
     end
@@ -19,7 +19,7 @@ class TrkDatatablesBaseTest < Minitest::Test
     end
 
     def all_items
-      []
+      Post.all
     end
   end
 
@@ -37,7 +37,7 @@ class TrkDatatablesBaseTest < Minitest::Test
       }
     end
 
-    def rows(filtered)
+    def rows(_filtered)
       []
     end
 
@@ -78,57 +78,9 @@ class TrkDatatablesBaseTest < Minitest::Test
     end
   end
 
-  def test_param_set
-    actual = PostsDatatable.param_set('users.email', 'my@email.com')
-      .deep_merge(PostsDatatable.param_set('posts.status', Post.statuses.values_at(:published, :promoted)))
-      .deep_merge(user_id: 1)
-    expected = {
-      columns: {
-        '2' => {
-          search: {
-            value: '1|2'
-          }
-        },
-        '3' => {
-          search: {
-            value: 'my@email.com'
-          }
-        }
-      },
-      user_id: 1,
-    }
-    assert_equal expected, actual
-
-    e = assert_raises(TrkDatatables::Error) { PostsDatatable.param_set('non_existing.table', 'my@email.com') }
-    assert_match "Can't find index for non_existing.table in posts.title", e.message
-  end
-
-  def test_param_get
-    params = {
-      columns: {
-        '0' => {
-          search: {
-            value: 'my_title'
-          }
-        },
-        '3' => {
-          search: {
-            value: 'my@email.com'
-          }
-        }
-      }
-    }
-    datatable = PostsDatatable.new OpenStruct.new params: params
-    actual = datatable.param_get('users.email')
-    assert_equal 'my@email.com', actual
-
-    e = assert_raises(TrkDatatables::Error) { datatable.param_get('non_existing.table') }
-    assert_match "Can't find index for non_existing.table in posts.title", e.message
-  end
-
   def test_additional_data
-    blank = PostsDatatable.new(view)
-    act = blank.as_json
+    datatable = PostsDatatable.new(view)
+    act = datatable.as_json
     exp = {
       draw: 0,
       recordsTotal: 0,

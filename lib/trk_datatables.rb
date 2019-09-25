@@ -1,7 +1,7 @@
 require 'trk_datatables/version'
 # modules
 require 'trk_datatables/preferences.rb'
-
+require 'trk_datatables/base_helpers'
 require 'trk_datatables/base'
 require 'trk_datatables/active_record'
 require 'trk_datatables/neo4j'

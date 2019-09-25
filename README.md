@@ -66,6 +66,10 @@ class PostsDatatable < TrkDatatables::ActiveRecord
     }
   end
 
+  def all_items
+    Post.left_joins(:user)
+  end
+
   def rows(filtered)
     filtered.map do |post|
       [
@@ -73,10 +77,6 @@ class PostsDatatable < TrkDatatables::ActiveRecord
         post.user&.email,
       ]
     end
-  end
-
-  def all_items
-    Post.left_joins(:user)
   end
 end
 ```
@@ -343,18 +343,30 @@ end
 ### Params
 
 To set parameters that you can use for links to set column search value, use
-this `PostsDatatable.param_set` for example
+this `PostsDatatable.param_set 'users.email', 'my@email.com'` for example
 
 ```
-link_to 'Active posts for my@email.com', \
-  posts_path(
-    PostsDatatable.param_set('users.email', 'my@email.com')
-      .deep_merge(PostsDatatable.param_set('posts.status', Post.statuses.values_at(:published, :promoted))
-      .deep_merge(user_id: 1)
-  )
+<%= link_to 'Active posts for my@email.com', \
+      posts_path(
+        PostsDatatable.param_set('users.email', 'my@email.com')
+          .deep_merge(PostsDatatable.param_set('posts.status', Post.statuses.values_at(:published, :promoted))
+          .deep_merge(user_id: 1)
+      )
+%>
 ```
 
-This will fill proper column search values so you do not need to do it manually (`post_path(:columns=>{"3"=>{:search=>{:value=>"my@email.com"}}, "2"=>{:search=>{:value=>"1|2"}}}, :user_id=>1)`)
+This will fill proper column search values so you do not need to do it manually
+(`post_path(:columns=>{"3"=>{:search=>{:value=>"my@email.com"}},
+"2"=>{:search=>{:value=>"1|2"}}}, :user_id=>1)`)
+
+For form fields you can use similar helper `PostsDatatable.form_field_name
+'users.email'`
+```
+<%= form_tag url: posts_path, method: :get do |f| %>
+  <%= f.text_field PostsDatatable.form_field_name('users.email'), 'my@email.com' %>
+  <%= f.submit 'Search' %>
+<% end %>
+```
 
 If you need, you can fetch params with this helper
 
@@ -486,7 +498,18 @@ side rendering and more advance listing
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run all tests.
+
+```
+# all
+rake
+# specific file
+ruby -I test test/trk_datatables/base_test.rb
+# only mathing
+ruby -I test test/trk_datatables/base_test.rb -n /additional/
+```
+
+You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To
 release a new version, update the version number in

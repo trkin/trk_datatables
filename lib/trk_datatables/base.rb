@@ -8,6 +8,8 @@ module TrkDatatables
   end
 
   class Base
+    extend TrkDatatables::BaseHelpers
+
     attr_accessor :column_key_options
 
     # In tests you can use `spy(:view)` when you want to initialize without
@@ -95,6 +97,8 @@ module TrkDatatables
       raise 'order_and_paginate_items_is_defined_in_specific_orm'
     end
 
+    # rubocop:disable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
+
     # Returns dt_orders or default as array of index and direction
     # https://datatables.net/reference/option/order
     # @return
@@ -104,7 +108,9 @@ module TrkDatatables
     def dt_orders_or_default_index_and_direction
       return @dt_orders_or_default if defined? @dt_orders_or_default
 
-      if @dt_params.dt_orders.present?
+      if columns.blank?
+        @dt_orders_or_default = []
+      elsif @dt_params.dt_orders.present?
         @dt_orders_or_default = @dt_params.dt_orders
         @preferences.set :order, @dt_params.dt_orders
       else
@@ -113,6 +119,7 @@ module TrkDatatables
       end
       @dt_orders_or_default
     end
+    # rubocop:enable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
 
     def default_order
       [[0, :desc]].freeze
@@ -132,26 +139,6 @@ module TrkDatatables
         else
           @preferences.get(:per_page) || default_page_length
         end
-    end
-
-    # Set params for columns. This is class method so you do not need datatable
-    # instance.
-    #
-    # @example
-    #   link_to 'Published posts for my@email.com',
-    #   posts_path(PostsDatatable.params('posts.status': :published,
-    #   'users.email: 'my@email.com')
-    #
-    # You can always use your params for filtering outside of datatable and
-    # merge to params
-    # @example
-    #   link_to 'Published posts for user1',
-    #   posts_path(PostsDatatable.param_set('posts.status', :published).merge(user_id: user1.id))
-    def self.param_set(column_key, value)
-      datatable = new OpenStruct.new(params: {})
-      value = value.join MULTIPLE_OPTION_SEPARATOR if value.is_a? Array
-      column_index = datatable.index_by_column_key column_key
-      DtParams.param_set column_index, value
     end
 
     # We need this method publicly available since we use it for class method

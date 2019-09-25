@@ -108,6 +108,10 @@ module TrkDatatables
       { columns: { column_index.to_s => { search: { value: value } } } }
     end
 
+    def self.form_field_name(column_index)
+      "columns[#{column_index}][search][value]"
+    end
+
     def param_get(column_index)
       @params.dig :columns, column_index.to_s, :search, :value
     end
