@@ -88,11 +88,13 @@ module TrkDatatables
 
     def search_all
       @params.dig(:search, :value) || ''
+    rescue TypeError => e
+      raise Error, e.message + '. Global search is in a format: { "search": { "value": "ABC" } }'
     end
 
     def as_json(all_count, filtered_items_count, data, additional = {})
       additional = {} if additional.nil?
-      raise ArgumentError, 'additional_data_for_json needs to be a hash' unless additional.is_a? Hash
+      raise Error, 'additional_data_for_json needs to be a hash' unless additional.is_a? Hash
 
       draw = @params[:draw].to_i
       {
@@ -114,6 +116,8 @@ module TrkDatatables
 
     def param_get(column_index)
       @params.dig :columns, column_index.to_s, :search, :value
+    rescue TypeError => e
+      raise Error, e.message + '. Column search is in a format: { "columns": { "0": { "search": { "value": { "ABC" } } } } }'
     end
 
     def self.sample_view_params(options = {})

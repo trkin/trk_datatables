@@ -8,7 +8,7 @@ class ColumnKeyOptionTest < Minitest::Test
     global_search_cols = %w[posts.body]
     e = assert_raises(TrkDatatables::Error) { TrkDatatables::ColumnKeyOptions.new cols, global_search_cols }
 
-    assert_equal 'Column options needs to be a Hash', e.message
+    assert_equal 'TrkDatatables: Column options needs to be a Hash', e.message
   end
 
   def test_wrong_key_column_option
@@ -33,7 +33,7 @@ class ColumnKeyOptionTest < Minitest::Test
     datatable = IndexOutOfRangeDatatable.new TrkDatatables::DtParams.sample_view_params order: { '0' => { column: 1 } }
     e = assert_raises(TrkDatatables::Error) { datatable.order_items Post.all }
 
-    assert_equal 'You asked for column index=1 but there is only 1 columns', e.message
+    assert_equal 'TrkDatatables: You asked for column index=1 but there is only 1 columns', e.message
   end
 
   def test_short_notation

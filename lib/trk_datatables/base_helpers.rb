@@ -34,7 +34,7 @@ module TrkDatatables
 
     # For range you can this helper to insert BETWEEN_SEPARATOR
     def range_string(range)
-      raise ArgumentError, "#{range} is not a Range" unless range.is_a? Range
+      raise Error, "#{range} is not a Range" unless range.is_a? Range
 
       from = range.min
       to = range.max

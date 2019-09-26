@@ -475,6 +475,30 @@ class PostsDatatable < TrkDatatables::ActiveRecord
 end
 ```
 
+## Test your datatables
+
+Here is example how you can test
+
+```
+# test/datatables/happ
+require 'test_helper'
+
+class PostsDatatableTest < ActiveSupport::TestCase
+  def sample_view_params(params = {})
+    OpenStruct.new(
+      params: params
+    )
+  end
+
+  test 'find kayaking posts' do
+    results = PostsDatatable.new(sample_view_params(activity_names: [activities(:kayaking).name])).all_items
+
+    assert_includes results, posts(:kayak_regata)
+    refute_includes results, posts(:half_marathon)
+  end
+end
+```
+
 ## Debug
 
 You can override some of the methos and put byebug, for example
@@ -513,8 +537,13 @@ You can also run `bin/console` for an interactive prompt that will allow you to 
 
 To install this gem onto your local machine, run `bundle exec rake install`. To
 release a new version, update the version number in
-`lib/trk_datatables/version.rb`, and then run `bundle exec rake release`, which
-will create a git tag for the version, push git commits and tags, and push the
+`lib/trk_datatables/version.rb`, and then run
+
+```
+bundle exec rake release
+```
+
+which will create a git tag for the version, push git commits and tags, and push the
 `.gem` file to [rubygems.org](https://rubygems.org).
 
 Instead of installing you can point directly to your path

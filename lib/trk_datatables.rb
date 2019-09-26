@@ -18,4 +18,9 @@ require 'active_support/core_ext/time/zones'
 
 # we need to define here since some conventions will look for definition in this file
 module TrkDatatables
+  class Error < StandardError
+    def message
+      "TrkDatatables: #{super}"
+    end
+  end
 end
