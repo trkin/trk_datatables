@@ -2,7 +2,7 @@ module TrkDatatables
   # rubocop:disable Rails/OutputSafety
   class RenderHtml
     @indent = 0
-    def initialize(search_link, datatable, html_options)
+    def initialize(search_link, datatable, html_options = {})
       @search_link = search_link
       @datatable = datatable
       @html_options = html_options
@@ -36,6 +36,7 @@ module TrkDatatables
     # _content_tag :div, class: 'background' do
     def _content_tag(tag, options = {}, content = nil)
       if !options.is_a?(Hash)
+        # content is first argument, do not pass hash as content
         inline = true
         content = options
         options = {}
@@ -120,7 +121,7 @@ module TrkDatatables
         safe_join(@datatable.rows(@datatable.ordered_paginated_filtered_items).map do |row|
           _content_tag :tr do
             safe_join(row.map do |col|
-              _content_tag :td, col
+              _content_tag :td, col.to_s
             end)
           end
         end, "\n".html_safe)

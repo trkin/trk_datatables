@@ -100,7 +100,7 @@ module TrkDatatables
           column_name: column_name,
           column_type_in_db: column_type_in_db,
           # the following are used for RenderHtml
-          title: column_options[TITLE_OPTION] || column_name.humanize,
+          title: column_options[TITLE_OPTION] || _determine_column_name(table_class, column_name),
           html_options: html_options(column_options, column_type_in_db),
         }
       end
@@ -143,6 +143,13 @@ module TrkDatatables
       else
         raise NotImplementedError, 'I work only with ActiveRecord and Neo4j'
       end
+    end
+
+    def _determine_column_name(table_class, column_name)
+      return column_name.humanize if table_class.blank?
+
+      # maybe we should check if human_attribute_name exists
+      table_class.human_attribute_name column_name
     end
 
     def searchable

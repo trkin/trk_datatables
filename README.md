@@ -499,6 +499,20 @@ class PostsDatatableTest < ActiveSupport::TestCase
 end
 ```
 
+# Exceptions
+
+To catch errors from TrkDatables you can
+
+```
+# app/controllers/application_controller.rb
+  rescue_from TrkDatatables::Error do |exception|
+    respond_to do |format|
+      format.html { redirect_to root_path, alert: exception.message }
+      format.json { render json: { error_message: exception.message, error_status: :bad_request }, status: :bad_request }
+    end
+  end
+```
+
 ## Debug
 
 You can override some of the methos and put byebug, for example
@@ -537,13 +551,13 @@ You can also run `bin/console` for an interactive prompt that will allow you to 
 
 To install this gem onto your local machine, run `bundle exec rake install`. To
 release a new version, update the version number in
-`lib/trk_datatables/version.rb`, and then run
+`lib/trk_datatables/version.rb`, and then publish with
 
 ```
 bundle exec rake release
 ```
 
-which will create a git tag for the version, push git commits and tags, and push the
+which will create a git tag for the version, push git commits and tags, and deploy the
 `.gem` file to [rubygems.org](https://rubygems.org).
 
 Instead of installing you can point directly to your path

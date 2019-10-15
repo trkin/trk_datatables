@@ -142,4 +142,46 @@ class RenderHtmlTest < Minitest::Test
     result = render_html.thead
     assert_equal expected.strip, result
   end
+
+  class ColumnIsHashDatatable < TrkDatatables::ActiveRecord
+    def columns
+      %i[posts.title]
+    end
+
+    def all_items
+      p = Post.create
+      Post.where(id: p.id)
+    end
+
+    def rows(filtered)
+      filtered.map do |post|
+        [
+          { id: post.id },
+        ]
+      end
+    end
+  end
+
+  def test_table_column_content_is_a_hash
+    datatable = ColumnIsHashDatatable.new TrkDatatables::DtParams.sample_view_params
+    render_html = TrkDatatables::RenderHtml.new 'link', datatable
+    expected = <<~HTML
+      <table class='table table-bordered table-striped ' data-datatable='true' data-datatable-ajax-url='link' data-datatable-page-length='10' data-datatable-order='[[0,&quot;desc&quot;]]' data-datatable-total-length='1'>
+        <thead>
+          <tr>
+            <th>Title</th>
+
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{:id=&gt;2}</td>
+
+          </tr>
+        </tbody>
+      </table>
+    HTML
+    result = render_html.table_tag_server
+    assert_equal expected.strip, result
+  end
 end
