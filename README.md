@@ -102,7 +102,7 @@ In controller add a route to `:search`
 # config/routes.rb
 Rails.application.routes.draw do
   resources :posts do
-    colletion do
+    collection do
       post :search
     end
   end
@@ -343,12 +343,15 @@ end
 ### Params
 
 To set parameters that you can use for links to set column search value, use
-this `PostsDatatable.param_set 'users.email', 'my@email.com'` for example
+this `PostsDatatable.param_set 'users.email', 'my@email.com'`. For between
+search you can use range `Time.zone.today..(Time.zone.today + 1.year)` and for
+in multiple values use array `[Post.statuses[:draft]]`.
 
 ```
 <%= link_to 'Active posts for my@email.com', \
       posts_path(
         PostsDatatable.param_set('users.email', 'my@email.com')
+          .deep_merge(PostsDatatable.param_set('posts.published_date', Date.parse('2019-10-20')..Date.parse('2019-10-22')))
           .deep_merge(PostsDatatable.param_set('posts.status', Post.statuses.values_at(:published, :promoted))
           .deep_merge(user_id: 1)
       )
@@ -372,6 +375,15 @@ If you need, you can fetch params with this helper
 
 ```
 PostsDatatable.param_get('users.email', params)
+```
+
+You can set filters on datatable even params are blank, for example
+
+```
+  def index
+    view_context.params.merge! PostsDatatable.param_set 'posts.start_date', Time.zone.today..(Time.zone.today + 1.year)
+    @datatable = PostsDatatable.new view_context
+  end
 ```
 
 ### Saved Preferences (optional)
@@ -550,10 +562,11 @@ ruby -I test test/trk_datatables/base_test.rb -n /additional/
 You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To
-release a new version, update the version number in
-`lib/trk_datatables/version.rb`, and then publish with
+release a new version, update the version number and then publish with
 
 ```
+vi lib/trk_datatables/version.rb
+bundle
 bundle exec rake release
 ```
 
