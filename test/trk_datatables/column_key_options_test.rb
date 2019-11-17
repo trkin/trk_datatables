@@ -105,4 +105,29 @@ class ColumnKeyOptionTest < Minitest::Test
     }
     assert_equal expected, column_key_options[1][:html_options]
   end
+
+  def test_determine_table_class_single
+    column_key_options = TrkDatatables::ColumnKeyOptions.new [], []
+    assert_equal column_key_options._determine_table_class('posts'), Post
+  end
+
+  def test_determine_table_class_two_words
+    column_key_options = TrkDatatables::ColumnKeyOptions.new [], []
+    Object.const_set 'CompanyUser', Class.new
+    assert_equal column_key_options._determine_table_class('company_users'), CompanyUser
+  end
+
+  def test_determine_table_class_admin_class
+    column_key_options = TrkDatatables::ColumnKeyOptions.new [], []
+    Object.const_set 'AdminCompany', Class.new
+    assert_equal column_key_options._determine_table_class('admin_companies'), AdminCompany
+  end
+
+  def test_determine_table_class_admin_module
+    column_key_options = TrkDatatables::ColumnKeyOptions.new [], []
+    _modul = Object.const_set 'Admin', Module.new
+    Object.const_get('Admin')
+          .const_set('User', Class.new)
+    assert_equal column_key_options._determine_table_class('admin_users'), Admin::User
+  end
 end

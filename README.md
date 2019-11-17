@@ -47,6 +47,7 @@ You need to create a class that inherits from `TrkDatatables::ActiveRecord` (you
 can use Rails generator)
 
 ```
+rails g trk_datatables user
 ```
 
 ## Usage example in Ruby on Rails

@@ -90,7 +90,8 @@ module TrkDatatables
           column_options[SEARCH_OPTION] = false
           column_options[ORDER_OPTION] = false
         else
-          table_class = table_name.singularize.camelcase.constantize
+          table_class = _determine_table_class table_name
+
           column_type_in_db = _determine_db_type_for_column(table_class, column_name) unless column_options[SEARCH_OPTION] == false && column_options[ORDER_OPTION] == false
         end
         arr << {
@@ -106,10 +107,26 @@ module TrkDatatables
       end
     end
 
+    def _determine_table_class(table_name)
+      # post_users -> PostUser
+      # but also check if admin_posts -> Admin::Post
+      # https://github.com/duleorlovic/rails/blob/master/activesupport/lib/active_support/inflector/methods.rb#L289
+      if [table_name.classify].inject(Object) { |c, n| c.const_defined? n }
+        table_name.classify.constantize
+      else
+        module_name, *class_name = table_name.split('_')
+        if module_name.present? && [module_name.classify].inject(Object) { |c, n| c.const_defined? n }
+          "#{module_name.classify}::#{class_name.join('_').classify}".constantize
+        else
+          table_name.classify.constantize
+        end
+      end
+    end
+
     def _set_global_search_cols(global_search_cols)
       @global_search_cols = global_search_cols.each_with_object([]) do |column_key, arr|
         table_name, column_name = column_key.to_s.split '.'
-        table_class = table_name.singularize.camelcase.constantize
+        table_class = _determine_table_class table_name
         column_type_in_db = _determine_db_type_for_column(table_class, column_name)
         arr << {
           column_key: column_key.to_sym,
@@ -206,7 +223,6 @@ module TrkDatatables
       end
       res
     end
-
   end
   # rubocop:enable ClassLength
 end
