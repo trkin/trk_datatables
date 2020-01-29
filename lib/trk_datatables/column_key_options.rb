@@ -111,13 +111,16 @@ module TrkDatatables
       # post_users -> PostUser
       # but also check if admin_posts -> Admin::Post
       # https://github.com/duleorlovic/rails/blob/master/activesupport/lib/active_support/inflector/methods.rb#L289
-      if [table_name.classify].inject(Object) { |c, n| c.const_defined? n }
+      # note that if class is not eager loaded than const_defined? returns false
+      if Object.const_defined? table_name.classify
         table_name.classify.constantize
       else
         module_name, *class_name = table_name.split('_')
-        if module_name.present? && [module_name.classify].inject(Object) { |c, n| c.const_defined? n }
-          "#{module_name.classify}::#{class_name.join('_').classify}".constantize
+        nested_name = "#{module_name.classify}::#{class_name.join('_').classify}"
+        if Object.const_defined? nested_name
+          nested_name.constantize
         else
+          # try again since it could be that class is not loaded yet
           table_name.classify.constantize
         end
       end
