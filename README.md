@@ -174,6 +174,8 @@ For specific columns you can use following keys
 * `predefined_ranges: {}` for datetime fiels add ranges to pick up from
 * `select_options: Post.statuses` generate select box instead of text input
 * `hide: true` hide column with display none
+* `class_name: 'Admin::User'` use different class name than
+  `table_name.classify` (in this case of `admin_users` will be `AdminUser`)
 
 ### Column 'BETWEEN' search
 

@@ -18,10 +18,11 @@ module TrkDatatables
     SELECT_OPTIONS = :select_options
     PREDEFINED_RANGES = :predefined_ranges
     HIDE_OPTION = :hide
+    CLASS_NAME = :class_name
     # this will load date picker
     # SEARCH_OPTION_DATE_VALUE = :date
     # SEARCH_OPTION_DATETIME_VALUE = :datetime
-    COLUMN_OPTIONS = [SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION, SELECT_OPTIONS, PREDEFINED_RANGES, HIDE_OPTION].freeze
+    COLUMN_OPTIONS = [SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION, SELECT_OPTIONS, PREDEFINED_RANGES, HIDE_OPTION, CLASS_NAME].freeze
 
     # for columns that as calculated in db query
     STRING_CALCULATED_IN_DB = :string_calculcated_in_db
@@ -90,7 +91,7 @@ module TrkDatatables
           column_options[SEARCH_OPTION] = false
           column_options[ORDER_OPTION] = false
         else
-          table_class = _determine_table_class table_name
+          table_class = _determine_table_class table_name, column_options[CLASS_NAME]
 
           column_type_in_db = _determine_db_type_for_column(table_class, column_name) unless column_options[SEARCH_OPTION] == false && column_options[ORDER_OPTION] == false
         end
@@ -107,22 +108,16 @@ module TrkDatatables
       end
     end
 
-    def _determine_table_class(table_name)
+    def _determine_table_class(table_name, class_name = nil)
       # post_users -> PostUser
-      # but also check if admin_posts -> Admin::Post
+      # but also check if admin_posts -> Admin::Post so user can defined
+      # class_name: 'Admin::Ppost'
       # https://github.com/duleorlovic/rails/blob/master/activesupport/lib/active_support/inflector/methods.rb#L289
-      # note that if class is not eager loaded than const_defined? returns false
-      if Object.const_defined? table_name.classify
-        table_name.classify.constantize
+      # note that when class is not eager loaded than const_defined? returns false
+      if class_name.present?
+        class_name.constantize
       else
-        module_name, *class_name = table_name.split('_')
-        nested_name = "#{module_name.classify}::#{class_name.join('_').classify}"
-        if Object.const_defined? nested_name
-          nested_name.constantize
-        else
-          # try again since it could be that class is not loaded yet
-          table_name.classify.constantize
-        end
+        table_name.classify.constantize
       end
     end
 

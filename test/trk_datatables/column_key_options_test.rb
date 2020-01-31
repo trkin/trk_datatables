@@ -128,6 +128,6 @@ class ColumnKeyOptionTest < Minitest::Test
     _modul = Object.const_set 'Admin', Module.new
     Object.const_get('Admin')
           .const_set('User', Class.new)
-    assert_equal column_key_options._determine_table_class('admin_users'), Admin::User
+    assert_equal column_key_options._determine_table_class('admin_users', 'Admin::User'), Admin::User
   end
 end
