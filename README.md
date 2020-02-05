@@ -1,12 +1,23 @@
 # Trk Datatables
 
-This is a source for [trk_datatables gem](https://rubygems.org/gems/trk_datatables) that you
-can use with [trk_datatables npm package](https://www.npmjs.com/package/trk_datatables) for easier usage of [Datatables plug-in for jQuery library](https://datatables.net)
+This is a source for [trk_datatables gem](https://rubygems.org/gems/trk_datatables) that is
+used with [trk_datatables npm package](https://www.npmjs.com/package/trk_datatables) to render tables.
 
-After [configuration](https://github.com/trkin/trk_datatables#configuration) you can use
-one line commands (like `@datatable.render_html`) to generate first page in html
-(so non-js crawlers can see it), global search, filtering and sorting, adding
-map and other complex listing based on GET params.
+Instead of using Rails scaffold generator you can use advanced [Datatables plug-in for jQuery library](https://datatables.net).
+
+After [few lines of code](https://github.com/trkin/trk_datatables#installation) you can use
+one line commands `@datatable.render_html` to generate index page that supports:
+global search, filtering and sorting, first page is prerendered (so non-js
+crawlers can see it), adding map and other interesting features.
+
+So instead of basic Rails scaffold with a lot of html code
+
+![rails scaffold](test/scaffold.png "Rails default scaffold")
+
+You can get something like
+
+
+![trk-datatables](test/trk_datatables_with_daterangepicker.png "TRK Datatables")
 
 ## Table of Contents
 <!--ts-->
@@ -36,18 +47,75 @@ map and other complex listing based on GET params.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Let's first add Boostrap js package and https://www.npmjs.com/package/trk_datatables
+```
+yarn add trk_datatables bootstrap jquery popper.js
 
-```ruby
+# app/javascript/packs/application.js
+// node_modules
+import 'bootstrap'
+
+// our stuff
+import 'stylesheet/application'
+import 'turbolinks.load'
+
+# app/javascript/turbolinks.load.js
+const trkDatatables = require('trk_datatables')
+
+document.addEventListener('turbolinks:load', () => {
+  // this will initialise all data-datatables elements
+  trkDatatables.initialise()
+})
+
+# app/views/layouts/application.html.erb
+/* here we include other packages so postcss-import plugin will load css file from style attribute from package.json */
+@import 'bootstrap'
+
+# config/webpack/environment.js
+const { environment } = require('@rails/webpacker')
+const webpack = require('webpack');
+environment.plugins.append('Provide', new webpack.ProvidePlugin({
+  $: 'jquery',
+  jQuery: 'jquery',
+  Popper: ['popper.js', 'default']
+}));
+
+module.exports = environment
+
+# app/views/layouts/application.html.erb
+    <%= stylesheet_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+```
+
+To add a gem follow those instructions
+
+```
 # Gemfile
 gem 'trk_datatables'
-```
 
-You need to create a class that inherits from `TrkDatatables::ActiveRecord` (you
-can use Rails generator)
+# in console
+bundle
+rails g trk_datatables post
+vi app/datatables/posts_datatable.rb
 
-```
-rails g trk_datatables user
+# config/routes.rb
+  resources :posts do
+    collection do
+      post :search
+    end
+  end
+
+# app/controllers/posts_controller.rb
+  def index
+    @datatable = PostsDatatable.new view_context
+  end
+
+  def search
+    render json: PostsDatatable.new(view_context)
+  end
+
+# app/views/posts/index.html.erb
+<h1>Posts</h1>
+<%= @datatable.render_html search_posts_path(format: :json) %>
 ```
 
 ## Usage example in Ruby on Rails

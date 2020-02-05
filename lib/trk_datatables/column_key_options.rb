@@ -19,10 +19,13 @@ module TrkDatatables
     PREDEFINED_RANGES = :predefined_ranges
     HIDE_OPTION = :hide
     CLASS_NAME = :class_name
+    COLUMN_TYPE_IN_DB = :column_type_in_db
     # this will load date picker
     # SEARCH_OPTION_DATE_VALUE = :date
     # SEARCH_OPTION_DATETIME_VALUE = :datetime
-    COLUMN_OPTIONS = [SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION, SELECT_OPTIONS, PREDEFINED_RANGES, HIDE_OPTION, CLASS_NAME].freeze
+    COLUMN_OPTIONS = [SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION, SELECT_OPTIONS,
+                      PREDEFINED_RANGES, HIDE_OPTION, CLASS_NAME,
+                      COLUMN_TYPE_IN_DB].freeze
 
     # for columns that as calculated in db query
     STRING_CALCULATED_IN_DB = :string_calculcated_in_db
@@ -93,7 +96,7 @@ module TrkDatatables
         else
           table_class = _determine_table_class table_name, column_options[CLASS_NAME]
 
-          column_type_in_db = _determine_db_type_for_column(table_class, column_name) unless column_options[SEARCH_OPTION] == false && column_options[ORDER_OPTION] == false
+          column_type_in_db = column_options[COLUMN_TYPE_IN_DB] || _determine_db_type_for_column(table_class, column_name) unless column_options[SEARCH_OPTION] == false && column_options[ORDER_OPTION] == false
         end
         arr << {
           column_key: column_key.to_sym,
