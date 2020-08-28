@@ -12,8 +12,8 @@ module TrkDatatables
 
     attr_accessor :column_key_options
 
-    # In tests you can use `spy(:view)` when you want to initialize without
-    # exceptions when view.params is called
+    # In tests you can use `spy(:view, default_proc: false)` when you want to initialize without
+    # exceptions when view.params is called or @params = ActiveSupport::HashWithIndifferentAccess.new params
     def initialize(view)
       @view = view
       @dt_params = DtParams.new view.params
@@ -159,11 +159,21 @@ module TrkDatatables
     # _attr is given by Rails template, prefix, layout... not used
     def as_json(_attr = nil)
       @dt_params.as_json(
-        all_items.count,
-        filtered_items.count,
+        all_items_count,
+        filtered_items_count,
         rows(ordered_paginated_filtered_items),
         additional_data_for_json
       )
+    end
+
+    # helper for https://github.com/trkin/trk_datatables/issues/9 which you can
+    # override to support group query
+    def all_items_count
+      all_items.count
+    end
+
+    def filtered_items_count
+      filtered_items.count
     end
 
     def additional_data_for_json

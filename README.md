@@ -16,7 +16,6 @@ So instead of basic Rails scaffold with a lot of html code
 
 You can get something like
 
-
 ![trk-datatables](test/trk_datatables_with_daterangepicker.png "TRK Datatables")
 
 ## Table of Contents
@@ -456,6 +455,8 @@ You can set filters on datatable even params are blank, for example
     @datatable = PostsDatatable.new view_context
   end
 ```
+
+Inside datatable you can access params using `@view.params`
 
 ### Saved Preferences (optional)
 

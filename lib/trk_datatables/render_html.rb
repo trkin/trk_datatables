@@ -90,7 +90,7 @@ module TrkDatatables
         'data-datatable-order': @datatable.dt_orders_or_default_index_and_direction.to_json,
         # for initial page load we do not have ability to show recordsTotal
         # https://github.com/trkin/trk_datatables_js/issues/1
-        'data-datatable-total-length': @datatable.filtered_items.count,
+        'data-datatable-total-length': @datatable.filtered_items_count,
       ) do
         thead << "\n".html_safe << tbody
       end

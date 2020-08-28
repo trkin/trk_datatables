@@ -92,7 +92,7 @@ module TrkDatatables
       raise Error, e.message + '. Global search is in a format: { "search": { "value": "ABC" } }'
     end
 
-    def as_json(all_count, filtered_items_count, data, additional = {})
+    def as_json(all_count, filtered_count, data, additional = {})
       additional = {} if additional.nil?
       raise Error, 'additional_data_for_json needs to be a hash' unless additional.is_a? Hash
 
@@ -100,7 +100,7 @@ module TrkDatatables
       {
         draw: draw,
         recordsTotal: all_count,
-        recordsFiltered: filtered_items_count,
+        recordsFiltered: filtered_count,
         **additional,
         data: data,
       }

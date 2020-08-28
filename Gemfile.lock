@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    trk_datatables (0.1.22)
+    trk_datatables (0.1.23)
       activesupport
 
 GEM
@@ -50,4 +50,4 @@ DEPENDENCIES
   trk_datatables!
 
 BUNDLED WITH
-   2.0.2
+   2.1.4
