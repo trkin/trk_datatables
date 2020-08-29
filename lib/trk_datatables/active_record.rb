@@ -33,6 +33,8 @@ module TrkDatatables
       select_options = column_key_option[:column_options][ColumnKeyOptions::SELECT_OPTIONS]
       if select_options.present?
         filter_column_as_in(column_key_option, search_value)
+      elsif %i[boolean].include?(column_key_option[:column_type_in_db])
+        filter_column_as_boolean(column_key_option, search_value)
       elsif %i[date datetime integer float].include?(column_key_option[:column_type_in_db]) && \
             search_value.include?(BETWEEN_SEPARATOR)
         from, to = search_value.split BETWEEN_SEPARATOR
@@ -50,6 +52,13 @@ module TrkDatatables
         )
         casted_column.matches("%#{search_string}%")
       end.reduce(:and)
+    end
+
+    def filter_column_as_boolean(column_key_option, search_value)
+      # return true relation in case we ignore
+      return Arel::Nodes::SqlLiteral.new('1').eq(1) if search_value == 'any'
+
+      _arel_column(column_key_option).eq(search_value == 'true')
     end
 
     def filter_column_as_between(column_key_option, from, to)

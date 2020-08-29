@@ -215,7 +215,8 @@ end
 
 ### Column 'ILIKE' search with text input
 
-All columns are by default casted to string and `ILIKE` is perfomed.
+All columns are by default casted to `:string` (you can manually cast with
+`column_type_in_db: :string`) and `ILIKE` is perfomed.
 
 If you do not need any specific column configuration,
 for example custom `title`, than instead of defining columns as key/value
@@ -341,9 +342,9 @@ Post.statues.values_at(:published, :promoted)))
 
 ### Boolean column with checkbox
 
-You can use column_option `search: :checkbox` so for column_type_in_db `:boolean`
-it will provide checkbox. For other column_type_in_db it will match if value is
-NULL or NOT NULL.
+For column_type_in_db `:boolean` it will generate checkbox and use
+http://vanderlee.github.io/tristate/ so you can filter for `true`, `false` or
+`any` (in this case we ignore this column in filtering)
 
 ### Action and non database columns
 
