@@ -21,6 +21,7 @@ ActiveRecord::Schema.define do
     t.string :title
     t.text :body
     t.integer :status
+    t.boolean :verified
     t.date :published_date
     t.datetime :created_at
   end

@@ -92,7 +92,8 @@ module TrkDatatables
         'data-datatable-total-length': @datatable.filtered_items_count,
       ) do
         thead << "\n".html_safe << tbody
-      end
+      end +
+        "\n" # add new line at the end so we can test with HERE_DOC </table>
     end
 
     def thead
@@ -105,7 +106,6 @@ module TrkDatatables
             options['data-datatable-search-value'] = search_value if search_value.present?
             # add eventual select element
             select_options = column_key_option[:column_options][ColumnKeyOptions::SELECT_OPTIONS]
-            options['data-datatable-multiselect'] = _select_tag select_options, search_value if select_options.present?
             options['data-datatable-multiselect'] = _select_tag select_options, search_value if select_options.present?
             # all other options are pulled from column_key_option[:html_options]
             _content_tag :th, options, column_key_option[:title]

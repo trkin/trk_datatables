@@ -16,6 +16,7 @@ module TrkDatatables
     ORDER_OPTION = :order
     TITLE_OPTION = :title
     SELECT_OPTIONS = :select_options
+    CHECKBOX_OPTION = :checkbox_option
     PREDEFINED_RANGES = :predefined_ranges
     HIDE_OPTION = :hide
     CLASS_NAME = :class_name
@@ -23,9 +24,11 @@ module TrkDatatables
     # this will load date picker
     # SEARCH_OPTION_DATE_VALUE = :date
     # SEARCH_OPTION_DATETIME_VALUE = :datetime
-    COLUMN_OPTIONS = [SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION, SELECT_OPTIONS,
-                      PREDEFINED_RANGES, HIDE_OPTION, CLASS_NAME,
-                      COLUMN_TYPE_IN_DB].freeze
+    COLUMN_OPTIONS = [
+      SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION, SELECT_OPTIONS,
+      CHECKBOX_OPTION, PREDEFINED_RANGES, HIDE_OPTION, CLASS_NAME,
+      COLUMN_TYPE_IN_DB
+    ].freeze
 
     # for columns that as calculated in db query
     STRING_CALCULATED_IN_DB = :string_calculcated_in_db
@@ -98,6 +101,7 @@ module TrkDatatables
 
           unless column_options[SEARCH_OPTION] == false && column_options[ORDER_OPTION] == false
             column_type_in_db = column_options[COLUMN_TYPE_IN_DB] || _determine_db_type_for_column(table_class, column_name)
+            column_options[CHECKBOX_OPTION] = true if column_type_in_db == :boolean && column_options[CHECKBOX_OPTION].nil?
           end
         end
         arr << {
@@ -210,6 +214,7 @@ module TrkDatatables
       res['data-searchable'] = false if column_options[SEARCH_OPTION] == false
       res['data-orderable'] = false if column_options[ORDER_OPTION] == false
       res['data-datatable-hidden-column'] = true if column_options[HIDE_OPTION] == true
+      res['data-datatable-checkbox'] = true if column_options[CHECKBOX_OPTION] == true
       if %i[date datetime].include? column_type_in_db
         res['data-datatable-range'] = column_type_in_db == :datetime ? :datetime : true
         if column_options[PREDEFINED_RANGES].present? ||

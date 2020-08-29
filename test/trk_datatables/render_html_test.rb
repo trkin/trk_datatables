@@ -9,6 +9,7 @@ class RenderHtmlTest < Minitest::Test
     def columns
       {
         'posts.title': {},
+        'posts.verified': {},
         'posts.published_date': {title: 'Released'},
         'posts.status': {order: false, search: false},
         '': {title: 'Links'},
@@ -19,6 +20,7 @@ class RenderHtmlTest < Minitest::Test
       filtered.map do |post|
         [
           post.title,
+          post.verified ? 'Verified' : 'Not-verified',
           post.published_date,
           post.status,
           'my_link',
@@ -29,14 +31,15 @@ class RenderHtmlTest < Minitest::Test
 
   def test_render_basic
     Post.create title: 'Post1', status: :draft, published_date: '2020-01-01'
-    Post.create title: 'Post2', status: :published, published_date: '2020-10-10'
-    datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params columns: {'1': {search: {value: '2020'}}}
+    Post.create title: 'Post2', status: :published, verified: true, published_date: '2020-10-10'
+    datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params PostsDatatable.param_set('posts.published_date', '2020')
     result = datatable.render_html 'link', class: 'blue'
     expected = <<~HTML
       <table class='table table-bordered table-striped blue' data-datatable='true' data-datatable-ajax-url='link' data-datatable-page-length='10' data-datatable-order='[[0,&quot;desc&quot;]]' data-datatable-total-length='2'>
         <thead>
           <tr>
             <th>Title</th>
+            <th data-datatable-checkbox='true'>Verified</th>
             <th data-datatable-range='true' data-datatable-search-value='2020'>Released</th>
             <th data-searchable='false' data-orderable='false'>Status</th>
             <th data-searchable='false' data-orderable='false'>Links</th>
@@ -46,6 +49,7 @@ class RenderHtmlTest < Minitest::Test
         <tbody>
           <tr>
             <td>Post2</td>
+            <td>Verified</td>
             <td>2020-10-10</td>
             <td>published</td>
             <td>my_link</td>
@@ -53,6 +57,7 @@ class RenderHtmlTest < Minitest::Test
           </tr>
           <tr>
             <td>Post1</td>
+            <td>Not-verified</td>
             <td>2020-01-01</td>
             <td>draft</td>
             <td>my_link</td>
@@ -61,7 +66,7 @@ class RenderHtmlTest < Minitest::Test
         </tbody>
       </table>
     HTML
-    assert_equal expected.split.join, result.split.join, result
+    assert_equal expected, result, result
   end
 
   class ActionDatatable < TrkDatatables::ActiveRecord
@@ -182,6 +187,6 @@ class RenderHtmlTest < Minitest::Test
       </table>
     HTML
     result = render_html.table_tag_server
-    assert_equal expected.strip, result
+    assert_equal expected, result
   end
 end
