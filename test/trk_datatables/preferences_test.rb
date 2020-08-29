@@ -20,8 +20,6 @@ class Preferences < Minitest::Test
       @view.current_user
     end
   end
-
-  # rubocop:disable Rails/TimeZone
   def test_set_preference_on_order
     user = User.create
     post1 = Post.create published_date: Time.parse('2020-01-01'), title: 'b'
@@ -33,7 +31,7 @@ class Preferences < Minitest::Test
     results = datatable.order_and_paginate_items datatable.all_items
     assert_equal [post3, post1, post2], results.all, 'cba expected by ' + results.all.to_sql
 
-    datatable = PostsDatatable.new OpenStruct.new params: { order: { '0': { column: '1', dir: 'desc' } } }, current_user: user
+    datatable = PostsDatatable.new OpenStruct.new params: {order: {'0': {column: '1', dir: 'desc'}}}, current_user: user
     results = datatable.order_and_paginate_items datatable.all_items
     refute_nil user.preferences[TrkDatatables::Preferences::KEY_IN_PREFERENCES]
     assert_equal [post2, post3, post1], results.all
@@ -49,11 +47,10 @@ class Preferences < Minitest::Test
     assert_equal [post3, post1, post2], results.all, 'cba expected by ' + results.all.to_sql
 
     # order with two columns
-    datatable = PostsDatatable.new OpenStruct.new params: { order: { '0': { column: '2', dir: 'desc' }, '1': { column: '1', dir: :asc } } }, current_user: user
+    datatable = PostsDatatable.new OpenStruct.new params: {order: {'0': {column: '2', dir: 'desc'}, '1': {column: '1', dir: :asc}}}, current_user: user
     results = datatable.order_and_paginate_items datatable.all_items
     assert_equal [post1, post3, post2], results.all
   end
-  # rubocop:enable Rails/TimeZone
 
   def test_preferences_on_page_length
     user = User.create
@@ -66,7 +63,7 @@ class Preferences < Minitest::Test
     results = datatable.order_and_paginate_items datatable.all_items
     assert_equal [post3, post2, post1], results.all
 
-    datatable = PostsDatatable.new OpenStruct.new params: { length: '1' }, current_user: user
+    datatable = PostsDatatable.new OpenStruct.new params: {length: '1'}, current_user: user
     results = datatable.order_and_paginate_items datatable.all_items
     assert_equal [post3], results.all
 

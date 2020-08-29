@@ -13,7 +13,7 @@ class ColumnKeyOptionTest < Minitest::Test
 
   def test_wrong_key_column_option
     cols = {
-      'posts.title': { wrong: true },
+      'posts.title': {wrong: true},
     }
     global_search_cols = []
     e = assert_raises(ArgumentError) { TrkDatatables::ColumnKeyOptions.new cols, global_search_cols }
@@ -30,7 +30,7 @@ class ColumnKeyOptionTest < Minitest::Test
   end
 
   def test_index_out_of_range
-    datatable = IndexOutOfRangeDatatable.new TrkDatatables::DtParams.sample_view_params order: { '0' => { column: 1 } }
+    datatable = IndexOutOfRangeDatatable.new TrkDatatables::DtParams.sample_view_params order: {'0' => {column: 1}}
     e = assert_raises(TrkDatatables::Error) { datatable.order_items Post.all }
 
     assert_equal 'TrkDatatables: You asked for column index=1 but there is only 1 columns', e.message
@@ -45,8 +45,8 @@ class ColumnKeyOptionTest < Minitest::Test
   def test_array_notation
     cols = [
       'posts.title': {},
-      'posts.body': { search: true },
-      'posts.published_date': { search: false },
+      'posts.body': {search: true},
+      'posts.published_date': {search: false},
     ]
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
     assert_equal 2, column_key_options.searchable.size
@@ -64,40 +64,40 @@ class ColumnKeyOptionTest < Minitest::Test
 
   def test_html_options
     cols = {
-      'posts.user_id': { order: false },
-      'posts.title': { search: false },
-      'posts.body': { order: true },
+      'posts.user_id': {order: false},
+      'posts.title': {search: false},
+      'posts.body': {order: true},
       'posts.status': {},
     }
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
 
-    assert_equal({ 'data-orderable' => false }, column_key_options[0][:html_options])
-    assert_equal({ 'data-searchable' => false }, column_key_options[1][:html_options])
+    assert_equal({'data-orderable' => false}, column_key_options[0][:html_options])
+    assert_equal({'data-searchable' => false}, column_key_options[1][:html_options])
     assert_equal({}, column_key_options[2][:html_options])
     assert_equal({}, column_key_options[3][:html_options])
   end
 
   def test_default_predefined_ranges
     cols = %i[posts.created_at]
-    predefined_ranges = { 'Today': Time.now.beginning_of_day..Time.now.end_of_day }
+    predefined_ranges = {'Today': Time.now.beginning_of_day..Time.now.end_of_day}
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols, [], predefined_ranges
     expected = {
       'data-datatable-range' => :datetime,
-      'data-datatable-predefined-ranges' => { 'Today': [predefined_ranges[:'Today'].first.to_s, predefined_ranges[:'Today'].last.to_s] }
+      'data-datatable-predefined-ranges' => {'Today': [predefined_ranges[:Today].first.to_s, predefined_ranges[:Today].last.to_s]}
     }
     assert_equal expected, column_key_options[0][:html_options]
   end
 
   def test_column_predefined_ranges
-    predefined_ranges = { 'Today': Time.now.beginning_of_day..Time.now.end_of_day }
+    predefined_ranges = {'Today': Time.now.beginning_of_day..Time.now.end_of_day}
     cols = {
-      'posts.created_at': { predefined_ranges: predefined_ranges },
-      'posts.published_date': { predefined_ranges: false },
+      'posts.created_at': {predefined_ranges: predefined_ranges},
+      'posts.published_date': {predefined_ranges: false},
     }
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
     expected = {
       'data-datatable-range' => :datetime,
-      'data-datatable-predefined-ranges' => { 'Today': [predefined_ranges[:'Today'].first.to_s, predefined_ranges[:'Today'].last.to_s] }
+      'data-datatable-predefined-ranges' => {'Today': [predefined_ranges[:Today].first.to_s, predefined_ranges[:Today].last.to_s]}
     }
     assert_equal expected, column_key_options[0][:html_options]
     expected = {

@@ -5,10 +5,10 @@ used with [trk_datatables npm package](https://www.npmjs.com/package/trk_datatab
 
 Instead of using Rails scaffold generator you can use advanced [Datatables plug-in for jQuery library](https://datatables.net).
 
-After [few lines of code](https://github.com/trkin/trk_datatables#installation) you can use
-one line commands `@datatable.render_html` to generate index page that supports:
-global search, filtering and sorting, first page is prerendered (so non-js
-crawlers can see it), adding map and other interesting features.
+After [few lines of code](https://github.com/trkin/trk_datatables#installation)
+you can use one line commands `@datatable.render_html` to generate index page
+that supports: global search, filtering and sorting, first page is prerendered
+(so non-js crawlers can see it), adding map and other interesting features.
 
 So instead of basic Rails scaffold with a lot of html code
 
@@ -26,13 +26,19 @@ You can get something like
       * [Usage example in Ruby on Rails](#usage-example-in-ruby-on-rails)
       * [Configuration](#configuration)
          * [Global search](#global-search)
-         * [Column 'ILIKE' and 'BETWEEN' search](#column-ilike-and-between-search)
-         * [Column 'IN' search](#column-in-search)
-         * [Action column](#action-column)
+         * [Column 'ILIKE' search with text input](#column-ilike-search-with-text-input)
+         * [Column 'BETWEEN' search with js daterangepicker](#column-between-search-with-js-daterangepicker)
+         * [Column 'IN' search with select tag](#column-in-search-with-select-tag)
+         * [Boolean column with checkbox](#boolean-column-with-checkbox)
+         * [Action and non database columns](#action-and-non-database-columns)
+         * [Values calculated in database](#values-calculated-in-database)
+         * [Default order and page length](#default-order-and-page-length)
          * [Params](#params)
          * [Saved Preferences (optional)](#saved-preferences-optional)
          * [Additional data to json response](#additional-data-to-json-response)
       * [Different response for mobile app](#different-response-for-mobile-app)
+      * [Test your datatables](#test-your-datatables)
+      * [Exceptions](#exceptions)
       * [Debug](#debug)
       * [Alternatives](#alternatives)
       * [Development](#development)
@@ -40,7 +46,7 @@ You can get something like
       * [License](#license)
       * [Code of Conduct](#code-of-conduct)
 
-<!-- Added by: orlovic, at: Mon Sep  9 09:38:44 CEST 2019 -->
+<!-- Added by: orlovic, at: Sat Aug 29 05:26:19 CEST 2020 -->
 
 <!--te-->
 
@@ -207,7 +213,7 @@ class PostsDatatable < TrkDatatables::ActiveRecord
 end
 ```
 
-### Column 'ILIKE' search
+### Column 'ILIKE' search with text input
 
 All columns are by default casted to string and `ILIKE` is perfomed.
 
@@ -244,7 +250,7 @@ For specific columns you can use following keys
 * `class_name: 'Admin::User'` use different class name than
   `table_name.classify` (in this case of `admin_users` will be `AdminUser`)
 
-### Column 'BETWEEN' search
+### Column 'BETWEEN' search with js daterangepicker
 
 For column search when search string contains BETWEEN_SEPARATOR (` - `) and
 column_type_in_db as one of the: `:date`, `:datetime`, `:integer` and
@@ -315,7 +321,7 @@ We use
 [ActiveSupport::TimeZone](https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html)
 so if you use different than UTC you need to set `Time.zone =` in your app [example values](https://github.com/rails/rails/blob/master/activesupport/lib/active_support/values/time_zone.rb#L31). Whenever Time.parse is used (and we use `Time.zone.parse` for params) it needs correct zone (in Rails you can set timezone in `config.time_zone` or use [browser timezone rails gem](https://github.com/kbaum/browser-timezone-rails)).
 
-### Column 'IN' search
+### Column 'IN' search with select tag
 
 You can use column_option `select_options: [['name1', 'value1']]` so select box
 will be loaded and match if `col IN (value1|value2)`.
@@ -332,6 +338,8 @@ end
 link_to 'Active', search_posts_path(PostsDatatable.param_set('posts.status':
 Post.statues.values_at(:published, :promoted)))
 ```
+
+### Boolean column with checkbox
 
 You can use column_option `search: :checkbox` so for column_type_in_db `:boolean`
 it will provide checkbox. For other column_type_in_db it will match if value is
@@ -583,7 +591,7 @@ class PostsDatatableTest < ActiveSupport::TestCase
 end
 ```
 
-# Exceptions
+## Exceptions
 
 To catch errors from TrkDatables you can
 
@@ -627,7 +635,7 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 rake
 # specific file
 ruby -I test test/trk_datatables/base_test.rb
-# only mathing
+# specific test that matches additional
 ruby -I test test/trk_datatables/base_test.rb -n /additional/
 ```
 

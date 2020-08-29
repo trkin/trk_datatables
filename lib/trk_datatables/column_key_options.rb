@@ -1,5 +1,5 @@
 module TrkDatatables
-  # rubocop:disable ClassLength
+  # rubocop:disable Metrics/ClassLength
   class ColumnKeyOptions
     include Enumerable
 
@@ -96,7 +96,9 @@ module TrkDatatables
         else
           table_class = _determine_table_class table_name, column_options[CLASS_NAME]
 
-          column_type_in_db = column_options[COLUMN_TYPE_IN_DB] || _determine_db_type_for_column(table_class, column_name) unless column_options[SEARCH_OPTION] == false && column_options[ORDER_OPTION] == false
+          unless column_options[SEARCH_OPTION] == false && column_options[ORDER_OPTION] == false
+            column_type_in_db = column_options[COLUMN_TYPE_IN_DB] || _determine_db_type_for_column(table_class, column_name)
+          end
         end
         arr << {
           column_key: column_key.to_sym,
@@ -211,7 +213,7 @@ module TrkDatatables
       if %i[date datetime].include? column_type_in_db
         res['data-datatable-range'] = column_type_in_db == :datetime ? :datetime : true
         if column_options[PREDEFINED_RANGES].present? ||
-            (@predefined_ranges.present? && column_options[PREDEFINED_RANGES] != false)
+           (@predefined_ranges.present? && column_options[PREDEFINED_RANGES] != false)
           res['data-datatable-predefined-ranges'] = if column_options[PREDEFINED_RANGES].is_a? Hash
                                                       column_options[PREDEFINED_RANGES]
                                                     else
@@ -225,5 +227,5 @@ module TrkDatatables
       res
     end
   end
-  # rubocop:enable ClassLength
+  # rubocop:enable Metrics/ClassLength
 end

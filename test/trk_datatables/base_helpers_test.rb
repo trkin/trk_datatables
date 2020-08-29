@@ -10,7 +10,7 @@ class TrkDatatablesBaseHelpersTest < Minitest::Test
       {
         'posts.title': {},
         'posts.published_date': {},
-        'posts.status': { select_options: Post.statuses },
+        'posts.status': {select_options: Post.statuses},
         'users.email': {},
       }
     end

@@ -107,7 +107,7 @@ module TrkDatatables
     end
 
     def self.param_set(column_index, value)
-      { columns: { column_index.to_s => { search: { value: value } } } }
+      {columns: {column_index.to_s => {search: {value: value}}}}
     end
 
     def self.form_field_name(column_index)
@@ -135,7 +135,7 @@ module TrkDatatables
           value: '', regex: 'false'
         },
         order: {
-          '0': { column: '0', dir: 'desc' }
+          '0': {column: '0', dir: 'desc'}
         },
         # [:columns] should have the same size as column_key_options since we
         # ignore keys, and use positions

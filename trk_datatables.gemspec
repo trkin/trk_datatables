@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Dusan Orlovic']
   spec.email         = ['duleorlovic@gmail.com']
 
-  spec.summary       = %q(Gem that simplify using datatables with Ruby on Rails and Sinatra.)
-  spec.description   = %q(Html render first page, sort and filter...)
+  spec.summary       = 'Gem that simplify using datatables with Ruby on Rails and Sinatra.'
+  spec.description   = 'Html render first page, sort and filter...'
   spec.homepage      = 'https://github.com/trkin/trk_datatables'
   spec.license       = 'MIT'
 

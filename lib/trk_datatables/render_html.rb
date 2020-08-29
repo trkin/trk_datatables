@@ -1,5 +1,4 @@
 module TrkDatatables
-  # rubocop:disable Rails/OutputSafety
   class RenderHtml
     @indent = 0
     def initialize(search_link, datatable, html_options = {})
@@ -28,7 +27,7 @@ module TrkDatatables
       array.map { |i| ERB::Util.unwrapped_html_escape(i) }.join(sep).html_safe
     end
 
-    # rubocop:disable Metrics/AbcSize
+    # rubocop:disable Metrics/AbcSize, Metrics/PerceivedComplexity
     #
     # _content_tag :p, 'Hi'
     # _content_tag :p, class: 'button', 'Hi'
@@ -57,13 +56,13 @@ module TrkDatatables
       self.class.indent -= 1
       html
     end
-    # rubocop:enable Metrics/AbcSize
+    # rubocop:enable Metrics/AbcSize, Metrics/PerceivedComplexity
 
     def _select_tag(options, search_value)
       selected = search_value.to_s.split(MULTIPLE_OPTION_SEPARATOR)
       _content_tag :select, multiple: 'multiple' do
         safe_join(options.map do |key, value|
-          _content_tag :option, { value: value }.merge(selected.include?(value.to_s) ? { selected: 'selected' } : {}), key
+          _content_tag :option, {value: value}.merge(selected.include?(value.to_s) ? {selected: 'selected'} : {}), key
         end)
       end
     end
@@ -107,6 +106,7 @@ module TrkDatatables
             # add eventual select element
             select_options = column_key_option[:column_options][ColumnKeyOptions::SELECT_OPTIONS]
             options['data-datatable-multiselect'] = _select_tag select_options, search_value if select_options.present?
+            options['data-datatable-multiselect'] = _select_tag select_options, search_value if select_options.present?
             # all other options are pulled from column_key_option[:html_options]
             _content_tag :th, options, column_key_option[:title]
           end)
@@ -132,5 +132,4 @@ module TrkDatatables
       ''
     end
   end
-  # rubocop:enable Rails/OutputSafety
 end

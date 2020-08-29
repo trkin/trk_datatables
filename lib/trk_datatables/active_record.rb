@@ -86,7 +86,6 @@ module TrkDatatables
       [parsed_from, parsed_to]
     end
 
-    # rubocop:disable Rails/TimeZone
     def _parse_in_zone(time)
       return nil if time.blank?
 
@@ -95,7 +94,6 @@ module TrkDatatables
     rescue ArgumentError
       nil
     end
-    # rubocop:enable Rails/TimeZone
 
     def order_and_paginate_items(filtered)
       filtered = order_items filtered

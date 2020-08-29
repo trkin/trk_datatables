@@ -9,9 +9,9 @@ class RenderHtmlTest < Minitest::Test
     def columns
       {
         'posts.title': {},
-        'posts.published_date': { title: 'Released' },
-        'posts.status': { order: false, search: false },
-        '': { title: 'Links' },
+        'posts.published_date': {title: 'Released'},
+        'posts.status': {order: false, search: false},
+        '': {title: 'Links'},
       }
     end
 
@@ -30,7 +30,7 @@ class RenderHtmlTest < Minitest::Test
   def test_render_basic
     Post.create title: 'Post1', status: :draft, published_date: '2020-01-01'
     Post.create title: 'Post2', status: :published, published_date: '2020-10-10'
-    datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params columns: { '1': { search: { value: '2020' } } }
+    datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params columns: {'1': {search: {value: '2020'}}}
     result = datatable.render_html 'link', class: 'blue'
     expected = <<~HTML
       <table class='table table-bordered table-striped blue' data-datatable='true' data-datatable-ajax-url='link' data-datatable-page-length='10' data-datatable-order='[[0,&quot;desc&quot;]]' data-datatable-total-length='2'>
@@ -72,7 +72,7 @@ class RenderHtmlTest < Minitest::Test
     def columns
       {
         'posts.title': {},
-        '': { order: false, search: false, title: "<a href='#' id='toggle-all-rows'>All</a>".html_safe },
+        '': {order: false, search: false, title: "<a href='#' id='toggle-all-rows'>All</a>".html_safe},
       }
     end
 
@@ -115,13 +115,13 @@ class RenderHtmlTest < Minitest::Test
     def columns
       {
         'posts.title': {},
-        'posts.status': { title: 'POS', select_options: Post.statuses },
+        'posts.status': {title: 'POS', select_options: Post.statuses},
       }
     end
   end
 
   def test_render_select
-    datatable = MultiselectsDatatable.new TrkDatatables::DtParams.sample_view_params columns: { '1': { search: { value: 'published|promoted' } } }
+    datatable = MultiselectsDatatable.new TrkDatatables::DtParams.sample_view_params columns: {'1': {search: {value: 'published|promoted'}}}
     # Post.statuses.values_at(:published, :promoted).join(TrkDatatables::MULTIPLE_OPTION_SEPARATOR),
     render_html = TrkDatatables::RenderHtml.new 'link', datatable, class: 'blue'
     expected = <<~HTML
@@ -156,7 +156,7 @@ class RenderHtmlTest < Minitest::Test
     def rows(filtered)
       filtered.map do |post|
         [
-          { id: post.id },
+          {id: post.id},
         ]
       end
     end

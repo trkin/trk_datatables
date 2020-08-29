@@ -21,7 +21,7 @@ module TrkDatatables
     def set(key, value)
       return unless @holder
 
-      h = { KEY_IN_PREFERENCES => { @class_name => { key => value } } }
+      h = {KEY_IN_PREFERENCES => {@class_name => {key => value}}}
       @holder.send("#{@field}=", {}) if @holder.send(@field).nil?
       @holder.send(@field).deep_merge! h
       @holder.save!
