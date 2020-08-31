@@ -25,7 +25,7 @@ module TrkDatatables
           You can use in your controller
 
           # app/controllers/#{plural_name}_controller.rb
-          class #{class_name}Controller < ApplicationController
+          class #{class_name.pluralize}Controller < ApplicationController
             def index
               @datatable = #{@trk_class_name}.new view_context
             end
@@ -36,7 +36,7 @@ module TrkDatatables
           end
 
           In your views mkdir app/views/#{plural_name}
-          # app/views/#{plural_name}/index.html
+          # app/views/#{plural_name}/index.html.erb
           <h1>#{class_name.pluralize}</h1>
           <%= @datatable.render_html search_#{plural_name}_path(format: :json) %>
 

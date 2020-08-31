@@ -31,7 +31,7 @@ class TrkDatatablesBaseTest < Minitest::Test
     def columns
       {
         'posts.title': {},
-        'posts.published_date': {},
+        'posts.published_on': {},
         'posts.status': {select_options: Post.statuses},
         'users.email': {},
       }

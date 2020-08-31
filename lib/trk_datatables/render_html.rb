@@ -58,12 +58,11 @@ module TrkDatatables
     end
     # rubocop:enable Metrics/AbcSize, Metrics/PerceivedComplexity
 
-    def _select_tag(options, search_value)
+    # [{ key: 'draft', value: 0}, {key: 'published', value: 1, selected: 'selected}]
+    def _select_find_options(options, search_value)
       selected = search_value.to_s.split(MULTIPLE_OPTION_SEPARATOR)
-      _content_tag :select, multiple: 'multiple' do
-        safe_join(options.map do |key, value|
-          _content_tag :option, {value: value}.merge(selected.include?(value.to_s) ? {selected: 'selected'} : {}), key
-        end)
+      options.map do |key, value|
+        {key: key, value: value}.merge(selected.include?(value.to_s) ? {selected: 'selected'} : {})
       end
     end
 
@@ -106,7 +105,7 @@ module TrkDatatables
             options['data-datatable-search-value'] = search_value if search_value.present?
             # add eventual select element
             select_options = column_key_option[:column_options][ColumnKeyOptions::SELECT_OPTIONS]
-            options['data-datatable-multiselect'] = _select_tag select_options, search_value if select_options.present?
+            options['data-datatable-multiselect'] = _select_find_options select_options, search_value if select_options.present?
             # all other options are pulled from column_key_option[:html_options]
             _content_tag :th, options, column_key_option[:title]
           end)

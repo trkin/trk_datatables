@@ -9,7 +9,7 @@ class TrkDatatablesBaseHelpersTest < Minitest::Test
     def columns
       {
         'posts.title': {},
-        'posts.published_date': {},
+        'posts.published_on': {},
         'posts.status': {select_options: Post.statuses},
         'users.email': {},
       }
@@ -23,7 +23,7 @@ class TrkDatatablesBaseHelpersTest < Minitest::Test
   def test_param_set
     actual = PostsDatatable
              .param_set('users.email', 'my@email.com')
-             .deep_merge(PostsDatatable.param_set('posts.published_date', Date.parse('2019-10-20')..Date.parse('2019-10-22')))
+             .deep_merge(PostsDatatable.param_set('posts.published_on', Date.parse('2019-10-20')..Date.parse('2019-10-22')))
              .deep_merge(PostsDatatable.param_set('posts.status', Post.statuses.values_at(:published, :promoted)))
              .deep_merge(user_id: 1)
     expected = {

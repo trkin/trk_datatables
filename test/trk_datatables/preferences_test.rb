@@ -9,7 +9,7 @@ class Preferences < Minitest::Test
     def columns
       {
         'posts.title': {},
-        'posts.published_date': {},
+        'posts.published_on': {},
         'users.email': {},
       }
     end
@@ -22,9 +22,9 @@ class Preferences < Minitest::Test
   end
   def test_set_preference_on_order
     user = User.create
-    post1 = Post.create published_date: Time.parse('2020-01-01'), title: 'b'
-    post2 = Post.create published_date: Time.parse('2020-03-01'), title: 'a'
-    post3 = Post.create published_date: Time.parse('2020-02-01'), title: 'c'
+    post1 = Post.create published_on: Time.parse('2020-01-01'), title: 'b'
+    post2 = Post.create published_on: Time.parse('2020-03-01'), title: 'a'
+    post3 = Post.create published_on: Time.parse('2020-02-01'), title: 'c'
     assert_nil user.preferences[TrkDatatables::Preferences::KEY_IN_PREFERENCES]
 
     datatable = PostsDatatable.new OpenStruct.new params: {}, current_user: user

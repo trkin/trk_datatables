@@ -46,7 +46,7 @@ class ColumnKeyOptionTest < Minitest::Test
     cols = [
       'posts.title': {},
       'posts.body': {search: true},
-      'posts.published_date': {search: false},
+      'posts.published_on': {search: false},
     ]
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
     assert_equal 2, column_key_options.searchable.size
@@ -92,7 +92,7 @@ class ColumnKeyOptionTest < Minitest::Test
     predefined_ranges = {'Today': Time.now.beginning_of_day..Time.now.end_of_day}
     cols = {
       'posts.created_at': {predefined_ranges: predefined_ranges},
-      'posts.published_date': {predefined_ranges: false},
+      'posts.published_on': {predefined_ranges: false},
     }
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
     expected = {

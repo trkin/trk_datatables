@@ -5,16 +5,16 @@ used with [trk_datatables npm package](https://www.npmjs.com/package/trk_datatab
 
 Instead of using Rails scaffold generator you can use advanced [Datatables plug-in for jQuery library](https://datatables.net).
 
-After [few lines of code](https://github.com/trkin/trk_datatables#installation)
-you can use one line commands `@datatable.render_html` to generate index page
+After [installation](https://github.com/trkin/trk_datatables#installation)
+you can use one line command `@datatable.render_html` to generate index page
 that supports: global search, filtering and sorting, first page is prerendered
-(so non-js crawlers can see it), adding map and other interesting features.
+(so non-js crawlers can see it), map and other interesting features.
 
-So instead of basic Rails scaffold with a lot of html code
+So instead of basic Rails scaffold
 
 ![rails scaffold](test/scaffold.png "Rails default scaffold")
 
-You can get something like
+you can get something like
 
 ![trk-datatables](test/trk_datatables_with_daterangepicker.png "TRK Datatables")
 
@@ -72,7 +72,7 @@ document.addEventListener('turbolinks:load', () => {
   trkDatatables.initialise()
 })
 
-# app/views/layouts/application.html.erb
+# app/javascript/stylesheet/application.css
 /* here we include other packages so postcss-import plugin will load css file from style attribute from package.json */
 @import 'bootstrap'
 
@@ -91,7 +91,7 @@ module.exports = environment
     <%= stylesheet_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
 ```
 
-To add a gem follow those instructions
+Than add a gem and sample PostsDatatable
 
 ```
 # Gemfile
@@ -302,7 +302,7 @@ class PostsDatatable < TrkDatatables::ActiveRecord
   def columns
     {
       'posts.created_at': {}, # this column will have predefined_ranges
-      'posts.published_date': { predefined_ranges: false }
+      'posts.published_on': { predefined_ranges: false }
   end
 end
 ```
@@ -430,7 +430,7 @@ in multiple values use array `[Post.statuses[:draft]]`.
 <%= link_to 'Active posts for my@email.com', \
       posts_path(
         PostsDatatable.param_set('users.email', 'my@email.com')
-          .deep_merge(PostsDatatable.param_set('posts.published_date', Date.parse('2019-10-20')..Date.parse('2019-10-22')))
+          .deep_merge(PostsDatatable.param_set('posts.published_on', Date.parse('2019-10-20')..Date.parse('2019-10-22')))
           .deep_merge(PostsDatatable.param_set('posts.status', Post.statuses.values_at(:published, :promoted))
           .deep_merge(user_id: 1)
       )
@@ -647,6 +647,7 @@ release a new version, update the version number and then publish with
 
 ```
 vi lib/trk_datatables/version.rb
+git commit -am'...'
 bundle
 bundle exec rake release
 ```

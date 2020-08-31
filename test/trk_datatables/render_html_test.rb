@@ -10,7 +10,7 @@ class RenderHtmlTest < Minitest::Test
       {
         'posts.title': {},
         'posts.verified': {},
-        'posts.published_date': {title: 'Released'},
+        'posts.published_on': {title: 'Released'},
         'posts.status': {order: false, search: false},
         '': {title: 'Links'},
       }
@@ -21,7 +21,7 @@ class RenderHtmlTest < Minitest::Test
         [
           post.title,
           post.verified ? 'Verified' : 'Not-verified',
-          post.published_date,
+          post.published_on,
           post.status,
           'my_link',
         ]
@@ -30,9 +30,9 @@ class RenderHtmlTest < Minitest::Test
   end
 
   def test_render_basic
-    Post.create title: 'Post1', status: :draft, published_date: '2020-01-01'
-    Post.create title: 'Post2', status: :published, verified: true, published_date: '2020-10-10'
-    datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params PostsDatatable.param_set('posts.published_date', '2020')
+    Post.create title: 'Post1', status: :draft, published_on: '2020-01-01'
+    Post.create title: 'Post2', status: :published, verified: true, published_on: '2020-10-10'
+    datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params PostsDatatable.param_set('posts.published_on', '2020')
     result = datatable.render_html 'link', class: 'blue'
     expected = <<~HTML
       <table class='table table-bordered table-striped blue' data-datatable='true' data-datatable-ajax-url='link' data-datatable-page-length='10' data-datatable-order='[[0,&quot;desc&quot;]]' data-datatable-total-length='2'>
@@ -133,13 +133,7 @@ class RenderHtmlTest < Minitest::Test
       <thead>
         <tr>
           <th>Title</th>
-          <th data-datatable-search-value='published|promoted' data-datatable-multiselect='    &lt;select multiple=&quot;multiple&quot;&gt;
-            &lt;option value=&quot;0&quot;&gt;draft&lt;/option&gt;
-            &lt;option value=&quot;1&quot;&gt;published&lt;/option&gt;
-            &lt;option value=&quot;2&quot;&gt;promoted&lt;/option&gt;
-            &lt;option value=&quot;3&quot;&gt;landing&lt;/option&gt;
-
-          &lt;/select&gt;'>POS</th>
+          <th data-datatable-search-value='published|promoted' data-datatable-multiselect='[{&quot;key&quot;:&quot;draft&quot;,&quot;value&quot;:0},{&quot;key&quot;:&quot;published&quot;,&quot;value&quot;:1},{&quot;key&quot;:&quot;promoted&quot;,&quot;value&quot;:2},{&quot;key&quot;:&quot;landing&quot;,&quot;value&quot;:3}]'>POS</th>
 
         </tr>
       </thead>

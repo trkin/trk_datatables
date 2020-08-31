@@ -22,7 +22,7 @@ ActiveRecord::Schema.define do
     t.text :body
     t.integer :status
     t.boolean :verified
-    t.date :published_date
+    t.date :published_on
     t.datetime :created_at
   end
 
