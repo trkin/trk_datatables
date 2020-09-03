@@ -1,5 +1,18 @@
 module TrkDatatables
   # rubocop:disable Metrics/ClassLength
+  class CalculatedInDb
+    def self.human_attribute_name(column_name)
+      column_name
+    end
+
+    def self.determine_db_type_for_column
+      # converts TrkDatatables::IntegerCalculatedInDb to :integer
+      name.sub('TrkDatatables::', '').sub('CalculatedInDb', '').downcase.to_sym
+    end
+  end
+  class StringCalculatedInDb < CalculatedInDb; end
+  class IntegerCalculatedInDb < CalculatedInDb; end
+
   class ColumnKeyOptions
     include Enumerable
 
@@ -12,11 +25,10 @@ module TrkDatatables
     #     {
     #       'users.name': { search: false }
     #     }
+    TITLE_OPTION = :title
     SEARCH_OPTION = :search
     ORDER_OPTION = :order
-    TITLE_OPTION = :title
     SELECT_OPTIONS = :select_options
-    CHECKBOX_OPTION = :checkbox_option
     PREDEFINED_RANGES = :predefined_ranges
     HIDE_OPTION = :hide
     CLASS_NAME = :class_name
@@ -26,15 +38,16 @@ module TrkDatatables
     # SEARCH_OPTION_DATETIME_VALUE = :datetime
     COLUMN_OPTIONS = [
       SEARCH_OPTION, ORDER_OPTION, TITLE_OPTION, SELECT_OPTIONS,
-      CHECKBOX_OPTION, PREDEFINED_RANGES, HIDE_OPTION, CLASS_NAME,
+      PREDEFINED_RANGES, HIDE_OPTION, CLASS_NAME,
       COLUMN_TYPE_IN_DB
     ].freeze
 
     # for columns that as calculated in db query
-    STRING_CALCULATED_IN_DB = :string_calculcated_in_db
+    STRING_CALCULATED_IN_DB = :string_calculated_in_db
     INTEGER_CALCULATED_IN_DB = :integer_calculated_in_db
     DATE_CALCULATED_IN_DB = :date_calculated_in_db
-    DATETIME_CALCULATED_IN_DB = :datetime_calculcated_in_db
+    DATETIME_CALCULATED_IN_DB = :datetime_calculated_in_db
+    BOOLEAN_CALCULATED_IN_DB = :boolean_calculated_in_db
 
     # for 'columns' that are calculated in Ruby you need to disable search and
     # order and than it will not be used in queries
@@ -90,7 +103,12 @@ module TrkDatatables
 
         column_options.assert_valid_keys(*COLUMN_OPTIONS)
         table_name, column_name = column_key.to_s.split '.'
-        raise Error, 'Column key needs to have one dot for example: posts.name' if table_name.present? && column_name.nil?
+        if table_name.present? && table_name.ends_with?('_calculated_in_db')
+          # in calculated columns table_name is used only to determine type
+          column_key = column_name
+        elsif table_name.present? && column_name.nil?
+          raise Error, 'Unless table name ends with _calculad_in_db, column key needs to have one dot for example: posts.name'
+        end
 
         if table_name.blank?
           column_name = column_options[TITLE_OPTION] || 'actions' # some default name for a title
@@ -101,7 +119,6 @@ module TrkDatatables
 
           unless column_options[SEARCH_OPTION] == false && column_options[ORDER_OPTION] == false
             column_type_in_db = column_options[COLUMN_TYPE_IN_DB] || _determine_db_type_for_column(table_class, column_name)
-            column_options[CHECKBOX_OPTION] = true if column_type_in_db == :boolean && column_options[CHECKBOX_OPTION].nil?
           end
         end
         arr << {
@@ -120,11 +137,13 @@ module TrkDatatables
     def _determine_table_class(table_name, class_name = nil)
       # post_users -> PostUser
       # but also check if admin_posts -> Admin::Post so user can defined
-      # class_name: 'Admin::Ppost'
+      # class_name: 'Admin::Post'
       # https://github.com/duleorlovic/rails/blob/master/activesupport/lib/active_support/inflector/methods.rb#L289
       # note that when class is not eager loaded than const_defined? returns false
       if class_name.present?
         class_name.constantize
+      elsif table_name.ends_with? '_calculated_in_db'
+        "TrkDatatables::#{table_name.classify}".constantize
       else
         table_name.classify.constantize
       end
@@ -157,7 +176,9 @@ module TrkDatatables
     # @return
     #   :string, :integer, :date, :datetime
     def _determine_db_type_for_column(table_class, column_name)
-      if defined?(::ActiveRecord::Base)
+      if table_class < TrkDatatables::CalculatedInDb
+        table_class.determine_db_type_for_column
+      elsif defined?(::ActiveRecord::Base)
         ar_column = table_class.columns_hash[column_name]
         raise Error, "Can't find column #{column_name} in #{table_class.name}" unless ar_column
 
@@ -214,7 +235,7 @@ module TrkDatatables
       res['data-searchable'] = false if column_options[SEARCH_OPTION] == false
       res['data-orderable'] = false if column_options[ORDER_OPTION] == false
       res['data-datatable-hidden-column'] = true if column_options[HIDE_OPTION] == true
-      res['data-datatable-checkbox'] = true if column_options[CHECKBOX_OPTION] == true
+      res['data-datatable-checkbox'] = true if column_type_in_db == :boolean
       if %i[date datetime].include? column_type_in_db
         res['data-datatable-range'] = column_type_in_db == :datetime ? :datetime : true
         if column_options[PREDEFINED_RANGES].present? ||

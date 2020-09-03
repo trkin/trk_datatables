@@ -30,7 +30,7 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
   end
 
   def test_order_and_paginate_items
-    15.times { |i| Post.create title: "post#{format '%02d', i}" }
+    15.times { |i| Post.create title: "post#{format '%<i>02d', i: i}" }
 
     first_post = Post.find_by! title: 'post00'
     last_post = Post.find_by! title: 'post14'
@@ -56,6 +56,7 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
   end
 
   def test_filter_by_search_all
+    # global search
     first_user = User.create email: '1@email.com'
     first = Post.create title: '1_post', user: first_user, published_on: '2020-01-01'
     second = Post.create title: '2_post', user: first_user, published_on: '2021-01-01'
@@ -147,17 +148,6 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
     assert_equal_with_message [post1a], posts_dt(:filter_by_columns, columns: {'1': {searchable: true, search: {value: "2020-01-45#{TrkDatatables::BETWEEN_SEPARATOR}2020-03-02"}}}), :published_on
     assert_equal_with_message [post1a], posts_dt(:filter_by_columns, columns: {'1': {searchable: true, search: {value: "#{TrkDatatables::BETWEEN_SEPARATOR} "}}}), :published_on
     assert_equal_with_message [post1a], posts_dt(:filter_by_columns, columns: {'1': {searchable: true, search: {value: "-#{TrkDatatables::BETWEEN_SEPARATOR} "}}}), :published_on
-  end
-
-  def test_global_search
-    user1 = User.create email: '1@email.com', name: 'user1_name'
-    post1a = Post.create title: '1a_post', user: user1, body: '1a_body'
-    post1b = Post.create title: '1b_post', user: user1, body: '1b_body'
-    user2 = User.create email: '2@email.com', name: 'user2_name'
-    _post2 = Post.create title: '2a_post', user: user2, body: '2a_body'
-
-    assert_equal_with_message [post1b], posts_dt(:filter_by_search_all, search: {value: '1b_body'}), :title
-    assert_equal_with_message [post1a, post1b], posts_dt(:filter_by_search_all, search: {value: '_body user1_name'}), :title
   end
 
   class MultiselectsDatatable < TrkDatatables::ActiveRecord

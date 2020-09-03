@@ -121,7 +121,11 @@ module TrkDatatables
     end
 
     def _arel_column(column_key_option)
-      column_key_option[:table_class].arel_table[column_key_option[:column_name]]
+      if column_key_option[:table_class] < TrkDatatables::CalculatedInDb
+        Arel.sql send(column_key_option[:column_key])
+      else
+        column_key_option[:table_class].arel_table[column_key_option[:column_name]]
+      end
     end
   end
 end

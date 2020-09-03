@@ -245,11 +245,13 @@ For specific columns you can use following keys
 * `title: 'My Title'` set up column header
 * `search: false` disable searching for this column
 * `order: false` disable ordering for this column
-* `predefined_ranges: {}` for datetime fiels add ranges to pick up from
 * `select_options: Post.statuses` generate select box instead of text input
+* `predefined_ranges: {}` for datetime fiels add ranges to pick up from
 * `hide: true` hide column with display none
 * `class_name: 'Admin::User'` use different class name than
   `table_name.classify` (in this case of `admin_users` will be `AdminUser`)
+* `column_type_in_db` one of the: `:string`, `:integer`, `:date`, `:datetime`,
+  `:boolean`
 
 ### Column 'BETWEEN' search with js daterangepicker
 
@@ -372,9 +374,10 @@ use empty column_key
 
 If you have more columns that are not actually columns in database (for example
 links or Ruby calculated values) than you can not use empty column_key since
-there could be only one in hash. When you disable `order` and `search` than you
-can use any column name since that column will not be used in queries. For
-example this column key `posts.body_size` is not in database nor in Ruby code.
+there could be only one (keys in the hash should be unique). When you disable
+`order` and `search` than you can use any column name since that column will not
+be used in queries. For example column key `posts.body_size` is not in database
+nor in Ruby code.
 
 ```
   def columns
@@ -396,7 +399,131 @@ example this column key `posts.body_size` is not in database nor in Ruby code.
 
 ### Values calculated in database
 
-For values that
+There are three types of calculated values (new custom fields that are
+generated based on other columns):
+* simple calculations like `SELECT *, quantity * price as full_price`
+* subqueries like `SELECT *, (SELECT COUNT(*) FROM posts WHERE users.id =
+  posts.user_id) AS posts_count`
+* aggregate functions in joins/group_by `SELECT users.*, COUNT(posts.id) AS
+  posts_count FROM "users" LEFT OUTER JOIN "posts" ON "posts"."user_id" =
+  "users"."id" GROUP BY users.id`
+
+Since in SQL you can not use aggregate functions in WHERE (we can repeat
+calculation and subqueries), currently TrkDatatables does not support using
+aggregate functions since it requires implementation of `HAVING` (unless you
+disable search and order `'users.posts_count': { search: false, order: false }`).
+You can use concatenation aggregate function: in postgres `STRING_AGG`, in mysql
+`GROUP_CONCAT` since we search in real columns and show concatenation (we do not
+search concatenation like we need to search new field `post_count`).
+
+Simple calculations and subqueries works fine, just you have to use public
+method to define calculation (that method is also used in filtering). Name of
+method is the same as column name `title_and_body` or `comments_count`. For table
+name you should use one of:
+`:string_calculated_in_db`, `:integer_calculated_in_db`,
+`:date_calculated_in_db`, `:datetime_calculated_in_db` or
+`:boolean_calculated_in_db`.
+
+Before we give an example there is an issue in calling `all.count` if you are
+using subquery so we need to patch ActiveRecord
+```
+# config/initializers/active_record_group_count.rb
+# When you are using subquery or joins/group_by than all.count does not work
+# so we need to wrap sql in returns_count_sum
+# all.returns_count_sum.count # => 123
+# https://stackoverflow.com/a/21031792/287166
+# https://github.com/mrbrdo/active_record_group_count/blob/master/lib/active_record_group_count/scope.rb
+module ActiveRecordGroupCount
+  module Scope
+    extend ActiveSupport::Concern
+
+    module ExtensionMethods
+      def count(*_args)
+        scope = except(:select).select('1')
+        scope_sql = if scope.klass.connection.respond_to?(:unprepared_statement)
+                      scope.klass.connection.unprepared_statement { scope.to_sql }
+                    else
+                      scope.to_sql
+                    end
+        query = "SELECT count(*) AS count_all FROM (#{scope_sql}) x"
+        first_result = ActiveRecord::Base.connection.execute(query).first
+        if first_result.is_a? Array
+          first_result.first
+        else
+          first_result['count_all']
+        end
+      end
+    end
+
+    module ClassMethods
+      def returns_count_sum
+        all.extending(ExtensionMethods)
+      end
+    end
+  end
+end
+# https://github.com/mrbrdo/active_record_group_count/blob/master/lib/active_record_group_count/railtie.rb
+ActiveSupport.on_load :active_record do
+  include ActiveRecordGroupCount::Scope
+end
+```
+
+So now we can use `all_items.returns_count_sum.count`. Here is example of simple
+calulation and subquery
+
+```
+class MostLikedPostsDatatable < TrkDatatables::ActiveRecord
+  def columns
+    {
+      'posts.id': {},
+      'string_calculated_in_db.title_and_body': {},
+      'integer_calculated_in_db.comments_count': {},
+    }
+  end
+
+  def all_items
+    Post.select(%(
+                posts.*,
+                #{title_and_body} AS title_and_body,
+                (#{comments_count}) AS comments_count
+                ))
+  end
+
+  def title_and_body
+    "concat(posts.title, ' ', posts.body)"
+  end
+
+  def comments_count
+    <<~SQL
+      (SELECT COUNT(*) FROM comments
+      WHERE comments.post_id = posts.id)
+    SQL
+  end
+
+  def all_items_count
+    all_items.returns_count_sum.count
+  end
+
+  def filtered_items_count
+    filtered_items.returns_count_sum.count
+  end
+
+  def rows(filtered)
+    # you can use @view.link_to and other helpers
+    filtered.map do |post|
+      [
+        @view.link_to(post.id, post),
+        post.title_and_body,
+        post.comments_count,
+      ]
+    end
+  end
+
+  def default_order
+    [[2, :desc]]
+  end
+end
+```
 
 ### Default order and page length
 

@@ -130,4 +130,15 @@ class ColumnKeyOptionTest < Minitest::Test
           .const_set('User', Class.new)
     assert_equal column_key_options._determine_table_class('admin_users', 'Admin::User'), Admin::User
   end
+
+  def test_calculated_in_db
+    cols = {
+      'string_calculated_in_db.all_messages': {},
+      'integer_calculated_in_db.coun_likes': {},
+    }
+    column_key_options = TrkDatatables::ColumnKeyOptions.new cols, []
+    assert_equal TrkDatatables::StringCalculatedInDb, column_key_options[0][:table_class]
+    assert_equal :string, column_key_options[0][:column_type_in_db]
+    assert_equal :integer, column_key_options[1][:column_type_in_db]
+  end
 end
