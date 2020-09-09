@@ -62,9 +62,10 @@ import 'bootstrap'
 
 // our stuff
 import 'stylesheet/application'
-import 'turbolinks.load'
 
-# app/javascript/turbolinks.load.js
+// attach jQuery so it is available for javascript included with asset pipeline
+window.$ = window.jQuery = jQuery;
+
 const trkDatatables = require('trk_datatables')
 
 document.addEventListener('turbolinks:load', () => {
@@ -88,7 +89,11 @@ environment.plugins.append('Provide', new webpack.ProvidePlugin({
 module.exports = environment
 
 # app/views/layouts/application.html.erb
+    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%# we need stylesheet for production server, locally it could work without stylesheet_pack_tag even in production mode %>
     <%= stylesheet_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%# we use jQuery from wepbacker so asset pipeline should be included later %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
 ```
 
 Than add a gem and sample PostsDatatable
@@ -408,13 +413,17 @@ generated based on other columns):
   posts_count FROM "users" LEFT OUTER JOIN "posts" ON "posts"."user_id" =
   "users"."id" GROUP BY users.id`
 
-Since in SQL you can not use aggregate functions in WHERE (we can repeat
+Since in SQL you can not use aggregate functions in WHERE (we should repeat
 calculation and subqueries), currently TrkDatatables does not support using
 aggregate functions since it requires implementation of `HAVING` (unless you
-disable search and order `'users.posts_count': { search: false, order: false }`).
+disable search and order for those fields with aggregate functions
+`'users.posts_count': { search: false, order: false }`).
 You can use concatenation aggregate function: in postgres `STRING_AGG`, in mysql
-`GROUP_CONCAT` since we search in real columns and show concatenation (we do not
-search concatenation like we need to search new field `post_count`).
+`GROUP_CONCAT` so in this case we search on real columns. For example let's we
+have `Post.select(%(posts.*, GROUP_CONCAT(comments.body) AS
+comments_body)).left_outer_joins(:comments) .group('posts.id')` and that we have
+a row `postName, comment1, comment2` than when we searh for `comment2` we will
+get a row `postName, comment2`.
 
 Simple calculations and subqueries works fine, just you have to use public
 method to define calculation (that method is also used in filtering). Name of
@@ -424,8 +433,12 @@ name you should use one of:
 `:date_calculated_in_db`, `:datetime_calculated_in_db` or
 `:boolean_calculated_in_db`.
 
-Before we give an example there is an issue in calling `all.count` if you are
-using subquery so we need to patch ActiveRecord
+There is an issue in calling `all.count` when you are using subquery, or
+selecting two columns `User.select(:id, :email).count`, or using star in string
+`User.select('users.*').count` (although `User.select(Arel.star).count` works),
+using AS `User.select('users.id AS i').count` (here arel does not help, still
+raise exception `User.select(User.arel_table[:email].as('imejl')).count`).
+We need to patch ActiveRecord to define `returns_count_sum`:
 ```
 # config/initializers/active_record_group_count.rb
 # When you are using subquery or joins/group_by than all.count does not work
@@ -774,8 +787,8 @@ release a new version, update the version number and then publish with
 
 ```
 vi lib/trk_datatables/version.rb
-git commit -am'...'
 bundle
+git commit -am'...'
 bundle exec rake release
 ```
 
