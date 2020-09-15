@@ -12,6 +12,9 @@ module TrkDatatables
   end
   class StringCalculatedInDb < CalculatedInDb; end
   class IntegerCalculatedInDb < CalculatedInDb; end
+  class DateCalculatedInDb < CalculatedInDb; end
+  class DatetimeCalculatedInDb < CalculatedInDb; end
+  class BooleanCalculatedInDb < CalculatedInDb; end
 
   class ColumnKeyOptions
     include Enumerable
@@ -107,7 +110,7 @@ module TrkDatatables
           # in calculated columns table_name is used only to determine type
           column_key = column_name
         elsif table_name.present? && column_name.nil?
-          raise Error, 'Unless table name ends with _calculad_in_db, column key needs to have one dot for example: posts.name'
+          raise Error, 'Unless table name ends with _calculated_in_db, column key needs to have one dot for example: posts.name'
         end
 
         if table_name.blank?
@@ -150,6 +153,8 @@ module TrkDatatables
     end
 
     def _set_global_search_cols(global_search_cols)
+      raise Error, 'global_search_cols should be array, for example %w[users.name]' unless global_search_cols.is_a? Array
+
       @global_search_cols = global_search_cols.each_with_object([]) do |column_key, arr|
         table_name, column_name = column_key.to_s.split '.'
         table_class = _determine_table_class table_name
@@ -191,7 +196,7 @@ module TrkDatatables
     end
 
     def _determine_column_name(table_class, column_name)
-      return column_name.humanize if table_class.blank?
+      return column_name.titleize if table_class.blank?
 
       # maybe we should check if human_attribute_name exists
       table_class.human_attribute_name column_name

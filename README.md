@@ -18,6 +18,10 @@ you can get something like
 
 ![trk-datatables](test/trk_datatables_with_daterangepicker.png "TRK Datatables")
 
+Currenlty it supports:
+* ActiveRecord
+* Neo4j
+
 ## Table of Contents
 <!--ts-->
    * [Trk Datatables](#trk-datatables)
@@ -502,10 +506,14 @@ class MostLikedPostsDatatable < TrkDatatables::ActiveRecord
                 ))
   end
 
+  # This is used for filtering so you can move this to main query if
+  # you have { search: false }
   def title_and_body
     "concat(posts.title, ' ', posts.body)"
   end
 
+  # This is used for filtering so you can move this to main query if
+  # you have { search: false }
   def comments_count
     <<~SQL
       (SELECT COUNT(*) FROM comments
@@ -758,6 +766,36 @@ class PostsDatatable < TrkDatatables::ActiveRecord
   end
 end
 
+```
+
+## Neo4j
+
+User `.as(:users)` so we know which node us used
+
+```
+class UsersDatatable < TrkDatatables::Neo4j
+  def columns
+    {
+      'users.email': {},
+      'users.created_at': {},
+    }
+  end
+
+  def all_items
+    User
+      .as(:users)
+      .with_associations(moves: { from_group: [:location], to_groups: [:location] })
+  end
+
+  def rows(filtered)
+    filtered.map do |user|
+      [
+        @view.link_to(user.email, @view.admin_user_path(user)),
+        user.created_at.to_s(:long),
+      ]
+    end
+  end
+end
 ```
 
 ## Alternatives
