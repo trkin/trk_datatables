@@ -1,9 +1,12 @@
 module TrkDatatables
   class ActiveRecord < Base
+    # there is a stack level too deep exception for more than 190 strings
+    MAX_NUMBER_OF_STRINGS = 190
+
     # Global search. All columns are typecasted to string. Search string is
     # splited by space and "and"-ed.
     def filter_by_search_all(filtered)
-      conditions = @dt_params.search_all.split(' ').map do |search_string|
+      conditions = @dt_params.search_all.split(' ').first(MAX_NUMBER_OF_STRINGS).map do |search_string|
         @column_key_options.searchable_and_global_search.map do |column_key_option|
           _filter_column_as_string column_key_option, search_string
         end.reduce(:or) # any searchable column is 'or'-ed
@@ -45,7 +48,7 @@ module TrkDatatables
     end
 
     def _filter_column_as_string(column_key_option, search_value)
-      search_value.split(' ').map do |search_string|
+      search_value.split(' ').first(MAX_NUMBER_OF_STRINGS).map do |search_string|
         casted_column = ::Arel::Nodes::NamedFunction.new(
           'CAST',
           [_arel_column(column_key_option).as(@column_key_options.string_cast)]

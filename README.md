@@ -589,8 +589,12 @@ This will fill proper column search values so you do not need to do it manually
 (`post_path(:columns=>{"3"=>{:search=>{:value=>"my@email.com"}},
 "2"=>{:search=>{:value=>"1|2"}}}, :user_id=>1)`)
 
-For form fields you can use similar helper `PostsDatatable.form_field_name
-'users.email'`
+For form fields you can use similar helper that will return name which points to
+specific column, for example:
+```
+PostsDatatable.form_field_name('users.email'`) # => 'columns[3][search][value]'
+```
+Usefull when you want to provide a form for a user to search on specific column
 ```
 <%= form_tag url: posts_path, method: :get do |f| %>
   <%= f.text_field PostsDatatable.form_field_name('users.email'), 'my@email.com' %>
