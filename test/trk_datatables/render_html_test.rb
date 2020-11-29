@@ -40,7 +40,7 @@ class RenderHtmlTest < Minitest::Test
           <tr>
             <th>Title</th>
             <th data-datatable-checkbox='true'>Verified</th>
-            <th data-datatable-range='true' data-datatable-search-value='2020'>Released</th>
+            <th data-datatable-range='true' data-datatable-predefined-ranges='{&quot;Today&quot;:[&quot;2020-11-29&quot;,&quot;2020-11-29&quot;],&quot;Yesterday&quot;:[&quot;2020-11-28&quot;,&quot;2020-11-28&quot;],&quot;This Month&quot;:[&quot;2020-11-01&quot;,&quot;2020-11-29&quot;],&quot;Last Month&quot;:[&quot;2020-10-01&quot;,&quot;2020-10-31&quot;],&quot;This Year&quot;:[&quot;2020-01-01&quot;,&quot;2020-11-29&quot;]}' data-datatable-search-value='2020'>Released</th>
             <th data-searchable='false' data-orderable='false'>Status</th>
             <th data-searchable='false' data-orderable='false'>Links</th>
 

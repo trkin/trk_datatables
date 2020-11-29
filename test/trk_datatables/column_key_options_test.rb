@@ -79,11 +79,11 @@ class ColumnKeyOptionTest < Minitest::Test
 
   def test_default_predefined_ranges
     cols = %i[posts.created_at]
-    predefined_ranges = {'Today': Time.now.beginning_of_day..Time.now.end_of_day}
+    predefined_ranges = { datetime: { 'Today': Time.now.beginning_of_day..Time.now.end_of_day} }
     column_key_options = TrkDatatables::ColumnKeyOptions.new cols, [], predefined_ranges
     expected = {
       'data-datatable-range' => :datetime,
-      'data-datatable-predefined-ranges' => {'Today': [predefined_ranges[:Today].first.to_s, predefined_ranges[:Today].last.to_s]}
+      'data-datatable-predefined-ranges' => {'Today': [predefined_ranges[:datetime][:Today].first.to_s, predefined_ranges[:datetime][:Today].last.to_s]}
     }
     assert_equal expected, column_key_options[0][:html_options]
   end

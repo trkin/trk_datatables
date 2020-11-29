@@ -22,11 +22,15 @@ module TrkDatatables
     end
 
     # Get the form field name for column. This is class method so you do not
-    # need datatable instance.
+    # need datatable instance. It returns something like
+    # 'column[3][search][value]`. For global search you can use
+    # '[search][value]`
     #
     # @example
     # form_tag url: posts_path, method: :get do |f|
     #   f.text_field PostsDatatable.form_field_name('users.email'), 'my@email.com'
+    #   # it is the same as
+    #   f.text_field 'columns[3][search][value]', 'my@email.com'
     def form_field_name(column_key)
       datatable = new OpenStruct.new(params: {})
       column_index = datatable.index_by_column_key column_key

@@ -128,6 +128,25 @@ module TrkDatatables
     end
 
     def table_tag_client
+      # Should we allow generating datatable only in view
+      # <%= ClientDatatable.new(self).render_html do %>
+      #    <thead>
+      #      <tr>
+      # so we do not need datatable and search route
+      # than we just need <table> tag, but it uses datatable to determine page
+      # length and order (which in turn it determines from params or
+      # preferences)
+      # _content_tag(
+      #   :table,
+      #   class: "table table-bordered table-striped #{@html_options[:class]}",
+      #   'data-datatable': true,
+      #   'data-datatable-ajax-url': @search_link,
+      #   'data-datatable-page-length': @datatable.dt_per_page_or_default,
+      #   'data-datatable-order': @datatable.dt_orders_or_default_index_and_direction.to_json,
+      #   # for initial page load we do not have ability to show recordsTotal
+      #   # https://github.com/trkin/trk_datatables_js/issues/1
+      #   'data-datatable-total-length': @datatable.filtered_items_count,
+      # ) do
       ''
     end
   end

@@ -219,18 +219,34 @@ module TrkDatatables
     end
 
     def predefined_ranges
-      {}
+      Time.zone ||= 'UTC'
+      {
+        date: predefined_date_ranges,
+        datetime: predefined_datetime_ranges,
+      }
     end
 
-    def default_predefined_ranges
-      Time.zone ||= 'UTC'
+    def predefined_date_ranges
+      {
+        'Today': Time.zone.today..Time.zone.today,
+        'Yesterday': [Time.zone.today - 1.day, Time.zone.today - 1.day],
+        'This Month': Time.zone.today.beginning_of_month...Time.zone.today,
+        'Last Month': Time.zone.today.prev_month.beginning_of_month...Time.zone.today.prev_month.end_of_month,
+        'This Year': Time.zone.today.beginning_of_year...Time.zone.today,
+      }
+    end
+
+    def predefined_datetime_ranges
       {
         'Today': Time.zone.now.beginning_of_day..Time.zone.now.end_of_day,
         'Yesterday': [Time.zone.now.beginning_of_day - 1.day, Time.zone.now.end_of_day - 1.day],
-        'This Month': Time.zone.today.beginning_of_month...Time.zone.now.end_of_day,
-        'Last Month': Time.zone.today.prev_month.beginning_of_month...Time.zone.today.prev_month.end_of_month.end_of_day,
-        'This Year': Time.zone.today.beginning_of_year...Time.zone.today.end_of_day,
-      }
+        'This Month': Time.zone.today.beginning_of_month.beginning_of_day...Time.zone.now.end_of_day,
+        'Last Month': Time.zone.today.prev_month.beginning_of_month.beginning_of_day...Time.zone.today.prev_month.end_of_month.end_of_day,
+        'This Year': Time.zone.today.beginning_of_year.beginning_of_day...Time.zone.today.end_of_day,
+      }.transform_values do |range|
+        # datepicker expects format 2020-11-29 11:59:59
+        range.first.strftime('%F %T')..range.last.strftime('%F %T')
+      end
     end
   end
 end

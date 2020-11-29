@@ -244,11 +244,11 @@ module TrkDatatables
       if %i[date datetime].include? column_type_in_db
         res['data-datatable-range'] = column_type_in_db == :datetime ? :datetime : true
         if column_options[PREDEFINED_RANGES].present? ||
-           (@predefined_ranges.present? && column_options[PREDEFINED_RANGES] != false)
+            (@predefined_ranges.try(:[], column_type_in_db).present? && column_options[PREDEFINED_RANGES] != false)
           res['data-datatable-predefined-ranges'] = if column_options[PREDEFINED_RANGES].is_a? Hash
                                                       column_options[PREDEFINED_RANGES]
                                                     else
-                                                      @predefined_ranges
+                                                      @predefined_ranges[column_type_in_db]
                                                     end
           res['data-datatable-predefined-ranges'].transform_values! do |range|
             [range.first.to_s, range.last.to_s]

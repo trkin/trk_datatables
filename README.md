@@ -18,7 +18,7 @@ you can get something like
 
 ![trk-datatables](test/trk_datatables_with_daterangepicker.png "TRK Datatables")
 
-Currenlty it supports:
+Currently supports:
 * ActiveRecord
 * Neo4j
 
@@ -284,47 +284,32 @@ class PostsDatatable < TrkDatatables::ActiveRecord
 end
 ```
 
-To enable shortcuts for selecting ranges, you can override predefined ranges and
-enable for all `date` and `datetime` column
-
-```
-# app/datatables/base_trk_datatable.rb
-class BaseTrkDatable < TrkDatatables::ActiveRecord
-  def predefined_ranges
-    # defaults are defined in https://github.com/trkin/trk_datatables/blob/master/lib/trk_datatables/base.rb
-    default_predefined_ranges
-  end
-end
-```
-or you can enable for all `date` and `datetime columns` for specific datatable
-by defining `predefined_ranges` on that datatable. You can disable for specific columns also
+By default, predefined ranges are enabled. You can find source for
+`predefined_date_ranges` and `predefined_datetime_ranges` in
+[base.rb](https://github.com/trkin/trk_datatables/blob/master/lib/trk_datatables/base.rb)
+You can overwrite them in BaseTrkDatable or your trk datatable class.
+You can disable or enable for specific columns like in this example:
 ```
 class PostsDatatable < TrkDatatables::ActiveRecord
-  def predefined_ranges
+  def predefined_datetime_ranges
     {
       'Today': Time.zone.now.beginning_of_day..Time.zone.now.end_of_day,
       'Yesterday': [Time.zone.now.beginning_of_day - 1.day, Time.zone.now.end_of_day - 1.day],
       'This Month': Time.zone.today.beginning_of_month...Time.zone.now.end_of_day,
       'Last Month': Time.zone.today.prev_month.beginning_of_month...Time.zone.today.prev_month.end_of_month.end_of_day,
       'This Year': Time.zone.today.beginning_of_year...Time.zone.today.end_of_day,
-    }
+   }.transform_values do |range|
+     # datepicker expects format 2020-11-29 11:59:59
+     range.first.strftime('%F %T')..range.last.strftime('%F %T')
+   end
   end
 
   def columns
     {
-      'posts.created_at': {}, # this column will have predefined_ranges
-      'posts.published_on': { predefined_ranges: false }
-  end
-end
-```
-or you can define for specific column
-```
-# app/datatables/posts_datatable.rb
-class PostsDatatable < TrkDatatables::ActiveRecord
-  def columns
-    {
-      'posts.created_at': { predefined_ranges: { 'Today': Time.zone.now.beginning_of_day...Time.zone.now.end_of_day } },
-    }
+      'posts.created_at': {}, # this column will have predefined_datetime_ranges
+      'posts.published_on': { predefined_ranges: false },
+      'posts.updated_at': { predefined_ranges: { 'Today': Time.zone.now.beginning_of_day...Time.zone.now.end_of_day } },
+   }
   end
 end
 ```
@@ -598,6 +583,15 @@ Usefull when you want to provide a form for a user to search on specific column
 ```
 <%= form_tag url: posts_path, method: :get do |f| %>
   <%= f.text_field PostsDatatable.form_field_name('users.email'), 'my@email.com' %>
+  <%= f.submit 'Search' %>
+<% end %>
+```
+
+For global search you can use `[search][value]` for example
+
+```
+<%= form_tag url: posts_path, method: :get do |f| %>
+  <%= f.text_field '[search][value]', 'my@email.com' %>
   <%= f.submit 'Search' %>
 <% end %>
 ```
