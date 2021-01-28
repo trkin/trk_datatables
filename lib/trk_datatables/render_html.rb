@@ -5,7 +5,7 @@ module TrkDatatables
       @search_link = search_link
       @datatable = datatable
       @html_options = html_options
-      self.class.indent = -1
+      self.class.indent = 0
     end
 
     def result
@@ -53,7 +53,7 @@ module TrkDatatables
               else
                 ">\n".html_safe << yield << "\n#{'  ' * self.class.indent}</#{tag}>".html_safe
               end
-      self.class.indent -= 1
+      self.class.indent -= 1 if self.class.indent > 1
       html
     end
     # rubocop:enable Metrics/AbcSize, Metrics/PerceivedComplexity
