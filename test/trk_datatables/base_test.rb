@@ -90,4 +90,7 @@ class TrkDatatablesBaseTest < Minitest::Test
     }
     assert_equal exp, act
   end
+
+  def test_dt_orders_or_default_index_and_direction
+  end
 end

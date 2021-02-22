@@ -7,7 +7,7 @@ module TrkDatatables
   class Error < StandardError
   end
 
-  class Base
+  class Base # rubocop:todo Metrics/ClassLength
     extend TrkDatatables::BaseHelpers
 
     attr_accessor :column_key_options
@@ -97,8 +97,6 @@ module TrkDatatables
       raise 'order_and_paginate_items_is_defined_in_specific_orm'
     end
 
-    # rubocop:disable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
-
     # Returns dt_orders or default as array of index and direction
     # https://datatables.net/reference/option/order
     # @return
@@ -114,12 +112,11 @@ module TrkDatatables
         @dt_orders_or_default = @dt_params.dt_orders
         @preferences.set :order, @dt_params.dt_orders
       else
-        check_value = ->(r) { r.is_a?(Array) && r[0].is_a?(Array) && r[0][0].is_a?(Integer) }
+        check_value = ->(r) { r.is_a?(Array) && r[0].is_a?(Array) && r[0][0].is_a?(Integer) && r[0][0] < @column_key_options.size }
         @dt_orders_or_default = @preferences.get(:order, check_value) || default_order
       end
       @dt_orders_or_default
     end
-    # rubocop:enable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
 
     def default_order
       [[0, :desc]].freeze
@@ -226,7 +223,7 @@ module TrkDatatables
       }
     end
 
-    def predefined_date_ranges
+    def predefined_date_ranges # rubocop:todo Metrics/AbcSize
       {
         'Today': Time.zone.today..Time.zone.today,
         'Yesterday': [Time.zone.today - 1.day, Time.zone.today - 1.day],
@@ -236,12 +233,13 @@ module TrkDatatables
       }
     end
 
-    def predefined_datetime_ranges
+    def predefined_datetime_ranges # rubocop:todo Metrics/AbcSize
       {
         'Today': Time.zone.now.beginning_of_day..Time.zone.now.end_of_day,
         'Yesterday': [Time.zone.now.beginning_of_day - 1.day, Time.zone.now.end_of_day - 1.day],
         'This Month': Time.zone.today.beginning_of_month.beginning_of_day...Time.zone.now.end_of_day,
-        'Last Month': Time.zone.today.prev_month.beginning_of_month.beginning_of_day...Time.zone.today.prev_month.end_of_month.end_of_day,
+        'Last Month':
+          Time.zone.today.prev_month.beginning_of_month.beginning_of_day...Time.zone.today.prev_month.end_of_month.end_of_day,
         'This Year': Time.zone.today.beginning_of_year.beginning_of_day...Time.zone.today.end_of_day,
       }.transform_values do |range|
         # datepicker expects format 2020-11-29 11:59:59

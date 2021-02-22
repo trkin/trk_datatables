@@ -20,6 +20,7 @@ class Preferences < Minitest::Test
       @view.current_user
     end
   end
+
   def test_set_preference_on_order
     user = User.create
     post1 = Post.create published_on: Time.parse('2020-01-01'), title: 'b'
@@ -29,7 +30,7 @@ class Preferences < Minitest::Test
 
     datatable = PostsDatatable.new OpenStruct.new params: {}, current_user: user
     results = datatable.order_and_paginate_items datatable.all_items
-    assert_equal [post3, post1, post2], results.all, 'cba expected by ' + results.all.to_sql
+    assert_equal [post3, post1, post2], results.all, "cba expected by #{results.all.to_sql}"
 
     datatable = PostsDatatable.new OpenStruct.new params: {order: {'0': {column: '1', dir: 'desc'}}}, current_user: user
     results = datatable.order_and_paginate_items datatable.all_items
@@ -44,7 +45,18 @@ class Preferences < Minitest::Test
     # revert to default if there is no user
     datatable = PostsDatatable.new OpenStruct.new params: {}, current_user: nil
     results = datatable.order_and_paginate_items datatable.all_items
-    assert_equal [post3, post1, post2], results.all, 'cba expected by ' + results.all.to_sql
+    assert_equal [post3, post1, post2], results.all, "cba expected by #{results.all.to_sql}"
+
+    # revert to default if user preferences column is out of scope
+    datatable = PostsDatatable.new OpenStruct.new params: {order: {'0': {column: '3', dir: 'desc'}}}, current_user: user
+    assert_raises TrkDatatables::Error do
+      datatable.order_and_paginate_items datatable.all_items
+    end
+    assert_equal 3, user.preferences[TrkDatatables::Preferences::KEY_IN_PREFERENCES]['Preferences::PostsDatatable'][:order].first.first
+    # here use still contains out of scope index, but it will render using default
+    datatable = PostsDatatable.new OpenStruct.new params: {}, current_user: user
+    results = datatable.order_and_paginate_items datatable.all_items
+    assert_equal [post3, post1, post2], results.all, "cba expected by #{results.all.to_sql}"
 
     # order with two columns
     datatable = PostsDatatable.new OpenStruct.new params: {order: {'0': {column: '2', dir: 'desc'}, '1': {column: '1', dir: :asc}}}, current_user: user

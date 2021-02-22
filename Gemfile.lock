@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    trk_datatables (0.2.7)
+    trk_datatables (0.2.8)
       activesupport
 
 GEM
@@ -30,6 +30,7 @@ GEM
     rake (10.5.0)
     sqlite3 (1.4.1)
     thread_safe (0.3.6)
+    timecop (0.9.4)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
     zeitwerk (2.1.10)
@@ -47,6 +48,7 @@ DEPENDENCIES
   pg
   rake (~> 10.0)
   sqlite3
+  timecop
   trk_datatables!
 
 BUNDLED WITH
