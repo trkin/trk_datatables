@@ -117,7 +117,7 @@ module TrkDatatables
     def param_get(column_index)
       @params.dig :columns, column_index.to_s, :search, :value
     rescue TypeError => e
-      raise Error, e.message + '. Column search is in a format: { "columns": { "0": { "search": { "value": { "ABC" } } } } }'
+      raise Error, "#{e.message}. Column search is in a format: { \"columns\": { \"0\": { \"search\": { \"value\": { \"ABC\" } } } } }"
     end
 
     def self.sample_view_params(options = {})

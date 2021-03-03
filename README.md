@@ -552,6 +552,24 @@ class PostsDatatable
 end
 ```
 
+### Render html with additional css class and different DOM
+
+To add additional styling to your datatable you can use `:class` option when you
+are calling `@datatable.render_html url, options` for example
+
+```
+<%= @datatable.render_html search_posts_path(format: :json), class: 'table-hover' %>
+```
+
+Default [DOM](https://datatables.net/reference/option/dom) is
+`<"trk-global-search-wrapper"f>rtp<"trk-move-up"il>` which includes global
+**f**iltering, p**r**ocessing loader, **t**able search, **p**agination, table
+**i**nformation and **l**ength changing control. To override you can use
+
+```
+<%= @datatable.render_html search_posts_path(format: :json), 'data-datatable-dom': 'rt' %>
+```
+
 ### Params
 
 To set parameters that you can use for links to set column search value, use
@@ -599,7 +617,7 @@ For global search you can use `[search][value]` for example
 If you need, you can fetch params with this helper
 
 ```
-PostsDatatable.param_get('users.email', params)
+datatable.param_get 'users.email'
 ```
 
 You can set filters on datatable even params are blank, for example

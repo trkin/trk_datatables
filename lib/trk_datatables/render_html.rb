@@ -4,7 +4,7 @@ module TrkDatatables
     def initialize(search_link, datatable, html_options = {})
       @search_link = search_link
       @datatable = datatable
-      @html_options = html_options
+      @html_options = html_options.symbolize_keys
       self.class.indent = 0
     end
 
@@ -89,6 +89,7 @@ module TrkDatatables
         # for initial page load we do not have ability to show recordsTotal
         # https://github.com/trkin/trk_datatables_js/issues/1
         'data-datatable-total-length': @datatable.filtered_items_count,
+        'data-datatable-dom': @html_options[:'data-datatable-dom'] || '<"trk-global-search-wrapper"f>rtp<"trk-move-up"il>',
       ) do
         thead << "\n".html_safe << tbody
       end +

@@ -36,7 +36,7 @@ class RenderHtmlTest < Minitest::Test
       datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params PostsDatatable.param_set('posts.published_on', '2020')
       result = datatable.render_html 'link', class: 'blue'
       expected = <<-HTML
-  <table class='table table-bordered table-striped blue' data-datatable='true' data-datatable-ajax-url='link' data-datatable-page-length='10' data-datatable-order='[[0,&quot;desc&quot;]]' data-datatable-total-length='2'>
+  <table class='table table-bordered table-striped blue' data-datatable='true' data-datatable-ajax-url='link' data-datatable-page-length='10' data-datatable-order='[[0,&quot;desc&quot;]]' data-datatable-total-length='2' data-datatable-dom='&lt;&quot;trk-global-search-wrapper&quot;f&gt;rtp&lt;&quot;trk-move-up&quot;il&gt;'>
     <thead>
       <tr>
         <th>Title</th>
@@ -98,7 +98,7 @@ class RenderHtmlTest < Minitest::Test
     datatable = ActionDatatable.new TrkDatatables::DtParams.sample_view_params
     result = datatable.render_html 'link'
     expected = <<~HTML
-      <table class='table table-bordered table-striped' data-datatable='true' data-datatable-ajax-url='link' data-datatable-page-length='10' data-datatable-order='[[0,&quot;desc&quot;]]' data-datatable-total-length='1'>
+      <table class='table table-bordered table-striped' data-datatable='true' data-datatable-ajax-url='link' data-datatable-page-length='10' data-datatable-order='[[0,&quot;desc&quot;]]' data-datatable-total-length='1' data-datatable-dom='&lt;&quot;trk-global-search-wrapper&quot;f&gt;rtp&lt;&quot;trk-move-up&quot;il&gt;'>
         <thead>
           <tr>
             <th>Title</th>
@@ -167,7 +167,7 @@ class RenderHtmlTest < Minitest::Test
     datatable = ColumnIsHashDatatable.new TrkDatatables::DtParams.sample_view_params
     render_html = TrkDatatables::RenderHtml.new 'link', datatable
     expected = <<-HTML
-  <table class='table table-bordered table-striped ' data-datatable='true' data-datatable-ajax-url='link' data-datatable-page-length='10' data-datatable-order='[[0,&quot;desc&quot;]]' data-datatable-total-length='1'>
+  <table class='table table-bordered table-striped ' data-datatable='true' data-datatable-ajax-url='link' data-datatable-page-length='10' data-datatable-order='[[0,&quot;desc&quot;]]' data-datatable-total-length='1' data-datatable-dom='&lt;&quot;trk-global-search-wrapper&quot;f&gt;rtp&lt;&quot;trk-move-up&quot;il&gt;'>
     <thead>
       <tr>
         <th>Title</th>
