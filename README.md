@@ -256,7 +256,7 @@ For specific columns you can use following keys
 * `order: false` disable ordering for this column
 * `select_options: Post.statuses` generate select box instead of text input
 * `predefined_ranges: {}` for datetime fiels add ranges to pick up from
-* `hide: true` hide column with display none
+* `hide: true` hide column with display none, for example `{ hide: @view.params[:user_id].present? }`
 * `class_name: 'Admin::User'` use different class name than
   `table_name.classify` (in this case of `admin_users` will be `AdminUser`)
 * `column_type_in_db` one of the: `:string`, `:integer`, `:date`, `:datetime`,
@@ -332,7 +332,7 @@ def columns
 end
 
 # in view
-link_to 'Active', search_posts_path(PostsDatatable.param_set('posts.status':
+link_to 'Active', search_posts_path(PostsDatatable.param_set('posts.status',
 Post.statues.values_at(:published, :promoted)))
 ```
 
@@ -575,7 +575,7 @@ Default [DOM](https://datatables.net/reference/option/dom) is
 To set parameters that you can use for links to set column search value, use
 this `PostsDatatable.param_set 'users.email', 'my@email.com'`. For between
 search you can use range `Time.zone.today..(Time.zone.today + 1.year)` and for
-in multiple values use array `[Post.statuses[:draft]]`.
+in multiple values use array `[Post.statuses[:draft]]`:
 
 ```
 <%= link_to 'Active posts for my@email.com', \
@@ -591,6 +591,15 @@ in multiple values use array `[Post.statuses[:draft]]`.
 This will fill proper column search values so you do not need to do it manually
 (`post_path(:columns=>{"3"=>{:search=>{:value=>"my@email.com"}},
 "2"=>{:search=>{:value=>"1|2"}}}, :user_id=>1)`)
+Please note that user_id is not inside datatable params so it will not be used
+for next search params (all other search params are used with Datatables and
+will remain on next search) so you need to manually add that param
+```
+<%= @datatable.render_html search_posts_path(user_id: params[:user_id], format: :json) %>
+```
+
+You can use generic name `params[:non_table_filter]` and split with colon
+`user_id:123` but that is not needed.
 
 For form fields you can use similar helper that will return name which points to
 specific column, for example:
@@ -614,10 +623,39 @@ For global search you can use `[search][value]` for example
 <% end %>
 ```
 
-If you need, you can fetch params with this helper
+If you need, you can fetch params with this helper and for example, show the
+link for that record
 
 ```
-datatable.param_get 'users.email'
+if @datatable.param_get("locations.name").present? &&
+   (location = Location.find_by(name: @datatable.param_get("locations.name")))
+  page_description "For <a href='#{location_path(location)}'>#{location.name}</a>"
+  breadcrumb "Dashboard": dashboard_path, location.name => location_path(location), "Package Sales": nil
+else
+  breadcrumb "Dashboard": dashboard_path, "Package Sales": nil
+end
+```
+
+For other filter params which are not in columns you can use non table params
+```
+# on dashboard
+  <%= link_to 'Locations', isp_locations_path(non_table_filter: "reseller_operator_id:#{@reseller_operator.id}") %>
+
+# on index
+  if params[:non_table_filter].present? &&
+    (reseller_operator = ResellerOperator.find(params[:non_table_filter].split(":").second))
+    page_description "For <a href='#{reseller_operator_path(reseller_operator)}'>#{reseller_operator.company_name}</a>"
+    breadcrumb 'Dashboard' => isp_dashboard_path, reseller_operator.company_name => reseller_operator_path(reseller_operator), 'Locations' => nil
+  else
+    breadcrumb 'Dashboard' => isp_dashboard_path, 'Locations' => nil
+  end
+
+# in datatables
+    case @view.params[:non_table_filter].to_s.split(':').first
+    when 'reseller_operator_id'
+      reseller_operator = ResellerOperator.find @view.params[:non_table_filter].split(':').second
+      all_isp_locations = all_isp_locations.where(reseller_operator: reseller_operator)
+    end
 ```
 
 You can set filters on datatable even params are blank, for example
@@ -679,7 +717,9 @@ end
 
 You can use condition to provide different data, for example let's assume
 `@view.api_user?` returns true for json requests from mobile app. Here is
-example that provides different columns for normal and api_user:
+example that provides different columns for normal and api_user.
+Note that when you are using different columns for some reason in `@view` you
+need to provide view in `param_set` so it can check the same conditionals.
 
 ```
 # app/datatables/posts_datatable.rb
@@ -689,8 +729,14 @@ class PostsDatatable < TrkDatatables::ActiveRecord
   end
 
   def columns_for_html
+    balance = @view.current_location
+                {}
+              else
+                { 'integer_calculated_in_db.balance_amount_in_cents': { search: false, title: 'Balance' } }
+              end
     {
       'subscribers.subscriberid': {},
+      **balance,
       'subscribers.name': {},
     }
   end
@@ -709,8 +755,14 @@ class PostsDatatable < TrkDatatables::ActiveRecord
 
   def rows_for_html(filtered)
     filtered.map do |subscriber|
+      balance = if Constant.STILL_WITH_OLD_CODE
+                  []
+                else
+                  [@view.humanized_money_with_symbol(Money.new(location.balance_amount_in_cents)) : 'NA']
+                end
       [
         @view.link_to(subscriber.subscriberid, subscriber),
+        *balance,
         subscriber.name,
       ]
     end
@@ -730,6 +782,10 @@ class PostsDatatable < TrkDatatables::ActiveRecord
     @view.api_user? ? columns_for_api : nil
   end
 end
+
+# On some dashboard page provide @view using `self` to param_set
+link_to 'Active', search_posts_path(PostsDatatable.param_set('posts.status',
+:active, self))
 ```
 
 ## Test your datatables

@@ -13,8 +13,8 @@ module TrkDatatables
     # @example
     #   link_to 'Published posts for user1',
     #   posts_path(PostsDatatable.param_set('posts.status', :published).merge(user_id: user1.id))
-    def param_set(column_key, value)
-      datatable = new OpenStruct.new(params: {})
+    def param_set(column_key, value, view = nil)
+      datatable = new view || OpenStruct.new(params: {})
       value = value.join MULTIPLE_OPTION_SEPARATOR if value.is_a? Array
       value = [value.first, value.last].join BETWEEN_SEPARATOR if value.is_a? Range
       column_index = datatable.index_by_column_key column_key
