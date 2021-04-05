@@ -172,7 +172,12 @@ module TrkDatatables
     # This is helper
     def _determine_string_type_cast # :nodoc:
       if defined?(::ActiveRecord::Base)
-        DB_ADAPTER_STRING_TYPE_CAST[::ActiveRecord::Base.connection_config[:adapter].to_sym]
+        current_adapter = if ::ActiveRecord::Base.respond_to?(:connection_db_config)
+                            ::ActiveRecord::Base.connection_db_config.configuration_hash[:adapter]
+                          else
+                            ::ActiveRecord::Base.connection_config[:adapter]
+                          end
+        DB_ADAPTER_STRING_TYPE_CAST[current_adapter.to_sym]
       else
         'not_used'
       end
