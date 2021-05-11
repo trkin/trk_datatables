@@ -48,7 +48,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'minitest-color'
   spec.add_development_dependency 'timecop'
   spec.add_development_dependency 'pg'
-  spec.add_development_dependency 'rake', '~> 10.0'
+  spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'sqlite3'
 end
 # rubocop:enable Metrics/BlockLength
