@@ -531,6 +531,94 @@ class MostLikedPostsDatatable < TrkDatatables::ActiveRecord
 end
 ```
 
+### Table less models
+
+You can use raw sql to fetch the data and use it as a model.
+Here is an example when there is no relations to other models
+```
+# app/models/table_less.rb
+class TableLess < ApplicationRecord
+  self.abstract_class = true
+
+  def self.load_schema!
+    @columns_hash ||= {}
+
+    # From active_record/attributes.rb
+    attributes_to_define_after_schema_loads.each do |name, (type, options)|
+      type = ActiveRecord::Type.lookup(type, **options.except(:default)) if type.is_a?(Symbol)
+
+      define_attribute(name, type, **options.slice(:default))
+
+      # Improve Model#inspect output
+      @columns_hash[name.to_s] = ActiveRecord::ConnectionAdapters::Column.new(name.to_s, options[:default])
+    end
+  end
+end
+```
+
+```
+# app/models/translation.rb
+class Translation < TableLess
+  self.table_name = :translations
+
+  attribute :translateable_type, :string, default: nil
+  attribute :translateable_id, :string, default: nil
+  attribute :column_name, :string, default: nil
+  attribute :column_value, :string, default: nil
+
+  belongs_to :translateable, polymorphic: true
+end
+```
+
+```
+# app/datatables/translations_datatable.rb
+# rubocop:disable Layout/LineLength
+class TranslationsDatatable < BaseDatatable
+  def columns
+    {
+      'translations.translateable_id': {},
+      'translations.translateable_type': {hide: true},
+      'translations.column_name': {},
+      'translations.column_value': {},
+      '': {},
+    }
+  end
+
+  def all_items
+    sql = <<~SQL.squish
+      (
+        (SELECT 'Activity' AS translateable_type, id AS translateable_id, 'name' AS column_name, name AS column_value FROM activities)
+        UNION
+        (SELECT 'Activity' AS translateable_type, id AS translateable_id, 'description' AS column_name, description AS column_value FROM activities)
+      ) as translations
+    SQL
+    Translation.from([Arel.sql(sql)])
+  end
+
+  def rows(filtered)
+    filtered.map do |translation|
+      edit_link = @view.button_tag_open_modal(
+        @view.edit_translation_path(translation.translateable_id, translateable_type: translation.translateable_type, column_name: translation.column_name), title: @view.t_crud('edit', Translation)
+      )
+      [
+        @view.link_to(translation.translateable, translation.translateable),
+        translation.translateable_type,
+        translation.column_name,
+        translation.column_value,
+        edit_link,
+      ]
+    end
+  end
+end
+# rubocop:enable Layout/LineLength
+```
+
+For column title we use `table_class.human_attribute_name column_name`. When
+calculated_ columns is used than it can not find translation so better is to:
+```
+      'string_calculated_in_db.column_value_translated': {search: false, title: @view.t('activerecord.attributes.translation.column_value_translated')},
+```
+
 ### Default order and page length
 
 You can override default order (index and direction) and default page length so
@@ -575,7 +663,18 @@ Default [DOM](https://datatables.net/reference/option/dom) is
 To set parameters that you can use for links to set column search value, use
 this `PostsDatatable.param_set 'users.email', 'my@email.com'`. For between
 search you can use range `Time.zone.today..(Time.zone.today + 1.year)` and for
-in multiple values use array `[Post.statuses[:draft]]`:
+in multiple values use array `[Post.statuses[:draft]]`. Note that in Rails
+`Time.zone.now.to_s` usually returns seconds ('23:59:59') but if you change
+default format like in `config/initializers/time_formats.rb` with
+`Time::DATE_FORMATS[:default] = '%d-%b-%Y %I:%M %p'` than range
+`Time.zone.now.at_beginning_of_day..Time.zone.now.at_end_of_day` will not
+include those at end of day since param will not include seconds ('23:59') so in
+this case you can use range for strings
+`Time.zone.now.at_beginning_of_day.to_s..Time.zone.now.at_end_of_day.to_s(:with_seconds)`
+and config/initializers/time_formats.rb `Time::DATE_FORMATS[:with_seconds] = '%d-%b-%Y %I:%M:%S %p'`
+
+(or use date `Time.zone.today..Time.zone.today` but that will not populate
+datetime fields in dateRangePicker correctly)
 
 ```
 <%= link_to 'Active posts for my@email.com', \

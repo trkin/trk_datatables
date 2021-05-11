@@ -241,10 +241,7 @@ module TrkDatatables
         'Last Month':
           Time.zone.today.prev_month.beginning_of_month.beginning_of_day...Time.zone.today.prev_month.end_of_month.end_of_day,
         'This Year': Time.zone.today.beginning_of_year.beginning_of_day...Time.zone.today.end_of_day,
-      }.transform_values do |range|
-        # datepicker expects format 2020-11-29 11:59:59
-        range.first.strftime('%F %T')..range.last.strftime('%F %T')
-      end
+      }
     end
   end
 end
