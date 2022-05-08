@@ -96,7 +96,7 @@ module.exports = environment
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
     <%# we need stylesheet for production server, locally it could work without stylesheet_pack_tag even in production mode %>
     <%= stylesheet_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
-    <%# we use jQuery from wepbacker so asset pipeline should be included later %>
+    <%# we use jQuery from wepbacker so asset pipeline should be included later if you use asset pipeline %>
     <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
 ```
 
@@ -106,7 +106,7 @@ Than add a gem and sample PostsDatatable
 # Gemfile
 gem 'trk_datatables'
 
-# in console
+# in console you can use rails generator to generate app/datatables/xxx_datatable.rb
 bundle
 rails g trk_datatables post
 vi app/datatables/posts_datatable.rb
@@ -153,7 +153,7 @@ class PostsDatatable < TrkDatatables::ActiveRecord
     Post.left_joins(:user)
   end
 
-  def rows(filtered)
+  def rows(filtered) # rubocop:disable Metrics/MethodLength
     filtered.map do |post|
       [
         @view.link_to(post.title, post),
@@ -217,6 +217,9 @@ method.
 class PostsDatatable < TrkDatatables::ActiveRecord
   def global_search_columns
     # in addition to columns those fields will be used to match global search
+    # instead Post.all you should use Post.joins(:user) or
+    # Post.left_joins(:user) if user is optional. For has_many relations you
+    # need to join them since you will get multiple table rows
     %w[posts.body users.name]
   end
 end
@@ -391,6 +394,15 @@ nor in Ruby code.
   end
 ```
 
+You can access filtered items for example
+```
+  def totals
+    filter_by_columns all_items
+    filter_by_search_all filter_by_columns all_items # this is actually filtered_items
+    order_and_paginate_items filter_by_search_all filter_by_columns all_items # this is ordered_paginated_filtered_items
+  end
+```
+
 ### Values calculated in database
 
 There are three types of calculated values (new custom fields that are
@@ -409,10 +421,15 @@ disable search and order for those fields with aggregate functions
 `'users.posts_count': { search: false, order: false }`).
 You can use concatenation aggregate function: in postgres `STRING_AGG`, in mysql
 `GROUP_CONCAT` so in this case we search on real columns. For example let's we
-have `Post.select(%(posts.*, GROUP_CONCAT(comments.body) AS
-comments_body)).left_outer_joins(:comments) .group('posts.id')` and that we have
-a row `postName, comment1, comment2` than when we searh for `comment2` we will
-get a row `postName, comment2`.
+have
+```
+Post
+  .select(%(posts.*, GROUP_CONCAT(comments.body) AS comments_body))
+  .left_outer_joins(:comments) .group('posts.id')
+  .group('posts.id')
+```
+and that we have a row `postName, comment1, comment2` than when we searh for
+`comment2` we will get a row `postName, comment2`.
 
 Simple calculations and subqueries works fine, just you have to use public
 method to define calculation (that method is also used in filtering). Name of
@@ -501,8 +518,8 @@ class MostLikedPostsDatatable < TrkDatatables::ActiveRecord
   # you have { search: false }
   def comments_count
     <<~SQL
-      (SELECT COUNT(*) FROM comments
-      WHERE comments.post_id = posts.id)
+      SELECT COUNT(*) FROM comments
+      WHERE comments.post_id = posts.id
     SQL
   end
 
@@ -628,10 +645,11 @@ save preferences) and this default values will be used
 ```
 # app/datatables/posts_datatable.rb
 class PostsDatatable
-  # when we show some invoice_no on first column, and that is reset every year
-  # on first april, thatn it is better is to use date column ordering
+  # when we show invoice_no on first column, and that is reset every year
+  # on first april, than it is better is to use date column ordering
+  # column starts from zero 0, 1, 2, 3
   def default_order
-    [[3, :desc]]
+    [[columns.size - 1, :desc]]
   end
 
   def default_page_length
@@ -1025,6 +1043,13 @@ rm -rf .yardoc/
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/trkin/trk_datatables. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+
+## TODOs
+
+Column filtering with dropdowns https://datatables.net/extensions/searchpanes/examples/advanced/columnFilter.html
+Adding graphs https://datatables.net/forums/discussion/comment/123621/#Comment_123621
+https://datatables.net/examples/api/highcharts.html
+
 
 ## License
 
