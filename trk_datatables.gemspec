@@ -40,7 +40,7 @@ Gem::Specification.new do |spec|
   # for HashWithIndifferentAccess
   spec.add_dependency 'activesupport'
 
-  spec.add_development_dependency 'activerecord', '~> 6.0'
+  spec.add_development_dependency 'activerecord', '~> 7.0'
   spec.add_development_dependency 'bundler', '~> 2.0'
   spec.add_development_dependency 'byebug'
   spec.add_development_dependency 'database_cleaner'
