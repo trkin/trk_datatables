@@ -419,13 +419,13 @@ calculation and subqueries), currently TrkDatatables does not support using
 aggregate functions since it requires implementation of `HAVING` (unless you
 disable search and order for those fields with aggregate functions
 `'users.posts_count': { search: false, order: false }`).
-You can use concatenation aggregate function: in postgres `STRING_AGG`, in mysql
-`GROUP_CONCAT` so in this case we search on real columns. For example let's we
-have
+You can use concatenation aggregate function: in postgres
+`STRING_AGG(comments.body, ' ') comments_body`, in mysql `GROUP_CONCAT` so in
+this case we search on real columns. For example let's we have
 ```
 Post
   .select(%(posts.*, GROUP_CONCAT(comments.body) AS comments_body))
-  .left_outer_joins(:comments) .group('posts.id')
+  .left_outer_joins(:comments)
   .group('posts.id')
 ```
 and that we have a row `postName, comment1, comment2` than when we searh for
