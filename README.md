@@ -259,7 +259,9 @@ For specific columns you can use following keys
 * `order: false` disable ordering for this column
 * `select_options: Post.statuses` generate select box instead of text input
 * `predefined_ranges: {}` for datetime fiels add ranges to pick up from
-* `hide: true` hide column with display none, for example `{ hide: @view.params[:user_id].present? }`
+* `hide: true` hide column with display none, for example `{ hide:
+  @view.params[:user_id].present? }`, note that you should send that column data
+  anyway, just it will not be visible
 * `class_name: 'Admin::User'` use different class name than
   `table_name.classify` (in this case of `admin_users` will be `AdminUser`)
 * `column_type_in_db` one of the: `:string`, `:integer`, `:date`, `:datetime`,
@@ -414,11 +416,48 @@ generated based on other columns):
   posts_count FROM "users" LEFT OUTER JOIN "posts" ON "posts"."user_id" =
   "users"."id" GROUP BY users.id`
 
+Simple calculations and subqueries works fine, you can search and order by them.
+Note that when you use join with other table, than you should group by all
+columns that you have used as columns, for example
+```
+# app/datatables/member_profiles_datatable.rb
+  def columns
+    {
+      'member_profiles.full_name': {},
+      'users.email': {},
+      'users.current_sign_in_at': { },
+    }
+  end
+  def all_items
+    MemberProfile
+      .joins(:user)
+      .group("member_profiles.id")
+      .group("users.email")
+      .group("users.current_sign_in_at")
+   end
+```
+otherwise the error like
+`PG::GroupingError: ERROR:  column "users.current_sign_in_at" must appear in the
+GROUP BY clause or be used in an aggregate function`
+You should test by searching and selecting each column as sortable column.
+```
+# test/controllers/admin/member_profiles_controller_test.rb
+  test "#search when order by is by each defined column" do
+    columns = MemberProfilesDatatable.new(OpenStruct.new(params: {})).columns
+
+    columns.each_with_index do |_column_key_option, index|
+      post search_superadmin_member_profiles_path(search: { value: "foo" }, order: { "0": { column: index, dir: "asc" } })
+      assert_response :success
+    end
+  end
+```
+
 Since in SQL you can not use aggregate functions in WHERE (we should repeat
 calculation and subqueries), currently TrkDatatables does not support using
-aggregate functions since it requires implementation of `HAVING` (unless you
-disable search and order for those fields with aggregate functions
-`'users.posts_count': { search: false, order: false }`).
+aggregate functions since it requires implementation of `HAVING` so when you use
+aggregate functions you need to disable search and order for those fields with
+aggregate functions `'users.posts_count': { search: false, order: false }`).
+
 You can use concatenation aggregate function: in postgres
 `STRING_AGG(comments.body, ' ') comments_body`, in mysql `GROUP_CONCAT` so in
 this case we search on real columns. For example let's we have
@@ -433,8 +472,8 @@ and that we have a row `postName, comment1, comment2` than when we searh for
 
 Simple calculations and subqueries works fine, just you have to use public
 method to define calculation (that method is also used in filtering). Name of
-method is the same as column name `title_and_body` or `comments_count`. For table
-name you should use one of:
+method is the same as column name `title_and_body` or `comments_count`. For
+table name you should use one of:
 `:string_calculated_in_db`, `:integer_calculated_in_db`,
 `:date_calculated_in_db`, `:datetime_calculated_in_db` or
 `:boolean_calculated_in_db`.
@@ -542,8 +581,11 @@ class MostLikedPostsDatatable < TrkDatatables::ActiveRecord
     end
   end
 
+  # You can use this in config/initializers/trk_datatables.rb
+  # class TrkDatatables::ActiveRecord; def default_order;
+  # or put in specific datatable class like here
   def default_order
-    [[2, :desc]]
+    [[columns.size - 1, :desc]]
   end
 end
 ```
@@ -634,6 +676,43 @@ For column title we use `table_class.human_attribute_name column_name`. When
 calculated_ columns is used than it can not find translation so better is to:
 ```
       'string_calculated_in_db.column_value_translated': {search: false, title: @view.t('activerecord.attributes.translation.column_value_translated')},
+```
+
+Note that when you have two associations to the same class, for example
+`Interest` has `:from_member_profile` and `:to_member_profile` you can use
+search for the first column, but for the second you should use
+`string_calculated_in_db` and inside method use table name that is generated in
+joins like `to_member_profiles_interests` (trk_datatable can not determine which
+class is this, in order to find its column)
+```
+# app/models/interest.rb
+class Interest < ApplicationRecord
+  belongs_to :from_member_profile, class_name: 'MemberProfile'
+  belongs_to :to_member_profile, class_name: 'MemberProfile'
+end
+
+# app/datatables/interests_datatable.rb
+class InterestsDatatable < TrkDatatables::ActiveRecord
+  def columns
+    {
+      'member_profiles.full_name': {},
+      'string_calculated_in_db.to_member_profiles_interests_full_name': {},
+      # if we want to search by this column than we can not use
+      # "to_member_profiles_interests.full_name": {},
+      # since we can not find that class and its arel_table
+   }
+  end
+
+  def to_member_profiles_interests_full_name
+    "to_member_profiles_interests.full_name"
+  end
+
+  def all_items
+    Interest
+      .joins(:from_member_profile) # this will be "member_profiles" table in sql
+      .joins(:to_member_profile) # this will be "to_member_profiles_interests"
+   end
+end
 ```
 
 ### Default order and page length
@@ -814,7 +893,7 @@ class PostsDatatable
 end
 ```
 
-It will store order and page lenght inside `dt_preferences` on
+It will store order and page length inside `dt_preferences` on
 `user.preferences`.
 
 ### Additional data to json response
@@ -910,7 +989,7 @@ link_to 'Active', search_posts_path(PostsDatatable.param_set('posts.status',
 Here is example how you can test
 
 ```
-# test/datatables/happ
+# test/datatables/posts_datatable_test.rb
 require 'test_helper'
 
 class PostsDatatableTest < ActiveSupport::TestCase
@@ -925,6 +1004,27 @@ class PostsDatatableTest < ActiveSupport::TestCase
 
     assert_includes results, posts(:kayak_regata)
     refute_includes results, posts(:half_marathon)
+  end
+end
+```
+
+You can also write controller test
+```
+# test/controllers/posts_controller_test.rb
+require 'test_helper'
+
+class PostsControllerTest < ActiveSupport::TestCase
+  test "#index" do
+    get posts_path
+    assert_response :success
+  end
+
+  test "#search" do
+    post = posts(:post)
+    post search_posts_path(search: { value: post.title })
+    assert_response :success
+    response_json = JSON.parse response.body
+    assert_equal 1, response_json["data"].size
   end
 end
 ```

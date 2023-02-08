@@ -121,7 +121,11 @@ module TrkDatatables
         column_key_option = @column_key_options[index]
         next if column_key_option[:column_options][ColumnKeyOptions::ORDER_OPTION] == false
 
-        queries << "#{column_key_option[:column_key]} #{direction}"
+        queries << if column_key_option[:table_class] < TrkDatatables::CalculatedInDb
+                     "#{send(column_key_option[:column_key])} #{direction}"
+                   else
+                     "#{column_key_option[:column_key]} #{direction}"
+                   end
       end
       filtered.order(Arel.sql(order_by.join(', ')))
     end
