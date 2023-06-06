@@ -110,6 +110,10 @@ module TrkDatatables
       {columns: {column_index.to_s => {search: {value: value}}}}
     end
 
+    def self.order_set(column_index, direction)
+      {order: {'0': {column: column_index, dir: direction}}}
+    end
+
     def self.form_field_name(column_index)
       "columns[#{column_index}][search][value]"
     end

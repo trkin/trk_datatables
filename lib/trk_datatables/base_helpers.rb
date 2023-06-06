@@ -21,6 +21,18 @@ module TrkDatatables
       DtParams.param_set column_index, value
     end
 
+    # Set sort for column. This is class method so you do not need
+    # datatable instance.
+    #
+    # @example
+    #   link_to 'Sort by email',
+    #   posts_path(PostsDatatable.order_set('users.email', :desc)
+    def order_set(column_key, direction = :asc, view = nil)
+      datatable = new view || OpenStruct.new(params: {})
+      column_index = datatable.index_by_column_key column_key
+      DtParams.order_set column_index, direction
+    end
+
     # Get the form field name for column. This is class method so you do not
     # need datatable instance. It returns something like
     # 'column[3][search][value]`. For global search you can use

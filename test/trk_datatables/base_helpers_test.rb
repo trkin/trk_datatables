@@ -75,6 +75,19 @@ class TrkDatatablesBaseHelpersTest < Minitest::Test
     assert_match "Can't find index for non_existing.table in posts.title", e.message
   end
 
+  def test_order_set
+    actual = PostsDatatable
+             .order_set('users.email')
+    expected = {
+      order: {
+        'column' => 3,
+        'dir': 'asc'
+      }
+    }
+    assert_equal expected, actual
+  end
+
+
   def test_range_string
     act = PostsDatatable.range_string(1..5)
     exp = "1 #{TrkDatatables::BETWEEN_SEPARATOR} 5"

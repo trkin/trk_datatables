@@ -418,14 +418,14 @@ generated based on other columns):
 
 Simple calculations and subqueries works fine, you can search and order by them.
 Note that when you use join with other table, than you should group by all
-columns that you have used as columns, for example
+columns that you have used as columns which can be ordered by, for example
 ```
 # app/datatables/member_profiles_datatable.rb
   def columns
     {
       'member_profiles.full_name': {},
       'users.email': {},
-      'users.current_sign_in_at': { },
+      'users.current_sign_in_at': {},
     }
   end
   def all_items
@@ -543,7 +543,7 @@ class MostLikedPostsDatatable < TrkDatatables::ActiveRecord
     Post.select(%(
                 posts.*,
                 #{title_and_body} AS title_and_body,
-                (#{comments_count}) AS comments_count
+                #{comments_count} AS comments_count
                 ))
   end
 
@@ -557,8 +557,10 @@ class MostLikedPostsDatatable < TrkDatatables::ActiveRecord
   # you have { search: false }
   def comments_count
     <<~SQL
+     (
       SELECT COUNT(*) FROM comments
       WHERE comments.post_id = posts.id
+     )
     SQL
   end
 
@@ -864,6 +866,15 @@ You can set filters on datatable even params are blank, for example
 ```
 
 Inside datatable you can access params using `@view.params`
+
+To set the order (custom sort) in a link you can use:
+```
+<%= link_to 'Sort by email', \
+      posts_path(
+        PostsDatatable.order_set('users.email', :desc)
+      )
+%>
+```
 
 ### Saved Preferences (optional)
 
