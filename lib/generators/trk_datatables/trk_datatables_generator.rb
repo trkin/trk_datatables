@@ -2,10 +2,10 @@ module TrkDatatables
   module Generators
     class TrkDatatablesGenerator < Rails::Generators::NamedBase
       # we can call with `rails g trk_datatables` instead of: `rails g trk_datatables:trk_datatables`
-      namespace 'trk_datatables'
-      source_root File.expand_path('../templates', __dir__)
+      namespace "trk_datatables"
+      source_root File.expand_path("../templates", __dir__)
 
-      desc 'Generates datatables file for a give NAME'
+      desc "Generates datatables file for a give NAME"
       def create
         begin
           class_name.constantize
@@ -18,7 +18,7 @@ module TrkDatatables
           @trk_file_name = "#{singular_name}_datatable"
         end
 
-        template 'trk_datatable.rb', "app/datatables/#{@trk_file_name}.rb"
+        template "trk_datatable.rb", "app/datatables/#{@trk_file_name}.rb"
 
         say <<~TEXT
           ======================================================================

@@ -372,11 +372,11 @@ use empty column_key
 ```
 
 If you have more columns that are not actually columns in database (for example
-links or Ruby calculated values) than you can not use empty column_key since
-there could be only one (keys in the hash should be unique). When you disable
-`order` and `search` than you can use any column name since that column will not
-be used in queries. For example column key `posts.body_size` is not in database
-nor in Ruby code.
+links or Ruby calculated in ruby values) than you can not use empty column_key
+since there could be only one (keys in the hash should be unique). When you
+disable `order` and `search` than you can use any column name since that column
+will not be used in queries. For example column key `posts.body_size` is not in
+database nor in Ruby code.
 
 ```
   def columns
@@ -1161,6 +1161,12 @@ Column filtering with dropdowns https://datatables.net/extensions/searchpanes/ex
 Adding graphs https://datatables.net/forums/discussion/comment/123621/#Comment_123621
 https://datatables.net/examples/api/highcharts.html
 
+Run custom JS on next page or search, for example load tooltip.
+
+
+Check issue when we use param_set for select_options field since select option
+does not get selected and next page will show all items instead of only ones
+with selected field.
 
 ## License
 

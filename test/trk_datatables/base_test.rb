@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class TrkDatatablesBaseTest < Minitest::Test
   def view
@@ -30,10 +30,10 @@ class TrkDatatablesBaseTest < Minitest::Test
 
     def columns
       {
-        'posts.title': {},
-        'posts.published_on': {},
-        'posts.status': {select_options: Post.statuses},
-        'users.email': {},
+        "posts.title": {},
+        "posts.published_on": {},
+        "posts.status": {select_options: Post.statuses},
+        "users.email": {}
       }
     end
 
@@ -43,7 +43,7 @@ class TrkDatatablesBaseTest < Minitest::Test
 
     def additional_data_for_json
       {
-        columns: columns,
+        columns: columns
       }
     end
   end
@@ -70,7 +70,7 @@ class TrkDatatablesBaseTest < Minitest::Test
             draw: 0,
             recordsTotal: 0,
             recordsFiltered: 0,
-            data: [],
+            data: []
           }
           assert_equal exp, act
         end
@@ -86,7 +86,7 @@ class TrkDatatablesBaseTest < Minitest::Test
       recordsTotal: 0,
       recordsFiltered: 0,
       columns: PostsDatatable.new(view).columns,
-      data: [],
+      data: []
     }
     assert_equal exp, act
   end

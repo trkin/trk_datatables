@@ -40,12 +40,12 @@ module TrkDatatables
       @dt_orders = []
       return @dt_orders if @params[:order].blank?
 
-      @dt_orders = \
+      @dt_orders =
         @params[:order].each_with_object([]) do |(_index, dt_order), a|
           # for order we ignore key (_index) since order is preserved
           a << [
             dt_order[:column].to_i,
-            dt_order[:dir]&.to_s&.casecmp('ASC')&.zero? ? :asc : :desc,
+            dt_order[:dir]&.to_s&.casecmp("ASC")&.zero? ? :asc : :desc
           ]
         end
       @dt_orders
@@ -69,9 +69,9 @@ module TrkDatatables
       @params[:columns].each.map do |(dt_position, dt_column)|
         @dt_columns[dt_position.to_i] = {
           index: dt_position.to_i,
-          searchable: dt_column[:searchable].to_s != 'false', # if nil as it is in set_params, than use true
-          orderable: dt_column[:orderable].to_s != 'false', # if nil as it is in set_params, than use true
-          search_value: (dt_column[:search] && dt_column[:search][:value]) || '',
+          searchable: dt_column[:searchable].to_s != "false", # if nil as it is in set_params, than use true
+          orderable: dt_column[:orderable].to_s != "false", # if nil as it is in set_params, than use true
+          search_value: (dt_column[:search] && dt_column[:search][:value]) || ""
         }
       end
       @dt_columns.each_with_index do |dt_column, i|
@@ -81,20 +81,20 @@ module TrkDatatables
           index: i,
           searchable: true,
           orderable: true,
-          search_value: '',
+          search_value: ""
         }
       end
     end
 
     def search_all
-      @params.dig(:search, :value) || ''
+      @params.dig(:search, :value) || ""
     rescue TypeError => e
       raise Error, e.message + '. Global search is in a format: { "search": { "value": "ABC" } }'
     end
 
     def as_json(all_count, filtered_count, data, additional = {})
       additional = {} if additional.nil?
-      raise Error, 'additional_data_for_json needs to be a hash' unless additional.is_a? Hash
+      raise Error, "additional_data_for_json needs to be a hash" unless additional.is_a? Hash
 
       draw = @params[:draw].to_i
       {
@@ -102,7 +102,7 @@ module TrkDatatables
         recordsTotal: all_count,
         recordsFiltered: filtered_count,
         **additional,
-        data: data,
+        data: data
       }
     end
 
@@ -111,7 +111,7 @@ module TrkDatatables
     end
 
     def self.order_set(column_index, direction)
-      {order: {'0': {column: column_index, dir: direction}}}
+      {order: {"0": {column: column_index, dir: direction}}}
     end
 
     def self.form_field_name(column_index)
@@ -121,51 +121,52 @@ module TrkDatatables
     def param_get(column_index)
       @params.dig :columns, column_index.to_s, :search, :value
     rescue TypeError => e
-      raise Error, "#{e.message}. Column search is in a format: { \"columns\": { \"0\": { \"search\": { \"value\": { \"ABC\" } } } } }"
+      raise Error,
+        "#{e.message}. Column search is in a format: { \"columns\": { \"0\": { \"search\": { \"value\": { \"ABC\" } } } } }"
     end
 
     def self.sample_view_params(options = {})
       OpenStruct.new(
-        params: sample_params(options),
+        params: sample_params(options)
       )
     end
 
     def self.sample_params(options = {})
       HashWithIndifferentAccess.new(
-        draw: '1',
-        start: '0',
-        length: '10',
+        draw: "1",
+        start: "0",
+        length: "10",
         search: {
-          value: '', regex: 'false'
+          value: "", regex: "false"
         },
         order: {
-          '0': {column: '0', dir: 'desc'}
+          "0": {column: "0", dir: "desc"}
         },
         # [:columns] should have the same size as column_key_options since we
         # ignore keys, and use positions
         columns: {
-          '0': {
-            searchable: 'true',
-            orderable: 'true',
+          "0": {
+            searchable: "true",
+            orderable: "true",
             search: {
-              value: '', regex: 'false'
+              value: "", regex: "false"
             }
           },
-          '1': {
-            searchable: 'true',
-            orderable: 'true',
+          "1": {
+            searchable: "true",
+            orderable: "true",
             search: {
-              value: '', regex: 'false'
+              value: "", regex: "false"
             }
           },
-          '2': {
-            searchable: 'true',
-            orderable: 'false',
+          "2": {
+            searchable: "true",
+            orderable: "false",
             search: {
-              value: '', regex: 'false'
+              value: "", regex: "false"
             }
-          },
-        },
+          }
+        }
       ).merge options
     end
   end

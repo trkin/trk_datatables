@@ -43,16 +43,16 @@ module TrkDatatables
         inline = true
       end
       self.class.indent += 1
-      html = "#{'  ' * self.class.indent}<#{tag}".html_safe
+      html = "#{"  " * self.class.indent}<#{tag}".html_safe
       options.each do |attribute, value|
         value = value.to_json if value.is_a?(Hash) || value.is_a?(Array)
         html << " #{attribute}='".html_safe << replace_quote(value) << "'".html_safe
       end
       html << if inline
-                '>'.html_safe << content.to_s << "</#{tag}>\n".html_safe
-              else
-                ">\n".html_safe << yield << "\n#{'  ' * self.class.indent}</#{tag}>".html_safe
-              end
+        ">".html_safe << content.to_s << "</#{tag}>\n".html_safe
+      else
+        ">\n".html_safe << yield << "\n#{"  " * self.class.indent}</#{tag}>".html_safe
+      end
       self.class.indent -= 1 if self.class.indent > 1
       html
     end
@@ -62,7 +62,7 @@ module TrkDatatables
     def _select_find_options(options, search_value)
       selected = search_value.to_s.split(MULTIPLE_OPTION_SEPARATOR)
       options.map do |key, value|
-        {key: key, value: value}.merge(selected.include?(value.to_s) ? {selected: 'selected'} : {})
+        {key: key, value: value}.merge(selected.include?(value.to_s) ? {selected: "selected"} : {})
       end
     end
 
@@ -82,14 +82,14 @@ module TrkDatatables
       _content_tag(
         :table,
         class: "table table-bordered table-striped #{@html_options[:class]}",
-        'data-datatable': true,
-        'data-datatable-ajax-url': @search_link,
-        'data-datatable-page-length': @datatable.dt_per_page_or_default,
-        'data-datatable-order': @datatable.dt_orders_or_default_index_and_direction.to_json,
+        "data-datatable": true,
+        "data-datatable-ajax-url": @search_link,
+        "data-datatable-page-length": @datatable.dt_per_page_or_default,
+        "data-datatable-order": @datatable.dt_orders_or_default_index_and_direction.to_json,
         # for initial page load we do not have ability to show recordsTotal
         # https://github.com/trkin/trk_datatables_js/issues/1
-        'data-datatable-total-length': @datatable.filtered_items_count,
-        'data-datatable-dom': @html_options[:'data-datatable-dom'] || '<"trk-global-search-wrapper"f>rtp<"trk-move-up"il>',
+        "data-datatable-total-length": @datatable.filtered_items_count,
+        "data-datatable-dom": @html_options[:"data-datatable-dom"] || '<"trk-global-search-wrapper"f>rtp<"trk-move-up"il>'
       ) do
         thead << "\n".html_safe << tbody
       end +
@@ -102,11 +102,14 @@ module TrkDatatables
           safe_join(@datatable.column_key_options.map do |column_key_option|
             options = column_key_option[:html_options]
             # add eventual value from params
-            search_value = @datatable.param_get(column_key_option[:column_key]) if options['data-searchable'] != false
-            options['data-datatable-search-value'] = search_value if search_value.present?
+            search_value = @datatable.param_get(column_key_option[:column_key]) if options["data-searchable"] != false
+            options["data-datatable-search-value"] = search_value if search_value.present?
             # add eventual select element
             select_options = column_key_option[:column_options][ColumnKeyOptions::SELECT_OPTIONS]
-            options['data-datatable-multiselect'] = _select_find_options select_options, search_value if select_options.present?
+            if select_options.present?
+              options["data-datatable-multiselect"] =
+                _select_find_options select_options, search_value
+            end
             # all other options are pulled from column_key_option[:html_options]
             _content_tag :th, options, column_key_option[:title]
           end)
@@ -148,7 +151,7 @@ module TrkDatatables
       #   # https://github.com/trkin/trk_datatables_js/issues/1
       #   'data-datatable-total-length': @datatable.filtered_items_count,
       # ) do
-      ''
+      ""
     end
   end
 end

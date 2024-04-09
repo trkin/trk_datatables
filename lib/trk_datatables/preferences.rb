@@ -15,14 +15,14 @@ module TrkDatatables
 
       result = @holder.send(@field).dig KEY_IN_PREFERENCES, @class_name, key
       return result if check_value.nil?
-      return result if check_value.call result
+      result if check_value.call result
     end
 
     def set(key, value)
       return unless @holder
 
       h = {KEY_IN_PREFERENCES => {@class_name => {key => value}}}
-      @holder.send("#{@field}=", {}) if @holder.send(@field).nil?
+      @holder.send(:"#{@field}=", {}) if @holder.send(@field).nil?
       @holder.send(@field).deep_merge! h
       @holder.save!
     end

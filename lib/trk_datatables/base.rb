@@ -1,7 +1,7 @@
 module TrkDatatables
   # TODO: extract those to configuration options
-  BETWEEN_SEPARATOR = ' - '.freeze
-  MULTIPLE_OPTION_SEPARATOR = '|'.freeze
+  BETWEEN_SEPARATOR = " - ".freeze
+  MULTIPLE_OPTION_SEPARATOR = "|".freeze
   # maximum page length = 100 (we should not believe params)
 
   class Error < StandardError
@@ -85,16 +85,16 @@ module TrkDatatables
     end
 
     def filter_by_search_all(_all)
-      raise 'filter_by_columns_is_defined_in_specific_orm'
+      raise "filter_by_columns_is_defined_in_specific_orm"
     end
 
     def filter_by_columns(_all)
-      raise 'filter_by_columns_is_defined_in_specific_orm' \
+      raise "filter_by_columns_is_defined_in_specific_orm" \
         "\n  Extent from TrkDatatables::ActiveRecord instead of TrkDatatables::Base"
     end
 
     def order_and_paginate_items(_filtered_items)
-      raise 'order_and_paginate_items_is_defined_in_specific_orm'
+      raise "order_and_paginate_items_is_defined_in_specific_orm"
     end
 
     # Returns dt_orders or default as array of index and direction
@@ -112,7 +112,9 @@ module TrkDatatables
         @dt_orders_or_default = @dt_params.dt_orders
         @preferences.set :order, @dt_params.dt_orders
       else
-        check_value = ->(r) { r.is_a?(Array) && r[0].is_a?(Array) && r[0][0].is_a?(Integer) && r[0][0] < @column_key_options.size }
+        check_value = lambda { |r|
+          r.is_a?(Array) && r[0].is_a?(Array) && r[0][0].is_a?(Integer) && r[0][0] < @column_key_options.size
+        }
         @dt_orders_or_default = @preferences.get(:order, check_value) || default_order
       end
       @dt_orders_or_default
@@ -129,7 +131,7 @@ module TrkDatatables
     def dt_per_page_or_default
       return @dt_per_page_or_default if defined? @dt_per_page_or_default
 
-      @dt_per_page_or_default = \
+      @dt_per_page_or_default =
         if @dt_params.dt_per_page.present?
           @preferences.set :per_page, @dt_params.dt_per_page
           @dt_params.dt_per_page
@@ -216,31 +218,31 @@ module TrkDatatables
     end
 
     def predefined_ranges
-      Time.zone ||= 'UTC'
+      Time.zone ||= "UTC"
       {
         date: predefined_date_ranges,
-        datetime: predefined_datetime_ranges,
+        datetime: predefined_datetime_ranges
       }
     end
 
     def predefined_date_ranges # rubocop:todo Metrics/AbcSize
       {
-        'Today': Time.zone.today..Time.zone.today,
-        'Yesterday': [Time.zone.today - 1.day, Time.zone.today - 1.day],
-        'This Month': Time.zone.today.beginning_of_month...Time.zone.today,
-        'Last Month': Time.zone.today.prev_month.beginning_of_month...Time.zone.today.prev_month.end_of_month,
-        'This Year': Time.zone.today.beginning_of_year...Time.zone.today,
+        Today: Time.zone.today..Time.zone.today,
+        Yesterday: [Time.zone.today - 1.day, Time.zone.today - 1.day],
+        "This Month": Time.zone.today.beginning_of_month...Time.zone.today,
+        "Last Month": Time.zone.today.prev_month.beginning_of_month...Time.zone.today.prev_month.end_of_month,
+        "This Year": Time.zone.today.beginning_of_year...Time.zone.today
       }
     end
 
     def predefined_datetime_ranges # rubocop:todo Metrics/AbcSize
       {
-        'Today': Time.zone.now.beginning_of_day..Time.zone.now.end_of_day,
-        'Yesterday': [Time.zone.now.beginning_of_day - 1.day, Time.zone.now.end_of_day - 1.day],
-        'This Month': Time.zone.today.beginning_of_month.beginning_of_day...Time.zone.now.end_of_day,
-        'Last Month':
+        Today: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day,
+        Yesterday: [Time.zone.now.beginning_of_day - 1.day, Time.zone.now.end_of_day - 1.day],
+        "This Month": Time.zone.today.beginning_of_month.beginning_of_day...Time.zone.now.end_of_day,
+        "Last Month":
           Time.zone.today.prev_month.beginning_of_month.beginning_of_day...Time.zone.today.prev_month.end_of_month.end_of_day,
-        'This Year': Time.zone.today.beginning_of_year.beginning_of_day...Time.zone.today.end_of_day,
+        "This Year": Time.zone.today.beginning_of_year.beginning_of_day...Time.zone.today.end_of_day
       }
     end
   end

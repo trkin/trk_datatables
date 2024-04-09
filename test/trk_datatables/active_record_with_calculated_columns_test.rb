@@ -1,12 +1,12 @@
-require 'test_helper'
+require "test_helper"
 
 class TrkDatatablesActiveRecordWithCalculatedColumnsTest < Minitest::Test
   class PostsWithCommentsCountDatatable < TrkDatatables::ActiveRecord
     def columns
       {
-        'posts.id': {},
-        'string_calculated_in_db.title_and_body': {},
-        'integer_calculated_in_db.comments_count': {},
+        "posts.id": {},
+        "string_calculated_in_db.title_and_body": {},
+        "integer_calculated_in_db.comments_count": {}
       }
     end
 
@@ -41,23 +41,24 @@ class TrkDatatablesActiveRecordWithCalculatedColumnsTest < Minitest::Test
 
   def test_order_and_paginate_items
     15.times do |i|
-      post = Post.create title: "post#{format '%<i>02d', i: i}"
+      post = Post.create title: "post#{format "%<i>02d", i: i}"
       i.times do
         Comment.create post: post
       end
     end
 
-    first_post = Post.find_by! title: 'post00'
-    last_post = Post.find_by! title: 'post14'
+    first_post = Post.find_by! title: "post00"
+    last_post = Post.find_by! title: "post14"
     # default is comments_count
     filtered = dt_send :order_and_paginate_items
     refute_includes filtered, first_post
     assert_includes filtered, last_post
 
-    filtered = dt_send :order_and_paginate_items, order: {0 => {column: 2, dir: 'asc'}}
+    filtered = dt_send :order_and_paginate_items, order: {0 => {column: 2, dir: "asc"}}
     assert_includes filtered, first_post
     refute_includes filtered, last_post
 
-    assert_equal_with_message [last_post], dt_send(:filter_by_columns, columns: {'2': {searchable: true, search: {value: '14'}}}), :title
+    assert_equal_with_message [last_post],
+      dt_send(:filter_by_columns, columns: {"2": {searchable: true, search: {value: "14"}}}), :title
   end
 end

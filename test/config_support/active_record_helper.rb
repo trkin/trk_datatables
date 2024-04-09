@@ -1,7 +1,7 @@
 # https://github.com/rails/rails/blob/master/guides/bug_report_templates/active_record_master.rb
-require 'active_record'
+require "active_record"
 
-ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
+ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 # ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 ActiveRecord::Schema.define do

@@ -3,7 +3,7 @@ class <%= @trk_class_name %> < TrkDatatables::ActiveRecord
     {
 <% @skip_model || class_name.constantize.columns.each do |column| -%>
 <% next if %w[created_at updated_at].include? column.name -%>
-      '<%= table_name %>.<%= column.name %>': {},
+      "<%= table_name %>.<%= column.name %>": {},
 <% end -%>
     }
   end
@@ -19,7 +19,7 @@ class <%= @trk_class_name %> < TrkDatatables::ActiveRecord
       [
 <% @skip_model || class_name.constantize.columns.each do |column| -%>
 <% next if %w[created_at updated_at].include? column.name -%>
-<% if column.name == 'id' -%>
+<% if column.name == "id" -%>
         @view.link_to(<%= singular_table_name %>.id, <%= singular_table_name %>),
 <% else -%>
         <%= singular_table_name %>.<%= column.name %>,
