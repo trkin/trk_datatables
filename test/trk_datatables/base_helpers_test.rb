@@ -81,8 +81,10 @@ class TrkDatatablesBaseHelpersTest < Minitest::Test
       .order_set("users.email")
     expected = {
       order: {
-        "column" => 3,
-        :dir => "asc"
+        "0": {
+          column: 3,
+          dir: :asc
+        }
       }
     }
     assert_equal expected, actual

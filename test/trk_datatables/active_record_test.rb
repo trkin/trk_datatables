@@ -205,7 +205,7 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
     datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params
     from = "2000-01-01"
     to = "2000-01-02 22:22:22 PM"
-    column_key_option = {column_type_in_db: :date}
+    column_key_option = {column_type_in_db: :datetime}
     assert_equal ["2000-01-01 00:00:00", "2000-01-02 22:22:22"], (datatable._parse_from_to(from, to, column_key_option).map do |t|
                                                                     t.strftime "%Y-%m-%d %H:%M:%S"
                                                                   end)

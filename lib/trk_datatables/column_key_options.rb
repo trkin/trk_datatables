@@ -111,7 +111,7 @@ module TrkDatatables
 
         column_options.assert_valid_keys(*COLUMN_OPTIONS)
         table_name, column_name = column_key.to_s.split "."
-        if table_name.present? && table_name.ends_with?("_calculated_in_db")
+        if table_name.present? && table_name.end_with?("_calculated_in_db")
           # in calculated columns table_name is used only to determine type
           column_key = column_name
         elsif table_name.present? && column_name.nil?
@@ -152,7 +152,7 @@ module TrkDatatables
       # note that when class is not eager loaded than const_defined? returns false
       if class_name.present?
         class_name.constantize
-      elsif table_name.ends_with? "_calculated_in_db"
+      elsif table_name.end_with? "_calculated_in_db"
         "TrkDatatables::#{table_name.classify}".constantize
       else
         table_name.classify.constantize

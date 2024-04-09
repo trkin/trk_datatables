@@ -88,8 +88,8 @@ module TrkDatatables
         parsed_from = from
         parsed_to = to
       when :date
-        parsed_from = _parse_in_zone(from).to_date
-        parsed_to = _parse_in_zone(to).to_date
+        parsed_from = _parse_in_zone(from)&.to_date
+        parsed_to = _parse_in_zone(to)&.to_date&.end_of_day
       when :datetime
         parsed_from = _parse_in_zone(from)
         parsed_to = _parse_in_zone(to)
