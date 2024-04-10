@@ -1,6 +1,6 @@
 module TrkDatatables
   class Preferences
-    KEY_IN_PREFERENCES = :trk_datatables
+    KEY_IN_PREFERENCES = "trk_datatables"
     def initialize(holder, field, class_name)
       @holder = holder
       @field = field
