@@ -3,6 +3,8 @@ module TrkDatatables
   BETWEEN_SEPARATOR = " - ".freeze
   MULTIPLE_OPTION_SEPARATOR = "|".freeze
   # maximum page length = 100 (we should not believe params)
+  ORDER = "order".freeze
+  PER_PAGE = "per_page".freeze
 
   class Error < StandardError
   end
@@ -110,12 +112,12 @@ module TrkDatatables
         @dt_orders_or_default = []
       elsif @dt_params.dt_orders.present?
         @dt_orders_or_default = @dt_params.dt_orders
-        @preferences.set :order, @dt_params.dt_orders
+        @preferences.set ORDER, @dt_params.dt_orders
       else
         check_value = lambda { |r|
           r.is_a?(Array) && r[0].is_a?(Array) && r[0][0].is_a?(Integer) && r[0][0] < @column_key_options.size
         }
-        @dt_orders_or_default = @preferences.get(:order, check_value) || default_order
+        @dt_orders_or_default = @preferences.get(ORDER, check_value) || default_order
       end
       @dt_orders_or_default
     end
@@ -133,10 +135,10 @@ module TrkDatatables
 
       @dt_per_page_or_default =
         if @dt_params.dt_per_page.present?
-          @preferences.set :per_page, @dt_params.dt_per_page
+          @preferences.set PER_PAGE, @dt_params.dt_per_page
           @dt_params.dt_per_page
         else
-          @preferences.get(:per_page) || default_page_length
+          @preferences.get(PER_PAGE) || default_page_length
         end
     end
 
