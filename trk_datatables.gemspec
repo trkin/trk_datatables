@@ -39,6 +39,9 @@ Gem::Specification.new do |spec|
   # for HashWithIndifferentAccess
   spec.add_dependency "activesupport"
 
+  # for `require rails/generators`
+  spec.add_development_dependency "rails"
+
   spec.add_development_dependency "activerecord", ">= 5.0"
   spec.add_development_dependency "bundler", "~> 2.0"
   spec.add_development_dependency "byebug"
@@ -47,7 +50,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest-color"
   spec.add_development_dependency "pg"
   spec.add_development_dependency "rake", ">= 10.0"
-  spec.add_development_dependency "sqlite3", ">= 2.0.0"
+  spec.add_development_dependency "sqlite3", "~> 1.4.0"
   spec.add_development_dependency "timecop"
   spec.add_development_dependency "standard"
   spec.add_development_dependency "appraisal"
