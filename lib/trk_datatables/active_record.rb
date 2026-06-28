@@ -83,10 +83,12 @@ module TrkDatatables
 
     def _parse_from_to(from, to, column_key_option)
       case column_key_option[:column_type_in_db]
-      when :integer, :float
-        # we do not need to cast from string since range will do automatically
-        parsed_from = from
-        parsed_to = to
+      when :integer
+        parsed_from = _parse_integer(from)
+        parsed_to = _parse_integer(to)
+      when :float
+        parsed_from = _parse_float(from)
+        parsed_to = _parse_float(to)
       when :date
         parsed_from = _parse_in_zone(from)&.to_date
         parsed_to = _parse_in_zone(to)&.to_date&.end_of_day
@@ -99,6 +101,22 @@ module TrkDatatables
         end
       end
       [parsed_from, parsed_to]
+    end
+
+    def _parse_integer(value)
+      return nil if value.blank?
+
+      Integer(value)
+    rescue ArgumentError
+      nil
+    end
+
+    def _parse_float(value)
+      return nil if value.blank?
+
+      Float(value)
+    rescue ArgumentError
+      nil
     end
 
     def _parse_in_zone(time)

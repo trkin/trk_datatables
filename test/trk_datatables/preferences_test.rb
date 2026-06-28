@@ -56,7 +56,7 @@ class Preferences < Minitest::Test
       datatable.order_and_paginate_items datatable.all_items
     end
     assert_equal 3,
-      user.preferences[TrkDatatables::Preferences::KEY_IN_PREFERENCES]["Preferences::PostsDatatable"][:order].first.first
+      user.preferences[TrkDatatables::Preferences::KEY_IN_PREFERENCES]["Preferences::PostsDatatable"]["order"].first.first
     # here use still contains out of scope index, but it will render using default
     datatable = PostsDatatable.new OpenStruct.new params: {}, current_user: user
     results = datatable.order_and_paginate_items datatable.all_items

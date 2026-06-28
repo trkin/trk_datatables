@@ -34,7 +34,7 @@ ActiveRecord::Schema.define do
 end
 
 class User < ActiveRecord::Base
-  serialize :preferences, Hash
+  serialize :preferences, type: Hash
 
   has_many :posts
 end

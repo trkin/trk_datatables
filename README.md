@@ -220,7 +220,8 @@ class PostsDatatable < TrkDatatables::ActiveRecord
     # instead Post.all you should use Post.joins(:user) or
     # Post.left_joins(:user) if user is optional. For has_many relations you
     # need to join them since you will get multiple table rows
-    %w[posts.body users.name]
+    # Post.left_joins(:comments).group("id")
+    %w[posts.body users.name comments.body]
   end
 end
 ```
@@ -727,11 +728,17 @@ save preferences) and this default values will be used
 # app/datatables/posts_datatable.rb
 class PostsDatatable
   # when we show invoice_no on first column, and that is reset every year
-  # on first april, than it is better is to use date column ordering
+  # on first april, than it is better is to use last (date) column ordering
   # column starts from zero 0, 1, 2, 3
   def default_order
     [[columns.size - 1, :desc]]
   end
+
+  # order by
+  def default_order
+    index_by_column_key "users.updated_at"
+  end
+
 
   def default_page_length
     20

@@ -1,5 +1,6 @@
 require "trk_datatables/version"
 # libs
+require "active_support"
 require "active_support/core_ext/hash/indifferent_access"
 require "active_support/core_ext/hash/keys"
 require "active_support/core_ext/string/inflections"
