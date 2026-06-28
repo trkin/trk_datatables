@@ -1,7 +1,10 @@
 appraise "rails-5" do
   gem "rails", "~> 5.2.0"
   gem "i18n", "~> 1.8", "< 1.9"
-  gem "sqlite3", "~> 1.4"
+  gem "nokogiri", "~> 1.15.0"
+  gem "pg", "~> 1.5.0"
+  gem "sqlite3", "~> 1.6.0"
+  gem "standard", "~> 1.35.0"
 end
 
 appraise "rails-6" do
