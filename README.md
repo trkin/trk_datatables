@@ -1125,6 +1125,25 @@ ruby -I test test/trk_datatables/base_test.rb
 ruby -I test test/trk_datatables/base_test.rb -n /additional/
 ```
 
+Run the Appraisal matrix when changing ActiveRecord, Rails, or adapter support:
+
+```
+# install appraisal gemfiles
+bundle exec appraisal install
+
+# run the Ruby 3 Rails matrix
+bundle exec appraisal rails-6 rake
+bundle exec appraisal rails-7 rake
+bundle exec appraisal rails-7-1 rake
+```
+
+Rails 5.2 is supported as a legacy appraisal on Ruby 2.7:
+
+```
+# switch to Ruby 2.7 first, then run
+bundle exec appraisal rails-5 rake
+```
+
 You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To

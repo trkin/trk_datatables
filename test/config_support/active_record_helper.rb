@@ -4,37 +4,40 @@ require "active_record"
 ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 # ActiveRecord::Base.logger = Logger.new(STDOUT)
 
-ActiveRecord::Schema.define do
-  self.verbose = false
+ActiveRecord::Schema.verbose = false
+connection = ActiveRecord::Base.connection
 
-  create_table :users, force: true do |t|
-    t.string :email
-    t.string :name
-    t.float :latitude
-    t.float :longitude
-    t.datetime :registered_at
-    t.text :preferences
-  end
+connection.create_table :users, force: true do |t|
+  t.string :email
+  t.string :name
+  t.float :latitude
+  t.float :longitude
+  t.datetime :registered_at
+  t.text :preferences
+end
 
-  create_table :posts, force: true do |t|
-    t.integer :user_id
-    t.string :title
-    t.text :body
-    t.integer :status
-    t.boolean :verified
-    t.date :published_on
-    t.datetime :created_at
-  end
+connection.create_table :posts, force: true do |t|
+  t.integer :user_id
+  t.string :title
+  t.text :body
+  t.integer :status
+  t.boolean :verified
+  t.date :published_on
+  t.datetime :created_at
+end
 
-  create_table :comments, force: true do |t|
-    t.integer :post_id
-    t.text :body
-    t.integer :likes, default: 0
-  end
+connection.create_table :comments, force: true do |t|
+  t.integer :post_id
+  t.text :body
+  t.integer :likes, default: 0
 end
 
 class User < ActiveRecord::Base
-  serialize :preferences, type: Hash
+  if ActiveRecord.gem_version >= Gem::Version.new("7.1.0")
+    serialize :preferences, type: Hash
+  else
+    serialize :preferences, Hash
+  end
 
   has_many :posts
 end

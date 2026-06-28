@@ -108,7 +108,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activerecord (>= 7.1, < 7.2)
+  activerecord (>= 5.0)
   appraisal
   bundler (~> 2.0)
   byebug
@@ -117,7 +117,7 @@ DEPENDENCIES
   minitest-color
   pg
   rake (>= 10.0)
-  sqlite3 (>= 2.0.0)
+  sqlite3 (>= 1.4)
   standard
   timecop
   trk_datatables!
