@@ -30,7 +30,7 @@ class RenderHtmlTest < Minitest::Test
   end
 
   def test_render_basic
-    Timecop.freeze "2020-01-01" do
+    Timecop.freeze Time.utc(2020, 1, 1, 12) do
       Post.create title: "Post1", status: :draft, published_on: "2020-01-01"
       Post.create title: "Post2", status: :published, verified: true, published_on: "2020-10-10"
       datatable = PostsDatatable.new TrkDatatables::DtParams.sample_view_params PostsDatatable.param_set(
@@ -168,6 +168,7 @@ class RenderHtmlTest < Minitest::Test
   def test_table_column_content_is_a_hash
     datatable = ColumnIsHashDatatable.new TrkDatatables::DtParams.sample_view_params
     render_html = TrkDatatables::RenderHtml.new "link", datatable
+    cell_content = {id: 2}
     expected = <<-HTML
   <table class='table table-bordered table-striped ' data-datatable='true' data-datatable-ajax-url='link' data-datatable-page-length='10' data-datatable-order='[[0,&quot;desc&quot;]]' data-datatable-total-length='1' data-datatable-dom='&lt;&quot;trk-global-search-wrapper&quot;f&gt;rtp&lt;&quot;trk-move-up&quot;il&gt;'>
     <thead>
@@ -178,7 +179,7 @@ class RenderHtmlTest < Minitest::Test
     </thead>
     <tbody>
       <tr>
-        <td>{:id=&gt;2}</td>
+        <td>#{cell_content}</td>
 
       </tr>
     </tbody>

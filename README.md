@@ -1143,6 +1143,11 @@ Rails 5.2 is supported as a legacy appraisal on Ruby 2.7:
 ASDF_RUBY_VERSION=2.7.8 BUNDLE_GEMFILE=gemfiles/rails_5.gemfile bundle exec rake
 ```
 
+Install
+```
+ASDF_RUBY_VERSION=3.4.7 BUNDLER_VERSION=2.7.2 BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile bundle _2.7.2_ install
+```
+
 You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To
