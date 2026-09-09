@@ -166,10 +166,14 @@ class TrkDatatablesActiveRecordTest < Minitest::Test
     post1a = Post.create title: "1a_post", published_on: "2020-01-01"
     assert_equal_with_message [post1a],
       posts_dt(:filter_by_columns, columns: {"1": {searchable: true, search: {value: "2020-01-45#{TrkDatatables::BETWEEN_SEPARATOR}2020-03-02"}}}), :published_on
-    assert_equal_with_message [post1a],
+
+    post1b = Post.create title: "1b_post", published_on: "2020-02-01"
+    assert_equal_with_message [post1a, post1b],
       posts_dt(:filter_by_columns, columns: {"1": {searchable: true, search: {value: "#{TrkDatatables::BETWEEN_SEPARATOR} "}}}), :published_on
-    assert_equal_with_message [post1a],
+    assert_equal_with_message [post1a, post1b],
       posts_dt(:filter_by_columns, columns: {"1": {searchable: true, search: {value: "-#{TrkDatatables::BETWEEN_SEPARATOR} "}}}), :published_on
+    assert_equal_with_message [post1a],
+      posts_dt(:filter_by_columns, columns: {"0": {searchable: true, search: {value: "1a_post"}}, "1": {searchable: true, search: {value: TrkDatatables::BETWEEN_SEPARATOR}}}), :published_on
   end
 
   class MultiselectsDatatable < TrkDatatables::ActiveRecord

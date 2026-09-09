@@ -23,7 +23,8 @@ module TrkDatatables
         column_key_option = @column_key_options[dt_column[:index]]
         next if column_key_option[:column_options][ColumnKeyOptions::SEARCH_OPTION] == false
 
-        cond << build_condition_for_column(column_key_option, dt_column[:search_value])
+        condition = build_condition_for_column(column_key_option, dt_column[:search_value])
+        cond << condition if condition.present?
       end.reduce(:and) # 'and' for each searchable column
 
       filtered.where conditions
